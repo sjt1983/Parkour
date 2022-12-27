@@ -1,2 +1,8 @@
 # Parkour
-PARKOUR!!!!!!!!!!
+
+Parkour sandbox game.
+
+Prerequisites:
+
+# Unity Input system
+# Probuilder
