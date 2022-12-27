@@ -12,16 +12,6 @@ public sealed class PawnInput : MonoBehaviour
     public float verticalDirection;
     private Vector2 movementDirection;
 
-    /** Camera/Mouse Variables. **/
-
-    //Used to capture raw mouse input.
-    private Vector2 rawMouseInput;
-
-    //Values of the mouse delta from the last fram, adjusted for sensitivity.
-    public float AdjustedMouseX;
-    public float AdjustedMouseY;
-    private float sensitivity = 15;
-
     /** Actions **/
 
     //Player is attempting to Interact with an object in the world, e.g. Pickup Item
@@ -75,14 +65,6 @@ public sealed class PawnInput : MonoBehaviour
         playerInputSystem = new PlayerInputSystem();
         movementInput = playerInputSystem.PlayerControls.Move;
 
-        //X-Axis movement 
-        playerInputSystem.PlayerControls.MouseX.performed += ctx => rawMouseInput.x = ctx.ReadValue<float>();
-        playerInputSystem.PlayerControls.MouseX.Enable();
-
-        //Y-Axis Movement
-        playerInputSystem.PlayerControls.MouseY.performed += ctx => rawMouseInput.y = ctx.ReadValue<float>();
-        playerInputSystem.PlayerControls.MouseY.Enable();
-
         //Interaction
         playerInputSystem.PlayerControls.Interact.Enable();
 
@@ -107,18 +89,12 @@ public sealed class PawnInput : MonoBehaviour
         //Enable the controller.
         movementInput.Enable();
 
-        //Lock the cursor to the window
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Confined;
+
 
     }
 
     private void Update()
     {
-
-        //Adjust mouse delta for sensitivity.
-        AdjustedMouseX = rawMouseInput.x * sensitivity * Time.deltaTime;
-        AdjustedMouseY = rawMouseInput.y * sensitivity * Time.deltaTime;
 
         //Move the player.
         //movementInput.ReadValue returns a Vector2 to see which movement buttons are pressed.

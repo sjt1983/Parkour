@@ -46,24 +46,6 @@ public partial class @PlayerInputSystem : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""MouseX"",
-                    ""type"": ""PassThrough"",
-                    ""id"": ""d2496114-ca9e-4d5e-9354-8e1a818a0320"",
-                    ""expectedControlType"": ""Axis"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""MouseY"",
-                    ""type"": ""PassThrough"",
-                    ""id"": ""a7099d36-591d-4fc4-96c7-0a051fd7d309"",
-                    ""expectedControlType"": ""Axis"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""PrimaryUse"",
                     ""type"": ""PassThrough"",
                     ""id"": ""c2093f0d-e656-468b-be7f-e72029f00726"",
@@ -187,28 +169,6 @@ public partial class @PlayerInputSystem : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""77753839-24df-4519-93f4-f1158d2c72e4"",
-                    ""path"": ""<Mouse>/delta/x"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MouseX"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""3b887103-3418-4e40-aeee-74124ffed6f9"",
-                    ""path"": ""<Mouse>/delta/y"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MouseY"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""264ace43-018f-416e-a6d8-793179a98d98"",
                     ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
@@ -282,8 +242,6 @@ public partial class @PlayerInputSystem : IInputActionCollection2, IDisposable
         m_PlayerControls = asset.FindActionMap("PlayerControls", throwIfNotFound: true);
         m_PlayerControls_Move = m_PlayerControls.FindAction("Move", throwIfNotFound: true);
         m_PlayerControls_Jump = m_PlayerControls.FindAction("Jump", throwIfNotFound: true);
-        m_PlayerControls_MouseX = m_PlayerControls.FindAction("MouseX", throwIfNotFound: true);
-        m_PlayerControls_MouseY = m_PlayerControls.FindAction("MouseY", throwIfNotFound: true);
         m_PlayerControls_PrimaryUse = m_PlayerControls.FindAction("PrimaryUse", throwIfNotFound: true);
         m_PlayerControls_SecondaryUse = m_PlayerControls.FindAction("SecondaryUse", throwIfNotFound: true);
         m_PlayerControls_Interact = m_PlayerControls.FindAction("Interact", throwIfNotFound: true);
@@ -351,8 +309,6 @@ public partial class @PlayerInputSystem : IInputActionCollection2, IDisposable
     private IPlayerControlsActions m_PlayerControlsActionsCallbackInterface;
     private readonly InputAction m_PlayerControls_Move;
     private readonly InputAction m_PlayerControls_Jump;
-    private readonly InputAction m_PlayerControls_MouseX;
-    private readonly InputAction m_PlayerControls_MouseY;
     private readonly InputAction m_PlayerControls_PrimaryUse;
     private readonly InputAction m_PlayerControls_SecondaryUse;
     private readonly InputAction m_PlayerControls_Interact;
@@ -365,8 +321,6 @@ public partial class @PlayerInputSystem : IInputActionCollection2, IDisposable
         public PlayerControlsActions(@PlayerInputSystem wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_PlayerControls_Move;
         public InputAction @Jump => m_Wrapper.m_PlayerControls_Jump;
-        public InputAction @MouseX => m_Wrapper.m_PlayerControls_MouseX;
-        public InputAction @MouseY => m_Wrapper.m_PlayerControls_MouseY;
         public InputAction @PrimaryUse => m_Wrapper.m_PlayerControls_PrimaryUse;
         public InputAction @SecondaryUse => m_Wrapper.m_PlayerControls_SecondaryUse;
         public InputAction @Interact => m_Wrapper.m_PlayerControls_Interact;
@@ -388,12 +342,6 @@ public partial class @PlayerInputSystem : IInputActionCollection2, IDisposable
                 @Jump.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnJump;
                 @Jump.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnJump;
                 @Jump.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnJump;
-                @MouseX.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMouseX;
-                @MouseX.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMouseX;
-                @MouseX.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMouseX;
-                @MouseY.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMouseY;
-                @MouseY.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMouseY;
-                @MouseY.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMouseY;
                 @PrimaryUse.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnPrimaryUse;
                 @PrimaryUse.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnPrimaryUse;
                 @PrimaryUse.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnPrimaryUse;
@@ -422,12 +370,6 @@ public partial class @PlayerInputSystem : IInputActionCollection2, IDisposable
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
-                @MouseX.started += instance.OnMouseX;
-                @MouseX.performed += instance.OnMouseX;
-                @MouseX.canceled += instance.OnMouseX;
-                @MouseY.started += instance.OnMouseY;
-                @MouseY.performed += instance.OnMouseY;
-                @MouseY.canceled += instance.OnMouseY;
                 @PrimaryUse.started += instance.OnPrimaryUse;
                 @PrimaryUse.performed += instance.OnPrimaryUse;
                 @PrimaryUse.canceled += instance.OnPrimaryUse;
@@ -454,8 +396,6 @@ public partial class @PlayerInputSystem : IInputActionCollection2, IDisposable
     {
         void OnMove(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
-        void OnMouseX(InputAction.CallbackContext context);
-        void OnMouseY(InputAction.CallbackContext context);
         void OnPrimaryUse(InputAction.CallbackContext context);
         void OnSecondaryUse(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);

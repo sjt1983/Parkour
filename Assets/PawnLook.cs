@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public sealed class PawnLook : MonoBehaviour
 {
@@ -19,15 +20,35 @@ public sealed class PawnLook : MonoBehaviour
     private float cameraVerticalRotationClamp = 85;
     private float cameraVerticalRotation = 0f;
 
+    /** Camera/Mouse Variables. **/
+
+    //Values of the mouse delta from the last fram, adjusted for sensitivity.
+    public float AdjustedMouseX;
+    public float AdjustedMouseY;
+    private float sensitivity = 15;
+
+    private void Awake()
+    {
+        //Lock the cursor to the window
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Confined;
+    }
+
     // Update is called once per frame
     void Update()
     {
-      
+        Vector2 targetMouseDelta = Mouse.current.delta.ReadValue() * Time.smoothDeltaTime;
+
+        AdjustedMouseX = targetMouseDelta.x * sensitivity;
+        AdjustedMouseY = targetMouseDelta.y * sensitivity;
+
+
+
         //Rotate player.
-        gameObject.transform.Rotate(Vector3.up, pawnInput.AdjustedMouseX);
+        gameObject.transform.Rotate(Vector3.up, AdjustedMouseX);
 
         //Move camera up
-        cameraVerticalRotation -= pawnInput.AdjustedMouseY;
+        cameraVerticalRotation -= AdjustedMouseY;
         cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -cameraVerticalRotationClamp, cameraVerticalRotationClamp);
         Vector3 targetRoation = transform.eulerAngles;
         targetRoation.x = cameraVerticalRotation;
