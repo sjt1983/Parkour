@@ -7,11 +7,11 @@ public sealed class Pawn : MonoBehaviour
     [SerializeField]
     public PawnInput pawnInput;
 
+    //Flag to prevent any logic from executing until after Initialization.
     public bool Initialized = false;
 
     private void Initialize()
-    {   //Name this one "SELF" so we can ignore it for raycasts for bullets
-        gameObject.name = "SELF";
+    {   
         Initialized = true;
     }
 

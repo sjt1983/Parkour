@@ -3,12 +3,16 @@ using UnityEngine;
 public sealed class PawnMovement : MonoBehaviour
 {
     /** References to other Components **/
-    [SerializeField]
-    private PawnInput pawnInput;
 
+    //Main GameObject controlled by the player.
     [SerializeField]
     private Pawn pawn;
 
+    //Current Input by the player.
+    [SerializeField]
+    private PawnInput pawnInput;
+
+    //The device which moves the pawn.
     [SerializeField]
     private CharacterController pawnCharacterController;
 

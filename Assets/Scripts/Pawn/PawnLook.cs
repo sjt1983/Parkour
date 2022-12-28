@@ -3,9 +3,11 @@ using UnityEngine.InputSystem;
 
 public sealed class PawnLook : MonoBehaviour
 {
+    //Main GameObject controlled by the player.
     [SerializeField]
     private Pawn pawn;
 
+    //Current Input by the player.
     [SerializeField]
     private PawnInput pawnInput;
 
@@ -13,20 +15,22 @@ public sealed class PawnLook : MonoBehaviour
     [SerializeField]
     private Transform pawnCamera;
 
+    //Used to indicate which objects the player can "see" for pickup.
     [SerializeField]
     private LayerMask lookLayerMask;
 
-    /** Camera/Mouse Variables. **/
+    /** Camera Variables. **/
 
     //Used to clamp the camera to prevent the users neck from doing vertical 360s.
-    private readonly float cameraVerticalRotationClamp = 85;
     private float cameraVerticalRotation = 0f;
+    private readonly float CAMERA_MAX_VERTICAL_ROTATION = 85;
 
+    /** Mouse Variables **/
     //Values of the mouse delta from the last fram, adjusted for sensitivity.
     private float adjustedMouseX;
     private float adjustedMouseY;
 
-    //Mouse
+    //Mouse Sensitivity
     public float MouseSensitivity = 15;
 
     void Update()
@@ -35,17 +39,18 @@ public sealed class PawnLook : MonoBehaviour
         if (UIManager.Instance.IsCursorVisible())
             return;
 
+        //Calculate the mouse delta since the last frame.
         Vector2 targetMouseDelta = Mouse.current.delta.ReadValue() * Time.smoothDeltaTime;
 
         adjustedMouseX = targetMouseDelta.x * MouseSensitivity;
         adjustedMouseY = targetMouseDelta.y * MouseSensitivity;
 
-        //Rotate player.
+        //Rotate player along the Y axis.
         gameObject.transform.Rotate(Vector3.up, adjustedMouseX);
 
-        //Move camera up
+        //Rotate the camera pitch.
         cameraVerticalRotation -= adjustedMouseY;
-        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -cameraVerticalRotationClamp, cameraVerticalRotationClamp);
+        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
         Vector3 targetRoation = transform.eulerAngles;
         targetRoation.x = cameraVerticalRotation;
         pawnCamera.transform.eulerAngles = targetRoation;
