@@ -28,7 +28,7 @@ public class PawnVault : MonoBehaviour
     private Vector3 movementVelocity;
 
     //How long in between vaults we allow.
-    private float cooldownTimer = 1;
+    private float cooldownTimer = .2f;
 
     /*** Unity Methods ***/
 
@@ -39,14 +39,15 @@ public class PawnVault : MonoBehaviour
 
         if (vaultState == VaultState.NONE)
         {
-            if (!pawn.IsGrounded && vaultSensor.FindVaultPoint(ref vaultPoint) && vaultSensor.CollidedObjects == 0)
+            if (!pawn.IsGrounded && vaultSensor.FindVaultPoint(ref vaultPoint) && vaultSensor.CollidedObjects == 0 && pawn.PawnInput.JumpPressed)
             {
                 pawn.Locked = true;
-                vaultState = VaultState.VERTICAL;
+                pawn.HaltMovement();
+                vaultState = VaultState.VERTICAL_LIFT;
                 vaultPoint += new Vector3(0, 1);
             }
         }
-        else if (vaultState == VaultState.VERTICAL)
+        else if (vaultState == VaultState.VERTICAL_LIFT)
         {
             movementVelocity.y = 10f;
             pawn.Move(movementVelocity);
@@ -78,6 +79,6 @@ public class PawnVault : MonoBehaviour
 enum VaultState
 {
     NONE,
-    VERTICAL,
+    VERTICAL_LIFT,
     COOLDOWN
 }

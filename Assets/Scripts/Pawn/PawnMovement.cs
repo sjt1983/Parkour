@@ -75,4 +75,11 @@ public sealed class PawnMovement : MonoBehaviour
         //Finally, move the controller.
         pawn.CharacterController.Move(movementVelocity * Time.deltaTime);
     }
+
+    /*** Class Methods ***/
+
+    public void HaltMovement()
+    {
+        movementVelocity = Vector3.zero;
+    }
 }

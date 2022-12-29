@@ -37,6 +37,9 @@ public sealed class Pawn : MonoBehaviour
     //Quick reference for getting the PawnLook object.
     public PawnLook PawnLook { get => pawnLook; }
 
+    //Quick reference for getting the PawnLook object.
+    public PawnMovement PawnMovement { get => pawnMovement; }
+
     public CharacterController CharacterController { get => characterController; }
 
     //Flag to prevent any logic from executing until after Initialization.
@@ -58,5 +61,9 @@ public sealed class Pawn : MonoBehaviour
         initialized = true;
     }
 
+    public void HaltMovement()
+    {
+        pawnMovement.HaltMovement();
+    }
   
 }

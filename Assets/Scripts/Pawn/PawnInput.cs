@@ -49,6 +49,8 @@ public sealed class PawnInput : MonoBehaviour
         set => jump = value;
     }
 
+    public bool JumpPressed { get => playerInputSystem.PlayerControls.Jump.IsPressed(); }
+
     //Player attempted to reload a weapon.
     //Same deal as before, we want to ensure we capture the input but as soon as we check for it, set it to false.
     //This pattern may kind of suck and be changes later.
@@ -171,7 +173,7 @@ public sealed class PawnInput : MonoBehaviour
             SecondaryUse = false;
         }
 
-        //Handle Interaction
+        //Handle Jumping
         if (playerInputSystem.PlayerControls.Jump.WasPressedThisFrame())
         {
             Jumping = true;
