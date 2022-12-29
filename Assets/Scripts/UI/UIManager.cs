@@ -2,12 +2,18 @@ using UnityEngine;
 
 public sealed class UIManager : MonoBehaviour
 {
-    //Singleton instance for quick access by all domains.
-    public static UIManager Instance { get; private set; }
+    /*** References to Unity Objects ***/
 
     //Any UI View needs to be added to this manager.
     [SerializeField]
     private BaseUI[] views;
+
+    /*** Class Properties ***/
+
+    //Singleton instance for quick access by all domains.
+    public static UIManager Instance { get; private set; }
+
+    /*** Unity Methods ***/
 
     private void Awake()
     {
@@ -18,6 +24,8 @@ public sealed class UIManager : MonoBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Confined;
     }
+
+    /*** Class Methods ***/
 
     public void Initialize()
     {

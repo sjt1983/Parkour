@@ -4,26 +4,30 @@ using UnityEngine.UI;
 //The initial menu which loads when you press the "Escape" key in game.
 public class ActionMenuUI : BaseUI
 {
-    /** Mouse Sensitivity Obnjects **/ 
+    /*** Refernce to Unity Objects */ 
     [SerializeField]
-    private PawnLook pawnLook;
+    private Pawn pawn;
 
     [SerializeField]
     private Slider mouseSensitivity;
 
+    /*** Unity Methjods ***/
+
     private void Awake()
     {
         ShowMouseCursor = true;
-        mouseSensitivity.value = pawnLook.MouseSensitivity;
+        mouseSensitivity.value = pawn.PawnLook.MouseSensitivity;
     }
+
+    /*** Class Methods ***/
 
     //Set the mouse sensitivity.
     public void OnPointerUpChangeMouseSensitivity()
     {
-        pawnLook.MouseSensitivity = mouseSensitivity.value;
+        pawn.PawnLook.MouseSensitivity = mouseSensitivity.value;
     }
 
-    //Quit the game.
+    //Quit the game - used by a button.
     public void OnQuit()
     {
         Application.Quit();

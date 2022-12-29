@@ -3,33 +3,36 @@ using UnityEngine.InputSystem;
 
 public sealed class PawnInput : MonoBehaviour
 {
-    //Reference to the Unity Input System
-    private PlayerInputSystem playerInputSystem;
-    private InputAction movementInput;
+    /*** References to Unity Objects ***/
+    //none!
+
+    /*** Class Properties ***/
 
     //2D Movement Directions
-    public float horizontalDirection;
-    public float verticalDirection;
-    private Vector2 movementDirection;
+    //////////////////////////////////
+    ///
+    public float HorizontalDirection { get; set; }
+    public float VerticalDirection { get; set; }
 
-    /** Actions **/
+    ///Actions
+    //////////////////////////
 
     //Player is attempting to Interact with an object in the world, e.g. Pickup Item
-    public bool Interacting;
+    public bool Interacting { get; set; }
 
     //Player is using their selected item, e.g. shoot gun.
-    public bool PrimaryUse;
+    public bool PrimaryUse { get; set; }
 
     //Player is using their selected item with alternate action, e.g. ADS/Zoom
-    public bool SecondaryUse;
+    public bool SecondaryUse { get; set; }
 
     //Sprinting!!!
-    public bool Sprinting;
+    public bool Sprinting { get; set; }
 
     //Crouching
-    public bool Crouching;
+    public bool Crouching { get; set; }
 
-    public bool MenuOpen = false;
+    private bool MenuOpen = false;
 
     //Player hit the jump button.
     //We want to capture that the user jumped.
@@ -60,6 +63,19 @@ public sealed class PawnInput : MonoBehaviour
         }
         set => reloading = value;
     }
+
+    /*** Local Class Variables ***/
+
+    //Reference to the Player Input System
+    private PlayerInputSystem playerInputSystem;
+
+    //Quick Reference to the movement controls (WSAD)
+    private InputAction movementInput;
+
+    //Calculated direction the player is moving
+    private Vector2 movementDirection;
+
+    /* Unity Methods */
 
     private void Awake()
     {
@@ -119,8 +135,8 @@ public sealed class PawnInput : MonoBehaviour
         //We assigned those to variables to indicate certain directions are "on" (Forward/backward/strafe left/strafe right)
         //PawnMovement script reads these values and determines what to do.
         movementDirection = movementInput.ReadValue<Vector2>();
-        horizontalDirection = movementDirection.x;
-        verticalDirection = movementDirection.y;
+        HorizontalDirection = movementDirection.x;
+        VerticalDirection = movementDirection.y;
 
         //Handle Interaction
         if (playerInputSystem.PlayerControls.Interact.WasPressedThisFrame())
