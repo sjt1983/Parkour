@@ -11,7 +11,7 @@ public class ActionMenuUI : BaseUI
     [SerializeField]
     private Slider mouseSensitivity;
 
-    /*** Unity Methjods ***/
+    /*** Unity Methods ***/
 
     private void Awake()
     {
