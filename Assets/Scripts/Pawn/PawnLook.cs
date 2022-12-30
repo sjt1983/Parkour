@@ -41,7 +41,7 @@ public sealed class PawnLook : MonoBehaviour
     void Update()
     {
         //If the cursor is visible at all, do not try to move the camera.
-        if (UIManager.Instance.IsCursorVisible())
+        if (UIManager.Instance.IsCursorVisible)
             return;
 
         //Calculate the mouse delta since the last frame.

@@ -17,7 +17,7 @@ public class VaultSensor : Sensor
     //Determine what point the sensor hits
     public bool FindVaultPoint(ref Vector3 vector3)
     {
-        if (Physics.Raycast(gameObject.transform.position, Vector3.down, .5f, layerMask))
+        if (Physics.Raycast(gameObject.transform.position, Vector3.down, 2f, layerMask))
         {
             vector3 = gameObject.transform.position;
             return true;

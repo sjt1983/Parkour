@@ -4,6 +4,10 @@ public sealed class UIManager : MonoBehaviour
 {
     /*** References to Unity Objects ***/
 
+    //We need the ActionUI for Debug Text
+    [SerializeField]
+    ActionUI actionUI;
+
     //Any UI View needs to be added to this manager.
     [SerializeField]
     private BaseUI[] views;
@@ -51,5 +55,12 @@ public sealed class UIManager : MonoBehaviour
 
     //Simple getter to see if the cursor is enabled for utility.
     //e.g. you're in a menu and you don't want the camera to move, return from update if IsCursorVisible.
-    public bool IsCursorVisible() => Cursor.visible;
+    public bool IsCursorVisible { get => Cursor.visible; }
+
+    //Debug Texts
+    public string DebugText1 { set => actionUI.DebugText1 = value; }
+
+    public string DebugText2 { set => actionUI.DebugText2 = value; }
+
+    public string DebugText3 { set => actionUI.DebugText3 = value; }
 }
