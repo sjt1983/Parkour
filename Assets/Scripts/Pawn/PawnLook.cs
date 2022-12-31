@@ -3,7 +3,9 @@ using UnityEngine.InputSystem;
 
 public sealed class PawnLook : MonoBehaviour
 {
+    /*****************************************/
     /*** Local References to Unity Objects ***/
+    /*****************************************/
 
     //Main GameObject controlled by the player.
     [SerializeField]
@@ -17,7 +19,9 @@ public sealed class PawnLook : MonoBehaviour
     [SerializeField]
     private LayerMask lookLayerMask;
 
+    /************************/
     /*** Class properties ***/
+    /************************/
 
     ///Camera Properties
     //////////////////////////////////////////////
@@ -56,6 +60,8 @@ public sealed class PawnLook : MonoBehaviour
         //Rotate the camera pitch.
         cameraVerticalRotation -= adjustedMouseY;
         cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
+        pawn.LookAngle = cameraVerticalRotation;
+        UIManager.Instance.DebugText1 = pawn.LookAngle.ToString();
         Vector3 targetRoation = transform.eulerAngles;
         targetRoation.x = cameraVerticalRotation;
         pawnCamera.transform.eulerAngles = targetRoation;

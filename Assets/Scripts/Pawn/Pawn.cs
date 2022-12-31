@@ -16,11 +16,18 @@ public sealed class Pawn : MonoBehaviour
     [SerializeField]
     private CharacterController characterController;
 
+    /************************/
     /*** Class properties ***/
+    /************************/
 
     //Flag to indicate that a certain script has control over the pawn and that nothing else should touch it.
     public bool Locked { get; set; }
+
+    public float LookAngle { get; set; }
+
+    /*****************************/
     /*** Additional Properties ***/
+    /*****************************/
 
     //Quick reference for seeing if the Character Controller is grounded.
     public bool IsGrounded { get { return characterController.isGrounded; } }

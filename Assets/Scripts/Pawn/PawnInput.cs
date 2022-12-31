@@ -26,9 +26,6 @@ public sealed class PawnInput : MonoBehaviour
     //Player is using their selected item with alternate action, e.g. ADS/Zoom
     public bool SecondaryUse { get; set; }
 
-    //Sprinting!!!
-    public bool Sprinting { get; set; }
-
     //Crouching
     public bool Crouching { get; set; }
 
@@ -49,7 +46,7 @@ public sealed class PawnInput : MonoBehaviour
         set => jump = value;
     }
 
-    public bool JumpPressed { get => playerInputSystem.PlayerControls.Jump.IsPressed(); }
+    public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
 
     //Player attempted to reload a weapon.
     //Same deal as before, we want to ensure we capture the input but as soon as we check for it, set it to false.
@@ -69,7 +66,7 @@ public sealed class PawnInput : MonoBehaviour
     /*** Local Class Variables ***/
 
     //Reference to the Player Input System
-    private PlayerInputSystem playerInputSystem;
+    private ActionController actionController;
 
     //Quick Reference to the movement controls (WSAD)
     private InputAction movementInput;
@@ -84,33 +81,30 @@ public sealed class PawnInput : MonoBehaviour
         UIManager.Instance.Initialize();
         UIManager.Instance.Show<ActionUI>();
         //Lets setup the controller
-        playerInputSystem = new PlayerInputSystem();
-        movementInput = playerInputSystem.PlayerControls.Move;
+        actionController = new ActionController();
+        movementInput = actionController.PlayerControls.Move;
 
         //Interaction
-        playerInputSystem.PlayerControls.Interact.Enable();
+        actionController.PlayerControls.Interact.Enable();
 
         //Primary Use
-        playerInputSystem.PlayerControls.PrimaryUse.Enable();
+        actionController.PlayerControls.PrimaryUse.Enable();
 
         //Secondary Use
-        playerInputSystem.PlayerControls.SecondaryUse.Enable();
+        actionController.PlayerControls.SecondaryUse.Enable();
 
         //Reload
-        playerInputSystem.PlayerControls.Reload.Enable();
+        actionController.PlayerControls.Reload.Enable();
 
         //Jump
-        playerInputSystem.PlayerControls.Jump.Enable();
-
-        //Sprint
-        playerInputSystem.PlayerControls.Sprint.Enable();
+        actionController.PlayerControls.Jump.Enable();
 
         //Crouch
-        playerInputSystem.PlayerControls.Crouch.Enable();
+        actionController.PlayerControls.Crouch.Enable();
 
         //Menu
-        playerInputSystem.PlayerControls.Menu.Enable();
-        playerInputSystem.PlayerControls.Menu.performed += ctx =>
+        actionController.PlayerControls.Menu.Enable();
+        actionController.PlayerControls.Menu.performed += ctx =>
         {
             MenuOpen = !MenuOpen;
             if (MenuOpen)
@@ -141,72 +135,61 @@ public sealed class PawnInput : MonoBehaviour
         VerticalDirection = movementDirection.y;
 
         //Handle Interaction
-        if (playerInputSystem.PlayerControls.Interact.WasPressedThisFrame())
+        if (actionController.PlayerControls.Interact.WasPressedThisFrame())
         {
             Interacting = true;
         }
 
-        if (playerInputSystem.PlayerControls.Interact.WasReleasedThisFrame())
+        if (actionController.PlayerControls.Interact.WasReleasedThisFrame())
         {
             Interacting = false;
         }
 
         //Handle Primary Use
-        if (playerInputSystem.PlayerControls.PrimaryUse.WasPressedThisFrame())
+        if (actionController.PlayerControls.PrimaryUse.WasPressedThisFrame())
         {
             PrimaryUse = true;
         }
 
-        if (playerInputSystem.PlayerControls.PrimaryUse.WasReleasedThisFrame())
+        if (actionController.PlayerControls.PrimaryUse.WasReleasedThisFrame())
         {
             PrimaryUse = false;
         }
 
         //Handle Secondary Use
-        if (playerInputSystem.PlayerControls.SecondaryUse.WasPressedThisFrame())
+        if (actionController.PlayerControls.SecondaryUse.WasPressedThisFrame())
         {
             SecondaryUse = true;
         }
 
-        if (playerInputSystem.PlayerControls.SecondaryUse.WasReleasedThisFrame())
+        if (actionController.PlayerControls.SecondaryUse.WasReleasedThisFrame())
         {
             SecondaryUse = false;
         }
 
         //Handle Jumping
-        if (playerInputSystem.PlayerControls.Jump.WasPressedThisFrame())
+        if (actionController.PlayerControls.Jump.WasPressedThisFrame())
         {
             Jumping = true;
         }
-        if (playerInputSystem.PlayerControls.Jump.WasReleasedThisFrame())
+        if (actionController.PlayerControls.Jump.WasReleasedThisFrame())
         {
             Jumping = false;
         }
 
         //Handle Reload
-        if (playerInputSystem.PlayerControls.Reload.WasPressedThisFrame())
+        if (actionController.PlayerControls.Reload.WasPressedThisFrame())
         {
             Reloading = true;
         }
 
         //Handle Sprint
-        if (playerInputSystem.PlayerControls.Sprint.WasPressedThisFrame())
-        {
-            Sprinting = true;
-        }
-
-        if (playerInputSystem.PlayerControls.Sprint.WasReleasedThisFrame())
-        {
-            Sprinting = false;
-        }
-
-        //Handle Sprint
-        if (playerInputSystem.PlayerControls.Crouch.WasPressedThisFrame())
+        if (actionController.PlayerControls.Crouch.WasPressedThisFrame())
         {
             Crouching = true;
         }
 
-        if (playerInputSystem.PlayerControls.Crouch.WasReleasedThisFrame())
+        if (actionController.PlayerControls.Crouch.WasReleasedThisFrame())
         {
             Crouching = false;
         }
