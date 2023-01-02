@@ -13,7 +13,7 @@ public sealed class PawnLook : MonoBehaviour
 
     //Reference for the camera attached to the pawn.
     [SerializeField]
-    private Transform cameraHolder;
+    private Transform mainCamera;
 
     //Used to indicate which objects the player can "see" for pickup.
     [SerializeField]
@@ -63,7 +63,7 @@ public sealed class PawnLook : MonoBehaviour
         pawn.LookAngle = cameraVerticalRotation;
         Vector3 targetRoation = transform.eulerAngles;
         targetRoation.x = cameraVerticalRotation;
-        cameraHolder.transform.eulerAngles = targetRoation;
+        mainCamera.transform.eulerAngles = targetRoation;
 
         checkToWhatPlayerIsLookingAt();
 

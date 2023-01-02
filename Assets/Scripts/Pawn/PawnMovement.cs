@@ -24,10 +24,11 @@ public sealed class PawnMovement : MonoBehaviour
     /*** Default Upper Thresholds for movement ***/    
 
     //How fast the character walks.
-    private const float MAX_WALK_SPEED = 10f;
+    private const float MAX_WALK_SPEED_FORWARD = 10f;
+    private const float MAX_WALK_SPEED_SIDEWAYS = 5f;
 
     //How hard the character jumps;
-    private const float WALK_ACCELERATION = 12f;
+    private const float WALK_ACCELERATION = 13f;
 
     //How fast the character stops moving.
     private const float WALK_STOP_FORCE = 20f;
@@ -36,7 +37,10 @@ public sealed class PawnMovement : MonoBehaviour
     private const float JUMP_FORCE = 10;
 
     //Current Speed the character is moving forwards or backwards.
-    private float currentXZSpeed = 0;
+    [SerializeField]
+    private float currentZSpeed = 0;
+    [SerializeField]
+    private float currentXSpeed = 0;
 
     //Last frame directions, used for keeping momentum.
     private float lastFrameHorizontalDirection;
@@ -68,32 +72,87 @@ public sealed class PawnMovement : MonoBehaviour
         //If both vectors are zero, reset speed.
 
         //If there is no input and the pawn is grounded, there is no speed.
-        if (!pawn.IsTryingToMove && pawn.IsGrounded && !pawn.IsCrouching)
-        {           
-            if (currentXZSpeed > 0)
-                currentXZSpeed -= WALK_STOP_FORCE * Time.deltaTime;
-            else
-                currentXZSpeed = 0;
-        }
-        else
+        if (pawn.IsGrounded && !pawn.IsCrouching)
         {
-            currentXZSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION) * Time.deltaTime;
+            if (pawn.PawnInput.VerticalDirection == 0f)
+            {
+                if (currentZSpeed > .3f)
+                {
+                    currentZSpeed -= WALK_STOP_FORCE * Time.deltaTime;
+                }
+                else if (currentZSpeed < -.3f)
+                {
+                    currentZSpeed += WALK_STOP_FORCE * Time.deltaTime;
+                }
+                else
+                {
+                    currentZSpeed = 0f;
+                }
+            }
+            else
+            {
+
+                //Is my Input the same direction I am going, e.g. I am already moving forward and holding forward.
+                //if so, accelerate slowly, else, accelerate in the opposite direction abruptly
+                //Forward/back first.
+                if ((pawn.PawnInput.VerticalDirection > 0 && currentZSpeed > 0) || (pawn.PawnInput.VerticalDirection < 0 && currentZSpeed < 0))
+                {
+                    currentZSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION) * pawn.PawnInput.VerticalDirection * Time.deltaTime;
+                }
+                else
+                {
+                    currentZSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION * 2) * pawn.PawnInput.VerticalDirection * Time.deltaTime;
+                }
+            }
+
+            if (pawn.PawnInput.HorizontalDirection == 0f)
+            {
+                if (currentXSpeed > .3f)
+                {
+                    currentXSpeed -= WALK_STOP_FORCE * Time.deltaTime;
+                }
+                else if (currentXSpeed < -.3f)
+                {
+                    currentXSpeed += WALK_STOP_FORCE * Time.deltaTime;
+                }
+                else
+                {
+                    currentXSpeed = 0f;
+                }
+            }
+            else
+            {
+                //Now for left/right
+                if ((pawn.PawnInput.HorizontalDirection > 0 && currentXSpeed > 0) || (pawn.PawnInput.HorizontalDirection < 0 && currentXSpeed < 0))
+                {
+                    currentXSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION) * pawn.PawnInput.HorizontalDirection * Time.deltaTime;
+                }
+                else
+                {
+                    currentXSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION * 2) * pawn.PawnInput.HorizontalDirection * Time.deltaTime;
+                }
+            }
+
         }
 
-        currentXZSpeed = Mathf.Clamp(currentXZSpeed, 0f, MAX_WALK_SPEED);
+        UIManager.Instance.DebugText1 = pawn.PawnInput.VerticalDirection.ToString();
+        UIManager.Instance.DebugText2 = pawn.PawnInput.HorizontalDirection.ToString();
+
+        currentZSpeed = Mathf.Clamp(currentZSpeed, -MAX_WALK_SPEED_FORWARD, MAX_WALK_SPEED_FORWARD);
+        currentXSpeed = Mathf.Clamp(currentXSpeed , -MAX_WALK_SPEED_SIDEWAYS, MAX_WALK_SPEED_SIDEWAYS);
 
         if (pawn.IsGrounded)
         {
             if (!pawn.IsCrouching && pawn.IsTryingToMove)
             {
                 //Calculate the velocity based on input.
-                inputCalculatedVelocity = Vector3.ClampMagnitude(((transform.forward * pawn.PawnInput.VerticalDirection) + (transform.right * pawn.PawnInput.HorizontalDirection)) * currentXZSpeed, MAX_WALK_SPEED);
+                inputCalculatedVelocity = Vector3.ClampMagnitude(transform.forward * currentZSpeed + (transform.right  * currentXSpeed), MAX_WALK_SPEED_FORWARD);
                 lastFrameVerticalDirection = pawn.PawnInput.VerticalDirection;
                 lastFrameHorizontalDirection = pawn.PawnInput.HorizontalDirection;                
             }
             else
             {
-                inputCalculatedVelocity = Vector3.ClampMagnitude(((transform.forward * lastFrameVerticalDirection) + (transform.right * lastFrameHorizontalDirection)) * currentXZSpeed, MAX_WALK_SPEED);
+                inputCalculatedVelocity = Vector3.ClampMagnitude(transform.forward * currentZSpeed + (transform.right * currentXSpeed), MAX_WALK_SPEED_FORWARD);
             }
         }
 
@@ -132,12 +191,12 @@ public sealed class PawnMovement : MonoBehaviour
     }
 
     //Quick check to see if there is significant movement
-    public bool IsMoving { get => Mathf.Abs(currentXZSpeed) > .1f; }
+    public bool IsMoving { get => Mathf.Abs(currentXSpeed + currentZSpeed) > .1f; }
 
     //Check to see if the player is moving faster than a certain speed;
     public bool IsMovingFasterThan (float targetVelocity)
     {
-        return Mathf.Abs(currentXZSpeed) > targetVelocity;
+        return Mathf.Abs(currentXSpeed + currentZSpeed) > targetVelocity;
     }
 
     //Quick check to see if any X/Z movement is TRYING to happen.

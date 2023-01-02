@@ -2361,6 +2361,7 @@ GameObject:
   - component: {fileID: 1041797166}
   - component: {fileID: 1041797161}
   - component: {fileID: 1041797167}
+  - component: {fileID: 1041797168}
   m_Layer: 0
   m_Name: Pawn
   m_TagString: Untagged
@@ -2380,7 +2381,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1677083182}
+  - {fileID: 1823688467}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2415,6 +2416,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 1041797165}
+  currentZSpeed: 0
+  currentXSpeed: 0
 --- !u!114 &1041797163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2428,7 +2431,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 1041797165}
-  cameraHolder: {fileID: 1677083182}
+  mainCamera: {fileID: 1823688467}
   lookLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -2488,7 +2491,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 1041797165}
-  cameraHolder: {fileID: 1677083182}
+  mainCamera: {fileID: 1823688467}
+--- !u!114 &1041797168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1041797159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbb45e84345f8bd4d81a47481825c57b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pawn: {fileID: 1041797165}
+  mainCamera: {fileID: 1823688467}
+  walkBobSpeed: 10
+  walkBobAmount: 0.1
+  crouchBobSpeed: 5
+  crouchBobAmount: 0.1
 --- !u!1 &1142727315
 GameObject:
   m_ObjectHideFlags: 0
@@ -4183,38 +4204,6 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
   m_PVRTiledBaking: 0
---- !u!1 &1677083181
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1677083182}
-  m_Layer: 0
-  m_Name: CameraHolder
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1677083182
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1677083181}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1823688467}
-  m_Father: {fileID: 1041797160}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1686410747
 GameObject:
   m_ObjectHideFlags: 0
@@ -4595,7 +4584,6 @@ GameObject:
   - component: {fileID: 1823688466}
   - component: {fileID: 1823688465}
   - component: {fileID: 1823688468}
-  - component: {fileID: 1823688469}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4667,7 +4655,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1022092205}
-  m_Father: {fileID: 1677083182}
+  m_Father: {fileID: 1041797160}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1823688468
@@ -4795,24 +4783,6 @@ MonoBehaviour:
       enableFptlForForwardOpaque: 0
       enableBigTilePrepass: 0
       isFptlEnabled: 0
---- !u!114 &1823688469
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1823688464}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbb45e84345f8bd4d81a47481825c57b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pawn: {fileID: 1041797165}
-  mainCamera: {fileID: 1823688467}
-  walkBobSpeed: 10
-  walkBobAmount: 0.1
-  crouchBobSpeed: 5
-  crouchBobAmount: 0.1
 --- !u!1 &1891978808
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,7 +6,7 @@ public class PawnCrouch : MonoBehaviour
     private Pawn pawn;
 
     [SerializeField]
-    private Transform cameraHolder;
+    private Transform mainCamera;
 
     private CharacterController characterController;
 
@@ -33,11 +33,11 @@ public class PawnCrouch : MonoBehaviour
 
         
         float newpos = Mathf.Clamp(pawn.IsCrouching ?
-                                        cameraHolder.localPosition.y - (CROUCH_SPEED * Time.deltaTime) :
-                                        cameraHolder.localPosition.y + (CROUCH_SPEED * Time.deltaTime),
+                                        mainCamera.localPosition.y - (CROUCH_SPEED * Time.deltaTime) :
+                                        mainCamera.localPosition.y + (CROUCH_SPEED * Time.deltaTime),
                                         CROUCH_HEAD_Y, STAND_HEAD_Y);
 
-        cameraHolder.localPosition = new Vector3(cameraHolder.localPosition.x, newpos, cameraHolder.localPosition.z);
+        mainCamera.localPosition = new Vector3(mainCamera.localPosition.x, newpos, mainCamera.localPosition.z);
     }
 
     private void Initialize() {
