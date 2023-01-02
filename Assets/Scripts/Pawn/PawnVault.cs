@@ -59,8 +59,8 @@ public class PawnVault : MonoBehaviour
         //Now vault.
         else if (vaultState == VaultState.EXECUTE_VAULT)
         {
-            movementVelocity = 10f * transform.forward;
-            movementVelocity.y = 10f;
+            movementVelocity = 15f * transform.forward;
+            movementVelocity.y = 15f;
             pawn.Move(movementVelocity);
 
             if (pawn.gameObject.transform.position.y >= vaultPoint.y)

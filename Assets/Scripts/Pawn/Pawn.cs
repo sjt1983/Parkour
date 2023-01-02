@@ -3,7 +3,10 @@ using UnityEngine;
 //Pawn is a class that represents the avatar which is controlled by the user.
 public sealed class Pawn : MonoBehaviour
 {
+    /*****************************************/
     /*** Local References to Unity Objects ***/
+    /*****************************************/
+
     [SerializeField]
     private PawnInput pawnInput;
 
@@ -24,6 +27,8 @@ public sealed class Pawn : MonoBehaviour
     public bool Locked { get; set; }
 
     public float LookAngle { get; set; }
+
+    public float Drag { get; set; }
 
     /*****************************/
     /*** Additional Properties ***/
@@ -47,6 +52,12 @@ public sealed class Pawn : MonoBehaviour
     //Quick reference for getting the PawnLook object.
     public PawnMovement PawnMovement { get => pawnMovement; }
 
+    //Quick reference for if the Pawn is moving.
+    public bool IsMoving { get => pawnMovement.IsMoving; }
+
+    //Quick reference for if the pawn is crouching.
+    public bool IsCrouching { get => pawnInput.Crouching; }
+
     public CharacterController CharacterController { get => characterController; }
 
     //Flag to prevent any logic from executing until after Initialization.
@@ -65,12 +76,23 @@ public sealed class Pawn : MonoBehaviour
     //Do any class initializations here.
     private void Initialize()
     {
+        Drag = 0f;
         initialized = true;
     }
 
+    //Stop all movement on the character;
     public void HaltMovement()
     {
         pawnMovement.HaltMovement();
     }
-  
+
+    //Quick check to see if the pawn is TRYING to move alonmg x/z due to input.
+    public bool IsTryingToMove { get => pawnMovement.IsTryingToMove(); }
+
+    //Check to see if the player is moving faster than a certain speed;t
+    public bool IsMovingFasterThan(float targetVelocity)
+    {
+        return pawnMovement.IsMovingFasterThan(targetVelocity);
+    }
+
 }

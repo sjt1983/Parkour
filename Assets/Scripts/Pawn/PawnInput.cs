@@ -183,7 +183,7 @@ public sealed class PawnInput : MonoBehaviour
             Reloading = true;
         }
 
-        //Handle Sprint
+        //Handle Crouch
         if (actionController.PlayerControls.Crouch.WasPressedThisFrame())
         {
             Crouching = true;
