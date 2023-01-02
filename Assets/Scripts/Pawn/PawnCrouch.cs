@@ -6,7 +6,7 @@ public class PawnCrouch : MonoBehaviour
     private Pawn pawn;
 
     [SerializeField]
-    private Transform mainCamera;
+    private Transform mainCameraMount;
 
     private CharacterController characterController;
 
@@ -22,26 +22,28 @@ public class PawnCrouch : MonoBehaviour
         if (!initialized)
             Initialize();
 
-        if (pawn.IsGrounded && pawn.IsCrouching)
+        UIManager.Instance.DebugText1 = pawn.IsGrounded.ToString();
+
+        if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > 5)
         {
-            pawn.Drag = 5f;
+            pawn.IsSliding = true;
+            pawn.Drag = 3f;
         }
         else
         {
+            pawn.IsSliding = false;
             pawn.Drag = 0;
         }
-
         
         float newpos = Mathf.Clamp(pawn.IsCrouching ?
-                                        mainCamera.localPosition.y - (CROUCH_SPEED * Time.deltaTime) :
-                                        mainCamera.localPosition.y + (CROUCH_SPEED * Time.deltaTime),
+                                        mainCameraMount.localPosition.y - (CROUCH_SPEED * Time.deltaTime) :
+                                        mainCameraMount.localPosition.y + (CROUCH_SPEED * Time.deltaTime),
                                         CROUCH_HEAD_Y, STAND_HEAD_Y);
 
-        mainCamera.localPosition = new Vector3(mainCamera.localPosition.x, newpos, mainCamera.localPosition.z);
+        mainCameraMount.localPosition = new Vector3(mainCameraMount.localPosition.x, newpos, mainCameraMount.localPosition.z);
     }
 
-    private void Initialize() {
-        characterController = pawn.CharacterController;
+    private void Initialize() {        
         initialized = true;
     }
 }

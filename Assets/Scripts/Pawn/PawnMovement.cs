@@ -15,17 +15,20 @@ public sealed class PawnMovement : MonoBehaviour
     /*** Class properties ***/
     /************************/
 
-    //None
+    public float ForwardSpeed { get => currentZSpeed; }
 
     /*****************************/
     /*** Local Class Variables ***/
     /*****************************/
 
-    /*** Default Upper Thresholds for movement ***/    
+    /*** Default Upper Thresholds for movement ***/
 
     //How fast the character walks.
     private const float MAX_WALK_SPEED_FORWARD = 10f;
     private const float MAX_WALK_SPEED_SIDEWAYS = 5f;
+
+    //How fast the character walks when crouched.
+    private const float MAX_CROUCH_WALK_SPEED = 3f;
 
     //How hard the character jumps;
     private const float WALK_ACCELERATION = 13f;
@@ -41,10 +44,6 @@ public sealed class PawnMovement : MonoBehaviour
     private float currentZSpeed = 0;
     [SerializeField]
     private float currentXSpeed = 0;
-
-    //Last frame directions, used for keeping momentum.
-    private float lastFrameHorizontalDirection;
-    private float lastFrameVerticalDirection;
 
     /*** Movement Vectors ***/
 
@@ -72,9 +71,13 @@ public sealed class PawnMovement : MonoBehaviour
         //If both vectors are zero, reset speed.
 
         //If there is no input and the pawn is grounded, there is no speed.
-        if (pawn.IsGrounded && !pawn.IsCrouching)
+        if (pawn.IsGrounded)
         {
-            if (pawn.PawnInput.VerticalDirection == 0f)
+            if (pawn.IsSliding)
+            {
+                currentZSpeed += (currentZSpeed < 0 ? pawn.Drag : -pawn.Drag) * Time.deltaTime;                
+            }
+            else if (pawn.PawnInput.VerticalDirection == 0f)
             {
                 if (currentZSpeed > .3f)
                 {
@@ -88,24 +91,28 @@ public sealed class PawnMovement : MonoBehaviour
                 {
                     currentZSpeed = 0f;
                 }
-            }
+            }            
             else
             {
 
                 //Is my Input the same direction I am going, e.g. I am already moving forward and holding forward.
                 //if so, accelerate slowly, else, accelerate in the opposite direction abruptly
-                //Forward/back first.
+                //Forward/back
                 if ((pawn.PawnInput.VerticalDirection > 0 && currentZSpeed > 0) || (pawn.PawnInput.VerticalDirection < 0 && currentZSpeed < 0))
                 {
-                    currentZSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION) * pawn.PawnInput.VerticalDirection * Time.deltaTime;
+                    currentZSpeed += (WALK_ACCELERATION) * pawn.PawnInput.VerticalDirection * Time.deltaTime;
                 }
                 else
                 {
-                    currentZSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION * 2) * pawn.PawnInput.VerticalDirection * Time.deltaTime;
+                    currentZSpeed += (WALK_ACCELERATION * 2) * pawn.PawnInput.VerticalDirection * Time.deltaTime;
                 }
             }
 
-            if (pawn.PawnInput.HorizontalDirection == 0f)
+            if (pawn.IsSliding)
+            {
+                currentXSpeed += (currentXSpeed < 0 ? pawn.Drag : -pawn.Drag) * Time.deltaTime;
+            }
+            else if (pawn.PawnInput.HorizontalDirection == 0f)
             {
                 if (currentXSpeed > .3f)
                 {
@@ -122,38 +129,35 @@ public sealed class PawnMovement : MonoBehaviour
             }
             else
             {
+                //Is my Input the same direction I am going, e.g. I am already moving forward and holding forward.
+                //if so, accelerate slowly, else, accelerate in the opposite direction abruptly
                 //Now for left/right
                 if ((pawn.PawnInput.HorizontalDirection > 0 && currentXSpeed > 0) || (pawn.PawnInput.HorizontalDirection < 0 && currentXSpeed < 0))
                 {
-                    currentXSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION) * pawn.PawnInput.HorizontalDirection * Time.deltaTime;
+                    currentXSpeed += (WALK_ACCELERATION) * pawn.PawnInput.HorizontalDirection * Time.deltaTime;
                 }
                 else
                 {
-                    currentXSpeed += (pawn.IsCrouching ? -pawn.Drag : WALK_ACCELERATION * 2) * pawn.PawnInput.HorizontalDirection * Time.deltaTime;
+                    currentXSpeed += (WALK_ACCELERATION * 2) * pawn.PawnInput.HorizontalDirection * Time.deltaTime;
                 }
             }
-
         }
 
-        UIManager.Instance.DebugText1 = pawn.PawnInput.VerticalDirection.ToString();
-        UIManager.Instance.DebugText2 = pawn.PawnInput.HorizontalDirection.ToString();
 
-        currentZSpeed = Mathf.Clamp(currentZSpeed, -MAX_WALK_SPEED_FORWARD, MAX_WALK_SPEED_FORWARD);
-        currentXSpeed = Mathf.Clamp(currentXSpeed , -MAX_WALK_SPEED_SIDEWAYS, MAX_WALK_SPEED_SIDEWAYS);
+        if (pawn.IsCrouching && !pawn.IsSliding)
+        {
+            currentZSpeed = Mathf.Clamp(currentZSpeed, -MAX_CROUCH_WALK_SPEED, MAX_CROUCH_WALK_SPEED);
+            currentXSpeed = Mathf.Clamp(currentXSpeed, -MAX_CROUCH_WALK_SPEED, MAX_CROUCH_WALK_SPEED);
+        }
+        else
+        {
+            currentZSpeed = Mathf.Clamp(currentZSpeed, -MAX_WALK_SPEED_FORWARD, MAX_WALK_SPEED_FORWARD);
+            currentXSpeed = Mathf.Clamp(currentXSpeed, -MAX_WALK_SPEED_SIDEWAYS, MAX_WALK_SPEED_SIDEWAYS);
+        }
 
         if (pawn.IsGrounded)
-        {
-            if (!pawn.IsCrouching && pawn.IsTryingToMove)
-            {
-                //Calculate the velocity based on input.
-                inputCalculatedVelocity = Vector3.ClampMagnitude(transform.forward * currentZSpeed + (transform.right  * currentXSpeed), MAX_WALK_SPEED_FORWARD);
-                lastFrameVerticalDirection = pawn.PawnInput.VerticalDirection;
-                lastFrameHorizontalDirection = pawn.PawnInput.HorizontalDirection;                
-            }
-            else
-            {
-                inputCalculatedVelocity = Vector3.ClampMagnitude(transform.forward * currentZSpeed + (transform.right * currentXSpeed), MAX_WALK_SPEED_FORWARD);
-            }
+        { 
+            inputCalculatedVelocity = Vector3.ClampMagnitude(transform.forward * currentZSpeed + (transform.right * currentXSpeed), MAX_WALK_SPEED_FORWARD);
         }
 
         //Take X/Z from the calculated velocity and store in the vector to move the player horizontally.
@@ -165,19 +169,20 @@ public sealed class PawnMovement : MonoBehaviour
         /*******************************/
 
         //If the controller is on the ground already, cancel gravity
-        if (pawn.CharacterController.isGrounded)
+        if (pawn.IsGrounded)
         {
             movementVelocity.y = 0;
             //Only allow jumping if grounded.
             if (pawn.PawnInput.Jumping)
             {
                 movementVelocity.y = JUMP_FORCE;
+                pawn.UnGround();
             }
         }
-        movementVelocity.y += Physics.gravity.y * 2.5f * Time.deltaTime;
+        movementVelocity.y += Physics.gravity.y * 3.5f * Time.deltaTime;
 
         //Finally, move the controller.
-        pawn.CharacterController.Move(movementVelocity * Time.deltaTime);
+        pawn.Move(movementVelocity * Time.deltaTime);
     }
 
     /*********************/
