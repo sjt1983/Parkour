@@ -27,7 +27,7 @@ public class PawnCrouch : MonoBehaviour
         if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > 5)
         {
             pawn.IsSliding = true;
-            pawn.Drag = 3f;
+            pawn.Drag = pawn.IsOnSlope ? 0f : 3f;
         }
         else
         {

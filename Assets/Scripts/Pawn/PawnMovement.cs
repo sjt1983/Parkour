@@ -53,6 +53,7 @@ public sealed class PawnMovement : MonoBehaviour
     //Actual calculated velocity after applying physics.
     private Vector3 movementVelocity;
 
+
     /*********************/
     /*** Unity Methods ***/
     /*********************/
@@ -171,12 +172,11 @@ public sealed class PawnMovement : MonoBehaviour
         //If the controller is on the ground already, cancel gravity
         if (pawn.IsGrounded)
         {
-            movementVelocity.y = 0;
+            movementVelocity.y = -5; //Always ensure we are trying to push the character down due to slopes.
             //Only allow jumping if grounded.
             if (pawn.PawnInput.Jumping)
             {
                 movementVelocity.y = JUMP_FORCE;
-                pawn.UnGround();
             }
         }
         movementVelocity.y += Physics.gravity.y * 3.5f * Time.deltaTime;

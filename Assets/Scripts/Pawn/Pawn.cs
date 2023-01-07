@@ -35,12 +35,7 @@ public sealed class Pawn : MonoBehaviour
     /*****************************/
 
     //Quick reference for seeing if the Character Controller is grounded.
-    public bool IsGrounded { get => groundedTimer > 0; }
-
-    public void UnGround()
-    {
-        groundedTimer = 0f;
-    }
+    public bool IsGrounded { get => characterController.isGrounded; }
 
     //Quick reference for moving the pawn's character controller.
     public void Move(Vector3 movementVelocity)
@@ -68,8 +63,6 @@ public sealed class Pawn : MonoBehaviour
 
     public float ForwardSpeed { get => pawnMovement.ForwardSpeed; }
 
-    private float groundedTimer = 0f;
-
     //Flag to prevent any logic from executing until after Initialization.
     private bool initialized = false;
 
@@ -80,16 +73,10 @@ public sealed class Pawn : MonoBehaviour
         if (!initialized)
             Initialize();
 
-        if (characterController.isGrounded)
-        {
-            // cooldown interval to allow reliable jumping even whem coming down ramps
-            groundedTimer = 0.25f;
-        }
-        if (groundedTimer > 0)
-        {
-            groundedTimer -= Time.deltaTime;
-        }
-
+        Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2.02f);
+        Debug.Log(hit.transform.gameObject.name);
+        slopeBeneathPlayer = hit.normal.y;
+        Debug.Log(hit.normal.y);
     }
 
     /*** Class Methods ***/
@@ -116,5 +103,10 @@ public sealed class Pawn : MonoBehaviour
     {
         return pawnMovement.IsMovingFasterThan(targetVelocity);
     }
+
+    public bool IsOnSlope { get => slopeBeneathPlayer < 1f; }
+
+    private float slopeBeneathPlayer = 1.0f;
+
 
 }
