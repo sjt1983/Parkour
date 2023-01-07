@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 2737.1934, g: 2734.0898, b: 3816.2344, a: 1}
+  m_IndirectSpecularColor: {r: 2737.1855, g: 2734.0078, b: 3816.1406, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2088,7 +2088,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh30708
+  m_Name: pb_Mesh59598
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2686,6 +2686,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pawn: {fileID: 1041797165}
   mainCameraMount: {fileID: 1267646542}
+  characterController: {fileID: 1041797161}
 --- !u!114 &1041797168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4643,7 +4644,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh30820
+  m_Name: pb_Mesh59710
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

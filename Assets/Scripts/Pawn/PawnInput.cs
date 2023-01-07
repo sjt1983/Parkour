@@ -3,19 +3,21 @@ using UnityEngine.InputSystem;
 
 public sealed class PawnInput : MonoBehaviour
 {
+    /***********************************/
     /*** References to Unity Objects ***/
+    /***********************************/
     //none!
 
+    /************************/
     /*** Class Properties ***/
+    /************************/
 
     //2D Movement Directions
-    //////////////////////////////////
-    ///
     public float HorizontalDirection { get; set; }
     public float VerticalDirection { get; set; }
 
-    ///Actions
-    //////////////////////////
+    
+    /*** Actions ***/
 
     //Player is attempting to Interact with an object in the world, e.g. Pickup Item
     public bool Interacting { get; set; }
@@ -29,7 +31,7 @@ public sealed class PawnInput : MonoBehaviour
     //Crouching
     public bool Crouching { get; set; }
 
-    private bool MenuOpen = false;
+    //Jumping 
 
     //Player hit the jump button.
     //We want to capture that the user jumped.
@@ -46,6 +48,7 @@ public sealed class PawnInput : MonoBehaviour
         set => jump = value;
     }
 
+    //Simple notification for scripts to know if the jump button is pressed.
     public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
 
     //Player attempted to reload a weapon.
@@ -63,7 +66,12 @@ public sealed class PawnInput : MonoBehaviour
         set => reloading = value;
     }
 
-    /*** Local Class Variables ***/
+    /*************************/
+    /*** Private variables ***/
+    /*************************/
+
+    //Flag to indicate the menu is open
+    private bool menuOpen = false;
 
     //Reference to the Player Input System
     private ActionController actionController;
@@ -74,7 +82,9 @@ public sealed class PawnInput : MonoBehaviour
     //Calculated direction the player is moving
     private Vector2 movementDirection;
 
-    /* Unity Methods */
+    /*********************/
+    /*** Unity Methods ***/
+    /*********************/
 
     private void Awake()
     {
@@ -106,8 +116,8 @@ public sealed class PawnInput : MonoBehaviour
         actionController.PlayerControls.Menu.Enable();
         actionController.PlayerControls.Menu.performed += ctx =>
         {
-            MenuOpen = !MenuOpen;
-            if (MenuOpen)
+            menuOpen = !menuOpen;
+            if (menuOpen)
             {
                 UIManager.Instance.Show<ActionMenuUI>();                
             }

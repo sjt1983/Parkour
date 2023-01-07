@@ -23,15 +23,13 @@ public sealed class PawnLook : MonoBehaviour
     /*** Class properties ***/
     /************************/
 
-    ///Camera Properties
-    //////////////////////////////////////////////
+    /*** Camera Properties ***/
 
     //Used to clamp the camera to prevent the users neck from doing vertical 360s.
     private float cameraVerticalRotation = 0f;
     private readonly float CAMERA_MAX_VERTICAL_ROTATION = 85;
 
-    ///Mouse Properties
-    //////////////////////////////////////////////
+    /*** Mouse Properties ***/
 
     //Values of the mouse delta from the last frame, adjusted for sensitivity.
     private float adjustedMouseX;
@@ -40,7 +38,9 @@ public sealed class PawnLook : MonoBehaviour
     //Mouse Sensitivity
     public float MouseSensitivity = 15;
 
+    /*********************/
     /*** Unity Methods ***/
+    /*********************/
 
     void Update()
     {
@@ -69,7 +69,9 @@ public sealed class PawnLook : MonoBehaviour
 
     }
 
+    /*********************/
     /*** Class Methods ***/
+    /*********************/
 
     //Eventually used to help pickup objects.
     private void checkToWhatPlayerIsLookingAt()

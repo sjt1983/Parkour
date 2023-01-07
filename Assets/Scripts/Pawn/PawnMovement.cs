@@ -15,7 +15,11 @@ public sealed class PawnMovement : MonoBehaviour
     /*** Class properties ***/
     /************************/
 
+    //How fast we are moving forward.
     public float ForwardSpeed { get => currentZSpeed; }
+
+    //Quick check to see if there is significant movement
+    public bool IsMoving { get => Mathf.Abs(currentXSpeed + currentZSpeed) > .1f; }
 
     /*****************************/
     /*** Local Class Variables ***/
@@ -52,7 +56,6 @@ public sealed class PawnMovement : MonoBehaviour
 
     //Actual calculated velocity after applying physics.
     private Vector3 movementVelocity;
-
 
     /*********************/
     /*** Unity Methods ***/
@@ -195,11 +198,8 @@ public sealed class PawnMovement : MonoBehaviour
         movementVelocity = Vector3.zero;
     }
 
-    //Quick check to see if there is significant movement
-    public bool IsMoving { get => Mathf.Abs(currentXSpeed + currentZSpeed) > .1f; }
-
     //Check to see if the player is moving faster than a certain speed;
-    public bool IsMovingFasterThan (float targetVelocity)
+    public bool IsMovingFasterThan(float targetVelocity)
     {
         return Mathf.Abs(currentXSpeed + currentZSpeed) > targetVelocity;
     }
