@@ -3,36 +3,44 @@ using UnityEngine;
 //Used to tell us if we can vault
 public class VaultSensor : Sensor
 {
+    /*****************************/
     /*** Local Class Variables ***/
-    int layerMask;
-    float sensorRange = 0f;
+    /*****************************/
 
+    //The layer mask we can hit when looking to vault.
+     private LayerMask layerMask;
+
+    //How far down from the sensor we should raycast.
+    private readonly float SENSOR_RANGE = 1f;
+
+    /*********************/
     /*** Unity Methods ***/
+    /*********************/
+
     private void Awake()
     {
         layerMask = LayerMask.GetMask("MapGeometry");
     }
 
+    /*********************/
     /*** Class Methods ***/
+    /*********************/
 
-    //Determine what point the sensor hits
-    public bool FindVaultPoint(ref Vector3 vector3, float lookAngle)
+    //Determine what point the sensor hits.
+    //Used the Bool with return object pattern.
+    public bool FindVaultPoint(ref Vector3 potentialVaultPoint, Vector3 vaultLowPointPosition)
     {
-        //The look angle is somewhere between -85 and 85 degrees.
-        //
-        if (lookAngle < 0)
+        RaycastHit hitInfo;
+        //Raycast down from the sensor, only looking at map geometry.
+        if (Physics.Raycast(gameObject.transform.position, Vector3.down, out hitInfo, SENSOR_RANGE, layerMask))
         {
-            sensorRange = 1.5f;
-        }
-        else
-        {
-            sensorRange = .5f * ((85f - lookAngle) / 85f);
-        }
+            potentialVaultPoint = hitInfo.point;
 
-        if (Physics.Raycast(gameObject.transform.position, Vector3.down, sensorRange, layerMask))
-        {
-            vector3 = gameObject.transform.position;
-            return true;
+            //If the point we are trying to vault at is lower than our shoulders, we dislocate both shoulders.
+            //JK we just dont allow the vault.
+
+            if (potentialVaultPoint.y > vaultLowPointPosition.y)
+                return true;
         }
 
         return false;

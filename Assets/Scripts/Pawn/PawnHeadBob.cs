@@ -25,7 +25,7 @@ public class PawnHeadBob : MonoBehaviour
 
     //How much the bobbing should occur.
     [SerializeField]
-    float walkBobAmount = .01f;
+    float walkBobAmount = .05f;
 
     //How fast the bobbing should occur, crouch edition.
     [SerializeField]
@@ -33,7 +33,7 @@ public class PawnHeadBob : MonoBehaviour
 
     //How much the bobbing should occur, crouch edition.
     [SerializeField]
-    float crouchBobAmount = .01f;
+    float crouchBobAmount = .08f;
 
     //Default Y position of the camera when standing still.
     private float defaultYPosition = 0;

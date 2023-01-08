@@ -25,12 +25,12 @@ public class PawnCrouch : MonoBehaviour
     
     //You know what this flag do.
     private bool initialized = false;
-    
-    //Target camera *LOCAL* position when the character is standing.
-    private const float STANDING_HEAD_Y = 1f;
 
-    //Target camera *LOCAL* position when the character is crouching.
-    private const float CROUCHING_HEAD_Y = 0f;
+    //Default local camera Y local position
+    private float defaultCameraLocalY = 1f;
+
+    //How tall the character should be when crouching.
+    private const float CROUCH_HEIGHT = 1;
 
     //How fast the charatcer should crouch, essentially, meters per second.
     private const float CROUCH_SPEED = 6f;
@@ -64,7 +64,7 @@ public class PawnCrouch : MonoBehaviour
         float newCameraMountPosition = Mathf.Clamp(pawn.IsCrouching ?
                                         mainCameraMount.localPosition.y - (CROUCH_SPEED * Time.deltaTime) :
                                         mainCameraMount.localPosition.y + (CROUCH_SPEED * Time.deltaTime),
-                                        CROUCHING_HEAD_Y, STANDING_HEAD_Y);
+                                        defaultCameraLocalY - CROUCH_HEIGHT, defaultCameraLocalY);
 
         mainCameraMount.localPosition = new Vector3(mainCameraMount.localPosition.x, newCameraMountPosition, mainCameraMount.localPosition.z);
 
@@ -79,6 +79,7 @@ public class PawnCrouch : MonoBehaviour
     /*********************/
 
     private void Initialize() {
+        defaultCameraLocalY = mainCameraMount.localPosition.y;
         initialized = true;
     }
 }

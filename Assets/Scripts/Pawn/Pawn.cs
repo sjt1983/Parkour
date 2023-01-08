@@ -6,7 +6,7 @@ public sealed class Pawn : MonoBehaviour
     /*****************************************/
     /*** Local References to Unity Objects ***/
     /*****************************************/
-
+ 
     [SerializeField]
     private PawnInput pawnInput;
 

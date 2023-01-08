@@ -12,6 +12,12 @@ public class PawnVault : MonoBehaviour
     [SerializeField]
     private VaultSensor vaultSensor;
 
+    [SerializeField]
+    private Transform vaultLowPoint;
+
+    [SerializeField]
+    private Transform mainCamera;
+
     /************************/
     /*** Class Properties ***/
     /************************/
@@ -36,6 +42,19 @@ public class PawnVault : MonoBehaviour
     //How long in between vaults we allow.
     private float cooldownTimer = .2f;
 
+    //Default Y position of the camera when standing still.
+    private float defaultYPosition = 0;
+
+    //these both work toward head bobbing which I googled how to do.
+    private float timer;
+    private float increment;
+
+    [SerializeField]
+    private float amount = 1.0f;
+
+    [SerializeField]
+    private float speed = 1.0f;
+
     /*********************/
     /*** Unity Methods ***/
     /*********************/
@@ -48,7 +67,7 @@ public class PawnVault : MonoBehaviour
         //Check to see if we SHOULD vault.
         if (vaultState == VaultState.ATTEMPT_VAULT)
         {
-            if (!pawn.IsGrounded && vaultSensor.FindVaultPoint(ref vaultPoint, pawn.LookAngle) && vaultSensor.CollidedObjects == 0 && pawn.PawnInput.JumpPressed)
+            if (!pawn.IsGrounded && vaultSensor.FindVaultPoint(ref vaultPoint, vaultLowPoint.position) && vaultSensor.CollidedObjects == 0 && pawn.PawnInput.JumpPressed)
             {
                 pawn.Locked = true;
                 pawn.HaltMovement();
@@ -59,12 +78,13 @@ public class PawnVault : MonoBehaviour
         //Now vault.
         else if (vaultState == VaultState.EXECUTE_VAULT)
         {
-            movementVelocity = 15f * transform.forward;
-            movementVelocity.y = 15f;
+            movementVelocity = 4f * transform.forward;
+            movementVelocity.y = 4f;
             pawn.Move(movementVelocity * Time.deltaTime);
-
+            bobTheHead();
             if (pawn.gameObject.transform.position.y >= vaultPoint.y)
             {
+                mainCamera.localPosition = new Vector3(mainCamera.localPosition.x, defaultYPosition, mainCamera.localPosition.z);
                 pawn.Locked = false;
                 vaultState = VaultState.COOLDOWN;
                 cooldownTimer = 0f;
@@ -86,6 +106,14 @@ public class PawnVault : MonoBehaviour
     private void Initialize()
     {
         initialized = true;
+    }
+
+    //Magic, I sort of get how it works with a SIN wave.
+    private void bobTheHead()
+    {
+        timer += Time.deltaTime * speed;
+        increment = Mathf.Sin(timer) * amount;
+        mainCamera.localPosition = new Vector3(mainCamera.localPosition.x, defaultYPosition + increment, mainCamera.localPosition.z);
     }
 }
 
