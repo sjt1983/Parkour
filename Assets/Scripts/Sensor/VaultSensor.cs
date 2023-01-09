@@ -11,7 +11,7 @@ public class VaultSensor : Sensor
      private LayerMask layerMask;
 
     //How far down from the sensor we should raycast.
-    private readonly float SENSOR_RANGE = 1f;
+    private readonly float SENSOR_RANGE = 3f;
 
     /*********************/
     /*** Unity Methods ***/
@@ -37,7 +37,7 @@ public class VaultSensor : Sensor
             //If the point we are trying to vault at is lower than our shoulders, we dislocate both shoulders.
             //JK we just dont allow the vault.
 
-            if (hitInfo.point.y > vaultLowPointPosition.y)
+            if (hitInfo.point.y > vaultLowPointPosition.y && hitInfo.point.y <= vaultLowPointPosition.y + 1)
             {
                 inHitInfo = hitInfo;
                 return true;

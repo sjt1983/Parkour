@@ -10,10 +10,10 @@ public class PawnVault : MonoBehaviour
     private Pawn pawn;
 
     [SerializeField]
-    private VaultSensor vaultSensor;
+    private VaultSensor vaultHighSensor;
 
     [SerializeField]
-    private Sensor vaultLowPoint;
+    private Sensor vaultLowSensor;
 
     [SerializeField]
     private Transform mainCamera;
@@ -83,11 +83,12 @@ public class PawnVault : MonoBehaviour
     private float cooldownTimer;
 
     /*** Camera ***/
-    private RaycastHit cameraHitInfo;
-    private Quaternion from;
-    private Quaternion to;
-    private float speed = 4f;
-    private float timeCount = 0.0f;
+    private readonly float VAULT_MAX_ANGLE_FROM_TARGET = 35f;
+    private RaycastHit lowSensorHitInfo;
+    private Quaternion currentPawnAngle;
+    private Quaternion vaultWallAngle;
+    private float vaultPawnRotationSpeed = 4f;
+    private float vaultPawnRotationTimer = 0.0f;
 
     /*********************/
     /*** Unity Methods ***/
@@ -101,47 +102,42 @@ public class PawnVault : MonoBehaviour
         //Check to see if we SHOULD vault.
         if (vaultState == VaultState.ATTEMPT_VAULT)
         {
-            if (!pawn.IsGrounded && pawn.PawnInput.JumpPressed && vaultSensor.CollidedObjects == 0 &&
-                vaultSensor.FindVaultPoint(ref hitInfo, vaultLowPoint.gameObject.transform.position))
+            if (!pawn.IsGrounded && pawn.PawnInput.JumpPressed && vaultHighSensor.CollidedObjects == 0 &&
+                vaultHighSensor.FindVaultPoint(ref hitInfo, vaultLowSensor.gameObject.transform.position))
             {
-                pawn.Locked = true;
-                UIManager.Instance.DebugText1 = "ON";
-                vaultState = pawn.IsFalling ? VaultState.DIP : VaultState.RAISE;
-                pawn.HaltMovement();
-                vaultPoint = hitInfo.point + new Vector3(0, 1);
-
-                gameObjectToVault = hitInfo.transform.gameObject.name;
-                pauseTimer = PAUSE_TIME;
-
-                dipY = vaultPoint.y - DIP_AMOUNT;
-                dipVelocity = -DIP_INITIAL_GRAVITY;
-
-                raiseVelocity = RAISE_INITIAL_VELOCITY;
-                cooldownTimer = 0f;
-
-                Utils.ClearAll();
-                Utils.Spawn(transform.position - new Vector3(.3f, .5f, 0));
-                Utils.Spawn(transform.position - new Vector3(.3f, .5f, 0) + transform.forward * 2);
-                movementVelocity = Vector3.zero;
-
-                if (Physics.Raycast(transform.position - new Vector3(.3f, .5f, 0), transform.forward, out cameraHitInfo, 2, LayerMask.GetMask("MapGeometry")))
+                if (Physics.Raycast(vaultLowSensor.transform.position, vaultLowSensor.transform.forward, out lowSensorHitInfo, 2, LayerMask.GetMask("MapGeometry")))
                 {
+                    currentPawnAngle = transform.rotation;
+                    vaultWallAngle = Quaternion.LookRotation(-lowSensorHitInfo.normal, transform.up);
 
-                    from = transform.rotation;
-                    to = Quaternion.LookRotation(-cameraHitInfo.normal, transform.up);
+                    Quaternion angleDifference = Quaternion.Inverse(currentPawnAngle) * vaultWallAngle;
 
-                    Debug.Log(to.eulerAngles);
-                    Debug.Log(transform.rotation.eulerAngles);
+                    if (angleDifference.eulerAngles.y <= VAULT_MAX_ANGLE_FROM_TARGET || 360f - angleDifference.eulerAngles.y <= VAULT_MAX_ANGLE_FROM_TARGET)
+                    {
+                        vaultPawnRotationTimer = 0;
 
-                    timeCount = 0;
-                }
-                else
-                {
-                    Debug.Log("CRY");
-                    from = transform.rotation;
-                    to = transform.rotation;
-                }
+                        pawn.Locked = true;
+                        UIManager.Instance.DebugText1 = "ON";
+                        vaultState = pawn.IsFalling ? VaultState.DIP : VaultState.RAISE;
+                        pawn.HaltMovement();
 
+                        //For some reason the position is 1m above the bottom of the CharacterController.
+                        vaultPoint = hitInfo.point + new Vector3(0, 1);
+
+                        gameObjectToVault = hitInfo.transform.gameObject.name;
+                        pauseTimer = PAUSE_TIME;
+
+                        dipY = vaultPoint.y - DIP_AMOUNT;
+                        dipVelocity = -DIP_INITIAL_GRAVITY;
+
+                        raiseVelocity = RAISE_INITIAL_VELOCITY;
+                        cooldownTimer = 0f;
+
+                        movementVelocity = Vector3.zero;
+                    }
+
+                   
+                }                
             }
         }
         else if (vaultState == VaultState.DIP)
@@ -151,7 +147,7 @@ public class PawnVault : MonoBehaviour
             dipVelocity += DIP_GRAVITY_DECREMENT * Time.deltaTime;
             pawn.Move(movementVelocity * Time.deltaTime);
             SlerpCamera();
-            if (vaultLowPoint.transform.position.y <= dipY)
+            if (vaultLowSensor.transform.position.y <= dipY)
             {
                 UIManager.Instance.DebugText2 = "";
                 vaultState = VaultState.PAUSE;
@@ -170,7 +166,7 @@ public class PawnVault : MonoBehaviour
         else if (vaultState == VaultState.RAISE)
         {
             SlerpCamera();
-            movementVelocity = vaultLowPoint.IsCollidingWith(gameObjectToVault) ? Vector3.zero : raiseVelocity * transform.forward;
+            movementVelocity = vaultLowSensor.IsCollidingWith(gameObjectToVault) ? Vector3.zero : raiseVelocity * transform.forward;
             movementVelocity.y = raiseVelocity;
             raiseVelocity += RAISE_INCREMENT * Time.deltaTime;
             raiseVelocity = Mathf.Clamp(raiseVelocity, -RAISE_MAX_VELOCITY, RAISE_MAX_VELOCITY);
@@ -206,8 +202,8 @@ public class PawnVault : MonoBehaviour
 
     private void SlerpCamera()
     {
-        transform.rotation = Quaternion.Slerp(from, to, timeCount * speed);
-        timeCount = timeCount + Time.deltaTime;
+        transform.rotation = Quaternion.Slerp(currentPawnAngle, vaultWallAngle, vaultPawnRotationTimer * vaultPawnRotationSpeed);
+        vaultPawnRotationTimer = vaultPawnRotationTimer + Time.deltaTime;
     }
 }
 
