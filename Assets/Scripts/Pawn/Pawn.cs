@@ -72,7 +72,12 @@ public sealed class Pawn : MonoBehaviour
     //Quick reference for if the pawn is sliding. Set by the PawnCrouch script.
     public bool IsSliding { get; set; }
 
+    //Quick reference for if the pawn is sliding. Set by the PawnCrouch script.
+    public bool IsFalling { get => pawnMovement.UpwardSpeed < 0f; }
+
     public float ForwardSpeed { get => pawnMovement.ForwardSpeed; }
+
+    public float UpwardSpeed { get => pawnMovement.UpwardSpeed; }
 
     /*********************/
     /*** Unity Methods ***/
