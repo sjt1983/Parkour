@@ -3,12 +3,13 @@ using UnityEngine;
 //Used to tell us if we can vault
 public class VaultSensor : Sensor
 {
+
     /*****************************/
     /*** Local Class Variables ***/
     /*****************************/
 
     //The layer mask we can hit when looking to vault.
-     private LayerMask layerMask;
+    private LayerMask layerMask;
 
     //How far down from the sensor we should raycast.
     private readonly float SENSOR_RANGE = 3f;

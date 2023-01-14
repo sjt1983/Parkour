@@ -81,6 +81,7 @@ public sealed class PawnMovement : MonoBehaviour
 
         UIManager.Instance.DebugText1 = pawn.SpeedCharges.ToString();
         UIManager.Instance.DebugText2 = currentZSpeed.ToString();
+        UIManager.Instance.DebugText3 = jumpBoostSensor.CollidedObjects.ToString();
 
         /*********************************/
         /*** Calculate the X/Z changes ***/

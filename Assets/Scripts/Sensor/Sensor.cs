@@ -7,7 +7,6 @@ public class Sensor : MonoBehaviour
 {
     /*** Class Properties ***/
     //Number of objects the sensor is currently colliding with.
-    [SerializeField ]
     public int CollidedObjects { get; set; }
 
     public bool IsCollidingWith(string gameObjectName)
