@@ -30,6 +30,8 @@ public class PawnVault : MonoBehaviour
     //Flag for initialization, do it first! LOL
     private bool initialized = false;
 
+    private readonly float GLOBAL_SPEED = .9f;
+
     //The state of the scripts control over the character.
     private VaultState vaultState = VaultState.ATTEMPT_VAULT;
 
@@ -94,8 +96,21 @@ public class PawnVault : MonoBehaviour
     private Quaternion vaultWallAngle;
 
     //Vars used to slerp the camera to the right angle.
-    private float vaultPawnRotationSpeed = 4f;
+    private readonly float VAULT_PAWN_ROTATION_SPEED = 4f;
     private float vaultPawnRotationTimer = 0.0f;
+
+    //Vars used for moving the head back and forth.
+    //How fast the camera should move back and forth.
+    private float VAULT_CAMERA_ZOB_SPEED = 5f;
+    //Where the camera starts
+    private float zobZDefault;
+
+    private Vector3 zobDefautVector;
+
+    //Flag to indicate we should zob
+    private bool zobFlag;
+    //How far away from the default Z we should go.
+    private float ZOB_DISTANCE = .45f;
 
     /*********************/
     /*** Unity Methods ***/
@@ -147,6 +162,10 @@ public class PawnVault : MonoBehaviour
                         //Initial velocity of the player when pulling them selves up.
                         raiseVelocity = RAISE_INITIAL_VELOCITY;
 
+                        //ZOB settings
+                        zobFlag = true;
+                        zobZDefault = mainCamera.localPosition.z;
+                        zobDefautVector = mainCamera.localPosition;
                         //Set the cooldown timer
                         cooldownTimer = 0f;
                         
@@ -161,7 +180,7 @@ public class PawnVault : MonoBehaviour
             
             //DO the vip logic, fall, then pull yourself up, while the camera slerps.
             movementVelocity.y = dipVelocity;
-            dipVelocity += DIP_GRAVITY_DECREMENT * Time.deltaTime;
+            dipVelocity += DIP_GRAVITY_DECREMENT * Time.deltaTime * GLOBAL_SPEED;
             pawn.Move(movementVelocity * Time.deltaTime);
             SlerpCameraTowardsVaultPoint();
 
@@ -188,8 +207,8 @@ public class PawnVault : MonoBehaviour
             //Go forward until the forward sensor is through the wall.
             movementVelocity = vaultLowSensor.IsCollidingWith(gameObjectToVault) ? Vector3.zero : raiseVelocity * transform.forward;
             //Raise up, progressively faster
-            movementVelocity.y = raiseVelocity;
-            raiseVelocity += RAISE_INCREMENT * Time.deltaTime;
+            movementVelocity.y = raiseVelocity * GLOBAL_SPEED;
+            raiseVelocity += RAISE_INCREMENT * Time.deltaTime * GLOBAL_SPEED;
             raiseVelocity = Mathf.Clamp(raiseVelocity, -RAISE_MAX_VELOCITY, RAISE_MAX_VELOCITY);
             pawn.Move(movementVelocity * Time.deltaTime);
 
@@ -228,8 +247,28 @@ public class PawnVault : MonoBehaviour
     //Rotates the player to be facing the vault point
     private void SlerpCameraTowardsVaultPoint()
     {
-        transform.rotation = Quaternion.Slerp(currentPawnAngle, vaultWallAngle, vaultPawnRotationTimer * vaultPawnRotationSpeed);
+        transform.rotation = Quaternion.Slerp(currentPawnAngle, vaultWallAngle, vaultPawnRotationTimer * VAULT_PAWN_ROTATION_SPEED * GLOBAL_SPEED);
         vaultPawnRotationTimer = vaultPawnRotationTimer + Time.deltaTime;
+
+        //Zob
+        if (zobFlag)
+        {
+            mainCamera.transform.localPosition -= new Vector3(0, 0, VAULT_CAMERA_ZOB_SPEED * Time.deltaTime * GLOBAL_SPEED);
+            if (mainCamera.transform.localPosition.z < zobZDefault - ZOB_DISTANCE)
+            {
+                zobFlag = false;
+            }
+        }
+        else
+        {
+            mainCamera.transform.localPosition += new Vector3(0, 0, VAULT_CAMERA_ZOB_SPEED * Time.deltaTime * GLOBAL_SPEED);
+
+            if (mainCamera.transform.localPosition.z > zobZDefault)
+            {
+                mainCamera.transform.localPosition = zobDefautVector;
+                zobFlag = false;
+            }
+        }
     }
 }
 
