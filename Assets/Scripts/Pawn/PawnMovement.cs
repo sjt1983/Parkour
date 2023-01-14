@@ -11,6 +11,9 @@ public sealed class PawnMovement : MonoBehaviour
     [SerializeField]
     private Pawn pawn;
 
+    [SerializeField]
+    private Sensor jumpBoostSensor;
+
     /************************/
     /*** Class properties ***/
     /************************/
@@ -46,6 +49,12 @@ public sealed class PawnMovement : MonoBehaviour
     //How hard the character jumps;
     private const float JUMP_FORCE = 10;
 
+    //How extra hard the character jumps while boosted
+    private readonly float JUMP_BOOST_MULTIPLIER = 1f;
+
+    //How much of a speed boost the character gets per charge
+    private float SPEED_CHARGE_MAX_VELOCITY = 1f;
+
     //Current Speed the character is moving forwards or backwards.
     [SerializeField]
     private float currentZSpeed = 0;
@@ -69,6 +78,9 @@ public sealed class PawnMovement : MonoBehaviour
         //This means some other script has taken control of the character, e.g. the script to vault the character.
         if (pawn.Locked)
             return;
+
+        UIManager.Instance.DebugText1 = pawn.SpeedCharges.ToString();
+        UIManager.Instance.DebugText2 = currentZSpeed.ToString();
 
         /*********************************/
         /*** Calculate the X/Z changes ***/
@@ -150,6 +162,11 @@ public sealed class PawnMovement : MonoBehaviour
             }
         }
 
+        //If the pawns speed goes below the default max speed we remove all speed charges
+        if (currentZSpeed < MAX_WALK_SPEED_FORWARD)
+        {
+            pawn.RemoveAllSpeedCharges();
+        }
 
         if (pawn.IsCrouching && !pawn.IsSliding)
         {
@@ -158,7 +175,7 @@ public sealed class PawnMovement : MonoBehaviour
         }
         else
         {
-            currentZSpeed = Mathf.Clamp(currentZSpeed, -MAX_WALK_SPEED_FORWARD, MAX_WALK_SPEED_FORWARD);
+            currentZSpeed = Mathf.Clamp(currentZSpeed, -MAX_WALK_SPEED_FORWARD, MAX_WALK_SPEED_FORWARD + (currentZSpeed <= 0 ? 0 : (pawn.SpeedCharges * SPEED_CHARGE_MAX_VELOCITY)));
             currentXSpeed = Mathf.Clamp(currentXSpeed, -MAX_WALK_SPEED_SIDEWAYS, MAX_WALK_SPEED_SIDEWAYS);
         }
 
@@ -182,7 +199,19 @@ public sealed class PawnMovement : MonoBehaviour
             //Only allow jumping if grounded.
             if (pawn.PawnInput.Jumping)
             {
-                movementVelocity.y = JUMP_FORCE;
+                if (jumpBoostSensor.CollidedObjects == 0)
+                {
+                    if (pawn.SpeedCharges < 2)
+                    {
+                        pawn.AddSpeedCharge();
+                    }
+                    movementVelocity.y = JUMP_FORCE + JUMP_BOOST_MULTIPLIER;
+                }
+                else
+                {
+                    movementVelocity.y = JUMP_FORCE;
+                }
+                
             }
         }
         movementVelocity.y += Physics.gravity.y * 3.5f * Time.deltaTime;

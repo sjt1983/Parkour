@@ -42,10 +42,25 @@ public sealed class Pawn : MonoBehaviour
     //How much Drag is on the player, as in the force to slow them down over time.
     public float Drag { get; set; }
 
-    //Quick check to see if the pawn is TRYING to move alonmg x/z due to input.
+    //Quick check to see if the pawn is TRYING to move along x/z due to input.
     public bool IsTryingToMove { get => pawnMovement.IsTryingToMove(); }
-
+    
+    //Angle of the slope beneath the player
     public bool IsOnSlopedSurface { get => slopeBeneathPawn < 1f; }
+
+    //How many Speed Charges the pawn has, which increases max velocity
+    public int SpeedCharges { get; private set; }
+
+    public void AddSpeedCharge()
+    {
+        SpeedCharges += 1;
+    }
+
+    public void RemoveAllSpeedCharges()
+    {
+        SpeedCharges = 0;
+    }
+
 
     /*****************************/
     /*** Additional Properties ***/
@@ -75,8 +90,10 @@ public sealed class Pawn : MonoBehaviour
     //Quick reference for if the pawn is sliding. Set by the PawnCrouch script.
     public bool IsFalling { get => pawnMovement.UpwardSpeed < 0f; }
 
+    //Quick Reference for Forward Speed
     public float ForwardSpeed { get => pawnMovement.ForwardSpeed; }
 
+    //Quick Reference for Upward Speed.
     public float UpwardSpeed { get => pawnMovement.UpwardSpeed; }
 
     /*********************/
@@ -99,6 +116,7 @@ public sealed class Pawn : MonoBehaviour
     private void Initialize()
     {
         Drag = 0f;
+        SpeedCharges = 0;
         IsSliding = false;
         initialized = true;
     }
