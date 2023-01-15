@@ -128,61 +128,48 @@ public class PawnVault : MonoBehaviour
             if (!pawn.IsGrounded && pawn.PawnInput.JumpPressed && vaultHighSensor.CollidedObjects == 0 &&
                 vaultHighSensor.FindVaultPoint(ref hitInfo, vaultLowSensor.gameObject.transform.position))
             {
-                //Cool, now lets check the angle of the wall we are trying to vault if the first few checks passed.
-                if (Physics.Raycast(vaultLowSensor.transform.position, vaultLowSensor.transform.forward, out lowSensorHitInfo, 2, LayerMask.GetMask("MapGeometry")))
-                {
-                    //Get both angles (pawn and wall) and calculate the difference.
-                    currentPawnAngle = transform.rotation;
-                    vaultWallAngle = Quaternion.LookRotation(-lowSensorHitInfo.normal, transform.up);
-                    Quaternion angleDifference = Quaternion.Inverse(currentPawnAngle) * vaultWallAngle;
+   
+               
+                //If here, lets vault, do some housekeeping on the pawn.
 
-                    //Weird Quaternion math, the angle is between 1 and 360, so a "difference" of 359 is smaller than a difference of 10
-                    //so check both ends assuming player camera is facing angle 0, and I want a 45 degree angle requirment to vault,
-                    //then I need to ensure the angle is less than 45 degrees AND greater than 315 degrees (45 degrees left or right from degree 0
-                    if (angleDifference.eulerAngles.y <= VAULT_MAX_ANGLE_FROM_TARGET || 360f - angleDifference.eulerAngles.y <= VAULT_MAX_ANGLE_FROM_TARGET)
-                    {
-                        //If here, lets vault, do some housekeeping on the pawn.
-
-                        //lock the pawn and stop it, but before we do that, see if its falling and set the proper state
-                        pawn.Locked = true;
-                        vaultState = pawn.IsFalling ? VaultState.DIP : VaultState.RAISE;
-                        pawn.HaltMovement();
+                //lock the pawn and stop it, but before we do that, see if its falling and set the proper state
+                pawn.Locked = true;
+                vaultState = pawn.IsFalling ? VaultState.DIP : VaultState.RAISE;
+                pawn.HaltMovement();
                         
-                        //For some reason the position of the pawn is 1m above the bottom of the CharacterController.
-                        vaultPoint = hitInfo.point + new Vector3(0, 1);
+                //For some reason the position of the pawn is 1m above the bottom of the CharacterController.
+                vaultPoint = hitInfo.point + new Vector3(0, 1);
 
-                        gameObjectToVault = hitInfo.transform.gameObject.name;
-                        //Set how long we pause in the air.
-                        pauseTimer = PAUSE_TIME;
+                gameObjectToVault = hitInfo.transform.gameObject.name;
+                //Set how long we pause in the air.
+                pauseTimer = PAUSE_TIME;
                         
-                        //Set the variables for the dip if were are falling
-                        dipY = vaultPoint.y - DIP_AMOUNT;
-                        dipVelocity = -DIP_INITIAL_GRAVITY;
+                //Set the variables for the dip if were are falling
+                dipY = vaultPoint.y - DIP_AMOUNT;
+                dipVelocity = -DIP_INITIAL_GRAVITY;
 
-                        //Initial velocity of the player when pulling them selves up.
-                        raiseVelocity = RAISE_INITIAL_VELOCITY;
+                //Initial velocity of the player when pulling them selves up.
+                raiseVelocity = RAISE_INITIAL_VELOCITY;
 
-                        //ZOB settings
-                        zobFlag = true;
-                        zobZDefault = mainCamera.localPosition.z;
-                        zobDefautVector = mainCamera.localPosition;
-                        //Set the cooldown timer
-                        cooldownTimer = 0f;
+                //ZOB settings
+                zobFlag = true;
+                zobZDefault = mainCamera.localPosition.z;
+                zobDefautVector = mainCamera.localPosition;
+
+                //Set the cooldown timer, time before the player can vault again
+                cooldownTimer = 0f;
                         
-                        //Zero out the veocity
-                        movementVelocity = Vector3.zero;
-                    }                   
-                }                
+                //Zero out the veocity
+                movementVelocity = Vector3.zero;                                   
             }
         }
         else if (vaultState == VaultState.DIP)
-        {
-            
-            //DO the vip logic, fall, then pull yourself up, while the camera slerps.
+        {            
+            //Do the dip logic, fall, then pull yourself up, while the camera slerps.
             movementVelocity.y = dipVelocity;
             dipVelocity += DIP_GRAVITY_DECREMENT * Time.deltaTime * GLOBAL_SPEED;
             pawn.Move(movementVelocity * Time.deltaTime);
-            SlerpCameraTowardsVaultPoint();
+            ZobCamera();
 
             //End logic for this state
             if (vaultLowSensor.transform.position.y <= dipY)
@@ -205,7 +192,7 @@ public class PawnVault : MonoBehaviour
         {
 
             //Go forward until the forward sensor is through the wall.
-            movementVelocity = vaultLowSensor.IsCollidingWith(gameObjectToVault) ? Vector3.zero : raiseVelocity * transform.forward;
+            movementVelocity = Vector3.zero;
             //Raise up, progressively faster
             movementVelocity.y = raiseVelocity * GLOBAL_SPEED;
             raiseVelocity += RAISE_INCREMENT * Time.deltaTime * GLOBAL_SPEED;
@@ -213,7 +200,7 @@ public class PawnVault : MonoBehaviour
             pawn.Move(movementVelocity * Time.deltaTime);
 
             //Move the camera
-            SlerpCameraTowardsVaultPoint();
+            ZobCamera();
 
             //Release control after the raise phase
             if (gameObject.transform.position.y >= vaultPoint.y)
@@ -244,12 +231,9 @@ public class PawnVault : MonoBehaviour
         initialized = true;
     }
 
-    //Rotates the player to be facing the vault point
-    private void SlerpCameraTowardsVaultPoint()
+    //Gives the illusion of head movement when vaulting.
+    private void ZobCamera()
     {
-        transform.rotation = Quaternion.Slerp(currentPawnAngle, vaultWallAngle, vaultPawnRotationTimer * VAULT_PAWN_ROTATION_SPEED * GLOBAL_SPEED);
-        vaultPawnRotationTimer = vaultPawnRotationTimer + Time.deltaTime;
-
         //Zob
         if (zobFlag)
         {
