@@ -30,7 +30,7 @@ public class Sensor : MonoBehaviour
             return;
 
         CollidedObjects++;
-        colliedObjectNames.Add(other.gameObject.name, true);
+        //colliedObjectNames.Add(other.gameObject.name, true);
     }
 
     //When this objects collides with another, decrement count by 1;
@@ -40,6 +40,6 @@ public class Sensor : MonoBehaviour
             return;
 
         CollidedObjects--;
-        colliedObjectNames.Remove(other.gameObject.name);
+        //colliedObjectNames.Remove(other.gameObject.name);
     }
 }
