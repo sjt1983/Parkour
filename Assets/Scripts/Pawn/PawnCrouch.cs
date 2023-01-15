@@ -46,7 +46,7 @@ public class PawnCrouch : MonoBehaviour
 
         //Rules for sliding
         //Pawn has to be on the ground, crouching, and moving faster than 5 m/s.
-        if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > 5)
+        if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > 2)
         {
             //Set the pawn to a sliding state for the movement script to handle.
             pawn.IsSliding = true;

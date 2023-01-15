@@ -18,9 +18,9 @@ public class VaultSensor : Sensor
     private readonly float SECONDARY_SENSOR_SPREAD = .25f;
 
     //How far up from the hitpoint we cast the secondary rays, and how far down we cast.
-    private readonly float SECONDARY_SENSOR_HEIGHT_DIFFERENTIAL = .25f;
+    private readonly float SECONDARY_SENSOR_HEIGHT_BUFFER = .25f;
 
-    //
+    //How far down the secondary raycast should travel
     private readonly float SECONDARY_SENSOR_RANGE = .27f;
 
     /*********************/
@@ -56,7 +56,7 @@ public class VaultSensor : Sensor
                 //I want the pawn to be able to vault on a platform, but not at an angle that is very close to parallel to the edge.
                 //Luckily we can use the first raycast's hitInfo to make the raycast as short as possible.
 
-                float adjustedY = transform.position.y - hitInfo.point.y - SECONDARY_SENSOR_HEIGHT_DIFFERENTIAL;
+                float adjustedY = transform.position.y - hitInfo.point.y - SECONDARY_SENSOR_HEIGHT_BUFFER;
                 Vector3 secondaryLeftSensorPosition = transform.position + (-transform.right * SECONDARY_SENSOR_SPREAD) + (-transform.up * adjustedY);      
                 Vector3 secondaryRightSensorPosition = transform.position + (transform.right * SECONDARY_SENSOR_SPREAD) + (-transform.up * adjustedY);
 

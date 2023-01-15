@@ -202,9 +202,10 @@ public sealed class PawnMovement : MonoBehaviour
             {
                 if (jumpBoostSensor.CollidedObjects == 0)
                 {
-                    if (pawn.SpeedCharges < 2)
+                    if (pawn.SpeedCharges < 2 && currentZSpeed >= 0f)
                     {
                         pawn.AddSpeedCharge();
+                        currentZSpeed += SPEED_CHARGE_MAX_VELOCITY;
                     }
                     movementVelocity.y = JUMP_FORCE + JUMP_BOOST_MULTIPLIER;
                 }
@@ -218,7 +219,12 @@ public sealed class PawnMovement : MonoBehaviour
         movementVelocity.y += Physics.gravity.y * 3.5f * Time.deltaTime;
 
         //Finally, move the controller.
-        pawn.Move(movementVelocity * Time.deltaTime);
+        CollisionFlags flags = pawn.Move(movementVelocity * Time.deltaTime);
+      
+        if ((flags & CollisionFlags.CollidedAbove) != 0)
+        {
+            movementVelocity.y = -5;
+        }
     }
 
     /*********************/

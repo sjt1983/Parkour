@@ -135,9 +135,9 @@ public sealed class Pawn : MonoBehaviour
     }
 
     //Quick reference for moving the pawn's character controller.
-    public void Move(Vector3 movementVelocity)
+    public CollisionFlags Move(Vector3 movementVelocity)
     {
-        characterController.Move(movementVelocity);
+        return characterController.Move(movementVelocity);
     }
 
     //Check to see if the player is moving faster than a certain speed

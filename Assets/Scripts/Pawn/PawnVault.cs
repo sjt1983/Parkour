@@ -39,8 +39,6 @@ public class PawnVault : MonoBehaviour
     private Vector3 vaultPoint = Vector3.zero;
     //The Raycast hit for the vault.
     private RaycastHit hitInfo;
-    //The gameObject we are trying to vault
-    private string gameObjectToVault;
 
     //The Vector to apply to the character when the script moves it.
     private Vector3 movementVelocity;
@@ -74,9 +72,18 @@ public class PawnVault : MonoBehaviour
     private readonly float RAISE_INCREMENT = 2f;
     //MAX Velocity for raising;
     private readonly float RAISE_MAX_VELOCITY = 10f;
+    //MAX Velocity for raising;
+    private readonly float RAISE_HEIGHT_BUFFER = 1.2f;
 
     //Velocity used for the raise.
     private float raiseVelocity;
+
+    /*** Forward ***/
+    //How long in between vaults we allow.
+    private readonly float FORWARD_TIME = .2f;
+    //Calculated forward time.
+    private float forwardTimer;
+    private readonly float FORWARD_VELOCITY = 4f;
 
     /*** Cooldown ***/
     //How long in between vaults we allow.
@@ -84,27 +91,15 @@ public class PawnVault : MonoBehaviour
     //Calculated cooldown time.
     private float cooldownTimer;
 
-    /*** Camera ***/
-    //How far the difference in angle can be to vault, e.g. dont let someone who is perpendicular to a wall vault it.
-    private readonly float VAULT_MAX_ANGLE_FROM_TARGET = 35f;
-
-    //HitInfo of the low sensor when it calculates the angle of the wall we far trying to vault.
-    private RaycastHit lowSensorHitInfo;
-    //current angle the pawn is facing.
-    private Quaternion currentPawnAngle;
-    //current angle of the wall we are facing.
-    private Quaternion vaultWallAngle;
-
-    //Vars used to slerp the camera to the right angle.
-    private readonly float VAULT_PAWN_ROTATION_SPEED = 4f;
-    private float vaultPawnRotationTimer = 0.0f;
+    /*** Camera Zob ***/
 
     //Vars used for moving the head back and forth.
     //How fast the camera should move back and forth.
     private float VAULT_CAMERA_ZOB_SPEED = 5f;
     //Where the camera starts
     private float zobZDefault;
-
+    
+    //Original Position of the camera
     private Vector3 zobDefautVector;
 
     //Flag to indicate we should zob
@@ -126,21 +121,17 @@ public class PawnVault : MonoBehaviour
         {
             //Do some basic checks and see if we have a potential vault point.
             if (!pawn.IsGrounded && pawn.PawnInput.JumpPressed && vaultHighSensor.CollidedObjects == 0 &&
-                vaultHighSensor.FindVaultPoint(ref hitInfo, vaultLowSensor.gameObject.transform.position))
-            {
-   
-               
+                vaultHighSensor.FindVaultPoint(ref hitInfo, vaultLowSensor.transform.position))
+            {               
                 //If here, lets vault, do some housekeeping on the pawn.
-
                 //lock the pawn and stop it, but before we do that, see if its falling and set the proper state
                 pawn.Locked = true;
                 vaultState = pawn.IsFalling ? VaultState.DIP : VaultState.RAISE;
                 pawn.HaltMovement();
                         
                 //For some reason the position of the pawn is 1m above the bottom of the CharacterController.
-                vaultPoint = hitInfo.point + new Vector3(0, 1);
+                vaultPoint = hitInfo.point + new Vector3(0, 1 + RAISE_HEIGHT_BUFFER);
 
-                gameObjectToVault = hitInfo.transform.gameObject.name;
                 //Set how long we pause in the air.
                 pauseTimer = PAUSE_TIME;
                         
@@ -158,7 +149,9 @@ public class PawnVault : MonoBehaviour
 
                 //Set the cooldown timer, time before the player can vault again
                 cooldownTimer = 0f;
-                        
+
+                forwardTimer = 0f;
+
                 //Zero out the veocity
                 movementVelocity = Vector3.zero;                                   
             }
@@ -166,9 +159,9 @@ public class PawnVault : MonoBehaviour
         else if (vaultState == VaultState.DIP)
         {            
             //Do the dip logic, fall, then pull yourself up, while the camera slerps.
-            movementVelocity.y = dipVelocity;
+            movementVelocity.y = dipVelocity * Time.deltaTime * GLOBAL_SPEED; ;
             dipVelocity += DIP_GRAVITY_DECREMENT * Time.deltaTime * GLOBAL_SPEED;
-            pawn.Move(movementVelocity * Time.deltaTime);
+            pawn.Move(movementVelocity);
             ZobCamera();
 
             //End logic for this state
@@ -180,7 +173,6 @@ public class PawnVault : MonoBehaviour
         else if (vaultState == VaultState.PAUSE)
         {
             //Just sit for a bit but also slerp the camera.
-            //SlerpCamera();
             pauseTimer -= Time.deltaTime;
             if (pauseTimer <= 0)
             {
@@ -189,26 +181,38 @@ public class PawnVault : MonoBehaviour
         }
         //Now vault.
         else if (vaultState == VaultState.RAISE)
-        {
-
-            //Go forward until the forward sensor is through the wall.
-            movementVelocity = Vector3.zero;
+        {            
+            //Go forward if we are sure we will collide with something.
+            movementVelocity = transform.forward * (FORWARD_VELOCITY * Time.deltaTime * GLOBAL_SPEED);
             //Raise up, progressively faster
-            movementVelocity.y = raiseVelocity * GLOBAL_SPEED;
+            movementVelocity.y = raiseVelocity * Time.deltaTime * GLOBAL_SPEED;
             raiseVelocity += RAISE_INCREMENT * Time.deltaTime * GLOBAL_SPEED;
             raiseVelocity = Mathf.Clamp(raiseVelocity, -RAISE_MAX_VELOCITY, RAISE_MAX_VELOCITY);
-            pawn.Move(movementVelocity * Time.deltaTime);
+            pawn.Move(movementVelocity);
 
             //Move the camera
             ZobCamera();
 
             //Release control after the raise phase
-            if (gameObject.transform.position.y >= vaultPoint.y)
+            if (transform.position.y >= vaultPoint.y)
             {
                 pawn.Locked = false;
-                vaultState = VaultState.COOLDOWN;
+                vaultState = VaultState.FORWARD;
                 cooldownTimer = 0f;
                 pawn.HaltMovement();
+            }
+        }
+        else if (vaultState == VaultState.FORWARD)
+        {
+            //Go forward if we are sure we will collide with something.
+            movementVelocity = transform.forward * (FORWARD_VELOCITY * Time.deltaTime * GLOBAL_SPEED);
+            movementVelocity.y = 0;
+            pawn.Move(movementVelocity);
+
+            forwardTimer += Time.deltaTime;
+            if (forwardTimer > FORWARD_TIME)
+            {
+                vaultState = VaultState.COOLDOWN;
             }
         }
         else if (vaultState == VaultState.COOLDOWN)
@@ -217,7 +221,7 @@ public class PawnVault : MonoBehaviour
             cooldownTimer += Time.deltaTime;
             if (cooldownTimer > COOLDOWN_TIME)
             {
-                vaultState = VaultState.ATTEMPT_VAULT;                
+                vaultState = VaultState.ATTEMPT_VAULT;
             }
         }
     }
@@ -264,5 +268,6 @@ enum VaultState
     PAUSE,
     DIP,
     RAISE,
+    FORWARD,
     COOLDOWN
 }
