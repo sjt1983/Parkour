@@ -120,8 +120,8 @@ public class PawnVault : MonoBehaviour
         if (vaultState == VaultState.ATTEMPT_VAULT)
         {
             //Do some basic checks and see if we have a potential vault point.
-            if (!pawn.IsGrounded && pawn.PawnInput.JumpIsPressed && vaultHighSensor.CollidedObjects == 0 &&
-                vaultHighSensor.FindVaultPoint(ref hitInfo, vaultLowSensor.transform.position))
+            if (!pawn.IsGrounded && pawn.PawnInput.JumpIsPressed && vaultHighSensor.CollidedObjects == 0 
+                 && pawn.VaultLockTimer <= 0 && vaultHighSensor.FindVaultPoint(ref hitInfo, vaultLowSensor.transform.position))
             {               
                 //If here, lets vault, do some housekeeping on the pawn.
                 //lock the pawn and stop it, but before we do that, see if its falling and set the proper state

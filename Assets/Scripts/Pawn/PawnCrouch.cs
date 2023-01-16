@@ -37,6 +37,8 @@ public class PawnCrouch : MonoBehaviour
     private const float SLIDING_DRAG = 3f;
     private const int MINIMUM_SLIDE_VELOCITY = 2;
 
+    private float lastY;
+
     /*********************/
     /*** Unity Methods ***/
     /*********************/
@@ -53,7 +55,7 @@ public class PawnCrouch : MonoBehaviour
             //Set the pawn to a sliding state for the movement script to handle.
             pawn.IsSliding = true;
             //Set the drag if we are on a sloped surface.
-            pawn.Drag = GetPawnSlopeAngle() < 1 ? 0f : SLIDING_DRAG;
+            pawn.Drag = GetPawnSlopeAngle() < 1 && IsSlidingDownhill() ? 0f : SLIDING_DRAG;
         }
         else
         {
@@ -70,6 +72,7 @@ public class PawnCrouch : MonoBehaviour
 
         mainCameraMount.localPosition = new Vector3(mainCameraMount.localPosition.x, newCameraMountPosition, mainCameraMount.localPosition.z);
 
+        lastY = transform.position.y;
        /* characterController.height = Mathf.Clamp(pawn.IsCrouching ?
                                         characterController.height - (CROUCH_SPEED * Time.deltaTime) :
                                         characterController.height + (CROUCH_SPEED * Time.deltaTime),
@@ -83,6 +86,12 @@ public class PawnCrouch : MonoBehaviour
     private void Initialize() {
         defaultCameraLocalY = mainCameraMount.localPosition.y;
         initialized = true;
+        lastY = transform.position.y;
+    }
+
+    private bool IsSlidingDownhill()
+    {
+        return transform.position.y < lastY;
     }
 
     private float GetPawnSlopeAngle()

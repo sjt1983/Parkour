@@ -195,6 +195,7 @@ public sealed class PawnMovement : MonoBehaviour
             //Jump if the user pressed jump this frame, since holding jump will have significance
             if (pawn.PawnInput.JumpedThisFrame)
             {
+                pawn.AddVaultLock(.35f);
                 //If the jump boost sensor isnt colliding, we are near an egde, so lets boost the character!
                 if (jumpBoostSensor.CollidedObjects == 0)
                 {
@@ -219,6 +220,8 @@ public sealed class PawnMovement : MonoBehaviour
         {
             currentYSpeed = JUMP_FORCE;
             currentZSpeed *= -1;
+            pawn.AddVaultLock(.35f);
+            Debug.Log("1");
         }
 
         //Apply Gravity
@@ -234,7 +237,6 @@ public sealed class PawnMovement : MonoBehaviour
         {
             currentYSpeed = GRAVITY_DEFAULT;
         }
-
 
     }
 

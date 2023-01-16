@@ -9,6 +9,9 @@ public sealed class Pawn : MonoBehaviour
     /*****************************************/
 
     [SerializeField]
+    float test;
+
+    [SerializeField]
     private PawnInput pawnInput;
 
     [SerializeField]
@@ -29,8 +32,7 @@ public sealed class Pawn : MonoBehaviour
     //Flag to prevent any logic from executing until after Initialization.
     private bool initialized = false;
 
-    //We want to disable certain actions for a time after other actions, such as wall jump into vault.
-    private Dictionary<string, float> actionLocks = new Dictionary<string, float>();
+    public float VaultLockTimer { set; get; }
 
     /************************/
     /*** Class properties ***/
@@ -105,15 +107,8 @@ public sealed class Pawn : MonoBehaviour
         if (!initialized)
             Initialize();
 
-        //Action Locks
-        foreach (var item in actionLocks)
-        {
-            actionLocks[item.Key] = actionLocks[item.Key] - Time.deltaTime;
-            if (actionLocks[item.Key] <= 0f)
-            {
-                actionLocks.Remove(item.Key);
-            }
-        }
+        VaultLockTimer = Mathf.Clamp(VaultLockTimer - Time.deltaTime, 0, 555);
+        test = VaultLockTimer;
     }
 
     /*********************/
@@ -126,6 +121,7 @@ public sealed class Pawn : MonoBehaviour
         Drag = 0f;
         SpeedCharges = 0;
         IsSliding = false;
+        VaultLockTimer = 0f;
         initialized = true;
     }
 
@@ -148,15 +144,9 @@ public sealed class Pawn : MonoBehaviour
     }
 
     //Add a lock on actions from happening.
-    public void AddActionLock(string action, float time)
+    public void AddVaultLock(float time)
     {
-        actionLocks.Remove(action);
-        actionLocks.Add(action, time < .25f ? ACTION_LOCK_MINIMUM_TIME : time);
+        VaultLockTimer = time < .25f ? ACTION_LOCK_MINIMUM_TIME : time;
     }
 
-    //Check to see if there is a lock on certain actions.
-    public bool IsActionLocked(string action)
-    {
-        return actionLocks.ContainsKey(action);
-    }
 }
