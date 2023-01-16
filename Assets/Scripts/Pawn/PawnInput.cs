@@ -37,7 +37,7 @@ public sealed class PawnInput : MonoBehaviour
     //We want to capture that the user jumped.
     //but as soon as something checks that the user hit the jump button, set it to false so we dont get in a jump loop.
     private bool jump = false;
-    public bool Jumping
+    public bool JumpedThisFrame
     {
         get
         {
@@ -49,7 +49,7 @@ public sealed class PawnInput : MonoBehaviour
     }
 
     //Simple notification for scripts to know if the jump button is pressed.
-    public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
+    public bool JumpIsPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
 
     //Player attempted to reload a weapon.
     //Same deal as before, we want to ensure we capture the input but as soon as we check for it, set it to false.
@@ -130,7 +130,6 @@ public sealed class PawnInput : MonoBehaviour
 
         //Enable the controller.
         movementInput.Enable();
-
     }
 
     private void Update()
@@ -180,11 +179,10 @@ public sealed class PawnInput : MonoBehaviour
         //Handle Jumping
         if (actionController.PlayerControls.Jump.WasPressedThisFrame())
         {
-            Jumping = true;
+            JumpedThisFrame = true;
         }
-        if (actionController.PlayerControls.Jump.WasReleasedThisFrame())
-        {
-            Jumping = false;
+        else { 
+            JumpedThisFrame = false;
         }
 
         //Handle Reload

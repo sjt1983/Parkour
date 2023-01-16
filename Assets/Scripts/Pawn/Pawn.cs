@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 //Pawn is a class that represents the avatar which is controlled by the user.
 public sealed class Pawn : MonoBehaviour
@@ -6,7 +7,7 @@ public sealed class Pawn : MonoBehaviour
     /*****************************************/
     /*** Local References to Unity Objects ***/
     /*****************************************/
- 
+
     [SerializeField]
     private PawnInput pawnInput;
 
@@ -23,18 +24,20 @@ public sealed class Pawn : MonoBehaviour
     /* Private class variables */
     /***************************/
 
-    //Holds the anlge of the slope beneath the player.
-    private float slopeBeneathPawn = 1.0f;
+    private const float ACTION_LOCK_MINIMUM_TIME = .25f;
 
     //Flag to prevent any logic from executing until after Initialization.
     private bool initialized = false;
+
+    //We want to disable certain actions for a time after other actions, such as wall jump into vault.
+    private Dictionary<string, float> actionLocks = new Dictionary<string, float>();
 
     /************************/
     /*** Class properties ***/
     /************************/
 
     //Flag to indicate that a certain script has control over the pawn and that nothing else should touch it.
-    public bool Locked { get; set; }
+    public bool MovementLocked { get; set; }
 
     //The angle the camera is looking at.
     public float LookAngle { get; set; }
@@ -44,9 +47,6 @@ public sealed class Pawn : MonoBehaviour
 
     //Quick check to see if the pawn is TRYING to move along x/z due to input.
     public bool IsTryingToMove { get => pawnMovement.IsTryingToMove(); }
-    
-    //Angle of the slope beneath the player
-    public bool IsOnSlopedSurface { get => slopeBeneathPawn < 1f; }
 
     //How many Speed Charges the pawn has, which increases max velocity
     public int SpeedCharges { get; private set; }
@@ -105,7 +105,15 @@ public sealed class Pawn : MonoBehaviour
         if (!initialized)
             Initialize();
 
-        calculateSlopeBeneathPawn();
+        //Action Locks
+        foreach (var item in actionLocks)
+        {
+            actionLocks[item.Key] = actionLocks[item.Key] - Time.deltaTime;
+            if (actionLocks[item.Key] <= 0f)
+            {
+                actionLocks.Remove(item.Key);
+            }
+        }
     }
 
     /*********************/
@@ -119,13 +127,6 @@ public sealed class Pawn : MonoBehaviour
         SpeedCharges = 0;
         IsSliding = false;
         initialized = true;
-    }
-
-    //Sets the slope angle of the surface beneath the player.
-    private void calculateSlopeBeneathPawn()
-    {
-        Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2.02f);
-        slopeBeneathPawn = hit.normal.y;
     }
 
     //Stop all movement on the character;
@@ -146,4 +147,16 @@ public sealed class Pawn : MonoBehaviour
         return pawnMovement.IsMovingFasterThan(targetVelocity);
     }
 
+    //Add a lock on actions from happening.
+    public void AddActionLock(string action, float time)
+    {
+        actionLocks.Remove(action);
+        actionLocks.Add(action, time < .25f ? ACTION_LOCK_MINIMUM_TIME : time);
+    }
+
+    //Check to see if there is a lock on certain actions.
+    public bool IsActionLocked(string action)
+    {
+        return actionLocks.ContainsKey(action);
+    }
 }

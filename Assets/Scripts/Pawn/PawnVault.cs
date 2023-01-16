@@ -120,12 +120,12 @@ public class PawnVault : MonoBehaviour
         if (vaultState == VaultState.ATTEMPT_VAULT)
         {
             //Do some basic checks and see if we have a potential vault point.
-            if (!pawn.IsGrounded && pawn.PawnInput.JumpPressed && vaultHighSensor.CollidedObjects == 0 &&
+            if (!pawn.IsGrounded && pawn.PawnInput.JumpIsPressed && vaultHighSensor.CollidedObjects == 0 &&
                 vaultHighSensor.FindVaultPoint(ref hitInfo, vaultLowSensor.transform.position))
             {               
                 //If here, lets vault, do some housekeeping on the pawn.
                 //lock the pawn and stop it, but before we do that, see if its falling and set the proper state
-                pawn.Locked = true;
+                pawn.MovementLocked = true;
                 vaultState = pawn.IsFalling ? VaultState.DIP : VaultState.RAISE;
                 pawn.HaltMovement();
                         
@@ -196,7 +196,7 @@ public class PawnVault : MonoBehaviour
             //Release control after the raise phase
             if (transform.position.y >= vaultPoint.y)
             {
-                pawn.Locked = false;
+                pawn.MovementLocked = false;
                 vaultState = VaultState.FORWARD;
                 cooldownTimer = 0f;
                 pawn.HaltMovement();

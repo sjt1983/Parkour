@@ -34,6 +34,8 @@ public class PawnCrouch : MonoBehaviour
 
     //How fast the charatcer should crouch, essentially, meters per second.
     private const float CROUCH_SPEED = 6f;
+    private const float SLIDING_DRAG = 3f;
+    private const int MINIMUM_SLIDE_VELOCITY = 2;
 
     /*********************/
     /*** Unity Methods ***/
@@ -43,15 +45,15 @@ public class PawnCrouch : MonoBehaviour
     {
         if (!initialized)
             Initialize();
-
+        
         //Rules for sliding
         //Pawn has to be on the ground, crouching, and moving faster than 5 m/s.
-        if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > 2)
+        if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > MINIMUM_SLIDE_VELOCITY)
         {
             //Set the pawn to a sliding state for the movement script to handle.
             pawn.IsSliding = true;
             //Set the drag if we are on a sloped surface.
-            pawn.Drag = pawn.IsOnSlopedSurface ? 0f : 3f;
+            pawn.Drag = GetPawnSlopeAngle() < 1 ? 0f : SLIDING_DRAG;
         }
         else
         {
@@ -81,5 +83,14 @@ public class PawnCrouch : MonoBehaviour
     private void Initialize() {
         defaultCameraLocalY = mainCameraMount.localPosition.y;
         initialized = true;
+    }
+
+    private float GetPawnSlopeAngle()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2.02f))
+        {
+            return hit.normal.y;
+        }
+        return 5; //This may bite me later;
     }
 }
