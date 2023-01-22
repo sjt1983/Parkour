@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 public sealed class PawnMovement : MonoBehaviour
 {
@@ -22,7 +21,7 @@ public sealed class PawnMovement : MonoBehaviour
     public float ForwardSpeed { get => currentZSpeed; }
 
     //How fast we are moving upward.
-    public float UpwardSpeed { get => inputCalculatedVelocity.y; }
+    public float UpwardSpeed { get => xzCalculatedVelocity.y; }
 
     //Quick check to see if there is significant movement
     public bool IsMoving { get => Mathf.Abs(currentXSpeed + currentZSpeed) > .1f; }
@@ -57,7 +56,7 @@ public sealed class PawnMovement : MonoBehaviour
     private const float JUMP_BOOST_MULTIPLIER = 1f;
 
     //Minimum vertical veelocity needed to wall jump
-    private const float WALL_JUMP_MINIMUM_VELOCITY = -.25f;
+    private const float WALL_JUMP_MINIMUM_VELOCITY = -1.25f;
 
     //Default Gravity if the character is grounded to ensure we stay grounded when going down slopes.
     private const int GRAVITY_DEFAULT = -5;
@@ -80,7 +79,23 @@ public sealed class PawnMovement : MonoBehaviour
     private float currentZSpeed = 0;
 
     //Velocity to move the pawn.
-    private Vector3 inputCalculatedVelocity;
+    private Vector3 xzCalculatedVelocity;
+
+    //We calculate y separately because we need to do funky stuff to xz if the character is in the air.
+    private Vector3 yCalculatedVelocity;
+
+    //The angle of the pawn when it jumps
+    private float jumpAngle;
+
+    //How many degrees difference from the jump angle the pawn can be to maintain momentum
+    private const float JUMP_MOMENTUM_TOLERANCE_LOW = 35.0f;
+    private const float JUMP_MOMENTUM_TOLERANCE_HIGH = 75.0f;
+
+    //Flag to see if the pawn was grounded last frame, so we know when to trigger "Landing".
+    private bool wasGroundedLastFrame = false;
+
+    private bool initialized = false;
+    //                ^-----------This guy!!!1
 
     /*********************/
     /*** Unity Methods ***/
@@ -88,19 +103,32 @@ public sealed class PawnMovement : MonoBehaviour
 
     public void Update()
     {
+
+        if (!initialized)
+            Initialize();
+
         //This means some other script has taken control of the character, e.g. the script to vault the character.
         if (pawn.MovementLocked)
             return;
-
-        UIManager.Instance.DebugText1 = pawn.IsGrounded.ToString();
-        UIManager.Instance.DebugText2 = currentZSpeed.ToString();
-        UIManager.Instance.DebugText3 = jumpBoostSensor.CollidedObjects.ToString();
 
         /*********************************/
         /*** Calculate the X/Z changes ***/
         /*********************************/
 
-        //Determine how fast we should be going.
+        //Check to see if we should land, if we are grounded this frame but were not the last.
+        if (pawn.IsGrounded)
+        {
+            if (!wasGroundedLastFrame)
+            {
+                Land();                
+            }
+            wasGroundedLastFrame = true;
+        }
+        else
+        {
+            wasGroundedLastFrame = false;
+        }
+
 
         //If we are grounded, do the thing.
         if (pawn.IsGrounded)
@@ -195,7 +223,6 @@ public sealed class PawnMovement : MonoBehaviour
             //Jump if the user pressed jump this frame, since holding jump will have significance
             if (pawn.PawnInput.JumpedThisFrame)
             {
-                pawn.AddVaultLock(.35f);
                 //If the jump boost sensor isnt colliding, we are near an egde, so lets boost the character!
                 if (jumpBoostSensor.CollidedObjects == 0)
                 {
@@ -213,25 +240,36 @@ public sealed class PawnMovement : MonoBehaviour
                 {
                     currentYSpeed = JUMP_FORCE;
                 }
+                jumpAngle = transform.rotation.eulerAngles.y;
             }
         }
         //WALL JUMP
-        else if(pawn.PawnInput.JumpedThisFrame && currentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY && jumpBoostSensor.CollidedObjects == 1)
+        else if(pawn.PawnInput.JumpedThisFrame && currentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
         {
-            currentYSpeed = JUMP_FORCE;
-            currentZSpeed *= -1;
-            pawn.AddVaultLock(.35f);
-            Debug.Log("1");
+            Utils.Spawn(jumpBoostSensor.transform.position + (transform.forward * -1f));
+            Utils.Spawn(jumpBoostSensor.transform.position + (transform.forward * -1f) + (transform.forward * 2));
+
+            if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f), transform.forward, 2f, LayerMask.GetMask("MapGeometry"))) {
+                currentYSpeed = JUMP_FORCE;
+                currentZSpeed = Mathf.Clamp(currentZSpeed * -1, -10, -2.5f);
+                pawn.AddVaultLock(.35f);
+                xzCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
+            }
         }
 
         //Apply Gravity
         currentYSpeed += Physics.gravity.y * UNITY_GRAVITY_BOOST_MULTIPLIER * Time.deltaTime;
 
         //Now that we have all that done, calculate the velocity.
-        inputCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed) + (transform.up * currentYSpeed);
+        if (pawn.IsGrounded)
+        {
+            xzCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
+        }
+        
+        yCalculatedVelocity = (transform.up * currentYSpeed);
 
         //Finally, move the controller.
-        CollisionFlags flags = pawn.Move(inputCalculatedVelocity * Time.deltaTime);
+        CollisionFlags flags = pawn.Move((xzCalculatedVelocity + yCalculatedVelocity) * Time.deltaTime);
       
         if ((flags & CollisionFlags.CollidedAbove) != 0)
         {
@@ -247,7 +285,7 @@ public sealed class PawnMovement : MonoBehaviour
     //Stop all movement on the character;
     public void HaltMovement()
     {
-        inputCalculatedVelocity = Vector3.zero;
+        xzCalculatedVelocity = Vector3.zero;
     }
 
     //Check to see if the player is moving faster than a certain speed;
@@ -260,5 +298,32 @@ public sealed class PawnMovement : MonoBehaviour
     public bool IsTryingToMove()
     {
         return pawn.PawnInput.HorizontalDirection != 0f || pawn.PawnInput.VerticalDirection != 0f;
+    }
+
+    //Make sure the pawn loses momentum if they land in a direction they were not facing when they jumped.
+    private void Land()
+    {  
+        float landDifference = 180 - Mathf.Abs(Mathf.Abs(transform.rotation.eulerAngles.y - jumpAngle) - 180);
+
+        UIManager.Instance.DebugText1 = landDifference.ToString();
+
+        //2 levels, pawn gets to keep some momentum if they dont stray too far
+        if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW && landDifference < JUMP_MOMENTUM_TOLERANCE_HIGH) 
+        {
+            currentXSpeed *= .5f;
+            currentZSpeed *= .5f;
+        }
+        else if (landDifference >= JUMP_MOMENTUM_TOLERANCE_HIGH)
+        {
+            currentXSpeed *= .1f;
+            currentZSpeed *= .1f;
+        }
+    }
+
+    //Generic Initialization function.
+    private void Initialize()
+    {
+        jumpAngle = transform.rotation.eulerAngles.y;
+        initialized = true;
     }
  }
