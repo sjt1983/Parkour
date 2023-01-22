@@ -116,8 +116,6 @@ public class PawnVault : MonoBehaviour
         if (!initialized)
             Initialize();
 
-        UIManager.Instance.DebugText1 = vaultState.ToString();
-
         //Check to see if we SHOULD vault.
         if (vaultState == VaultState.ATTEMPT_VAULT)
         {
@@ -156,7 +154,6 @@ public class PawnVault : MonoBehaviour
                 //Zero out the veocity
                 movementVelocity = Vector3.zero;
 
-                Utils.Spawn(vaultPoint);
             }
         }
         else if (vaultState == VaultState.DIP)

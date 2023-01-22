@@ -84,15 +84,15 @@ public sealed class PawnMovement : MonoBehaviour
     //We calculate y separately because we need to do funky stuff to xz if the character is in the air.
     private Vector3 yCalculatedVelocity;
 
-    //The angle of the pawn when it jumps
-    private float jumpAngle;
-
     //How many degrees difference from the jump angle the pawn can be to maintain momentum
     private const float JUMP_MOMENTUM_TOLERANCE_LOW = 35.0f;
     private const float JUMP_MOMENTUM_TOLERANCE_HIGH = 75.0f;
 
     //Flag to see if the pawn was grounded last frame, so we know when to trigger "Landing".
     private bool wasGroundedLastFrame = false;
+
+    //The angle of the pawn when it was last grounded.
+    private float lastGroundedFrameAngle;
 
     private bool initialized = false;
     //                ^-----------This guy!!!1
@@ -133,6 +133,7 @@ public sealed class PawnMovement : MonoBehaviour
         //If we are grounded, do the thing.
         if (pawn.IsGrounded)
         {
+            lastGroundedFrameAngle = transform.rotation.eulerAngles.y;
             /****************************/
             /***** Z - Forward/Back *****/
             /****************************/
@@ -240,7 +241,6 @@ public sealed class PawnMovement : MonoBehaviour
                 {
                     currentYSpeed = JUMP_FORCE;
                 }
-                jumpAngle = transform.rotation.eulerAngles.y;
             }
         }
         //WALL JUMP
@@ -249,9 +249,7 @@ public sealed class PawnMovement : MonoBehaviour
             if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f),  transform.forward, out RaycastHit hit, 2f,  LayerMask.GetMask("MapGeometry"))) {
                 currentYSpeed = JUMP_FORCE;
                 xzCalculatedVelocity = Vector3.Reflect(xzCalculatedVelocity, hit.normal);
-               // currentZSpeed = Mathf.Clamp(currentZSpeed * -1, -10, -2.5f);
                 pawn.AddVaultLock(.35f);
-               // xzCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
             }
         }
 
@@ -306,9 +304,7 @@ public sealed class PawnMovement : MonoBehaviour
     //Make sure the pawn loses momentum if they land in a direction they were not facing when they jumped.
     private void Land()
     {  
-        float landDifference = 180 - Mathf.Abs(Mathf.Abs(transform.rotation.eulerAngles.y - jumpAngle) - 180);
-
-        UIManager.Instance.DebugText1 = landDifference.ToString();
+        float landDifference = 180 - Mathf.Abs(Mathf.Abs(transform.rotation.eulerAngles.y - lastGroundedFrameAngle) - 180);
 
         //2 levels, pawn gets to keep some momentum if they dont stray too far
         if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW && landDifference < JUMP_MOMENTUM_TOLERANCE_HIGH) 
@@ -326,7 +322,7 @@ public sealed class PawnMovement : MonoBehaviour
     //Generic Initialization function.
     private void Initialize()
     {
-        jumpAngle = transform.rotation.eulerAngles.y;
+        lastGroundedFrameAngle = transform.rotation.eulerAngles.y;
         initialized = true;
     }
  }

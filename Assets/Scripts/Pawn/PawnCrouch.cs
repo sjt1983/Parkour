@@ -30,7 +30,10 @@ public class PawnCrouch : MonoBehaviour
     private float defaultCameraLocalY = 1f;
 
     //How tall the character should be when crouching.
-    private const float CROUCH_HEIGHT = 1;
+    private const float CROUCH_HEIGHT = 1f;
+
+    //How tall the character should be when crouching.
+    private const float STAND_HEIGHT = 2f;
 
     //How fast the charatcer should crouch, essentially, meters per second.
     private const float CROUCH_SPEED = 6f;
@@ -73,10 +76,11 @@ public class PawnCrouch : MonoBehaviour
         mainCameraMount.localPosition = new Vector3(mainCameraMount.localPosition.x, newCameraMountPosition, mainCameraMount.localPosition.z);
 
         lastY = transform.position.y;
-       /* characterController.height = Mathf.Clamp(pawn.IsCrouching ?
+        characterController.height = Mathf.Clamp(pawn.IsCrouching ?
                                         characterController.height - (CROUCH_SPEED * Time.deltaTime) :
                                         characterController.height + (CROUCH_SPEED * Time.deltaTime),
-                                        CROUCH_HEAD_Y, STAND_HEAD_Y);*/
+                                        CROUCH_HEIGHT, STAND_HEIGHT);
+        characterController.center = Vector3.down * (2f - characterController.height) / 2.0f;
     }
 
     /*********************/

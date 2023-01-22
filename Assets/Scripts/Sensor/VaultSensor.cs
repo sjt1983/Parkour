@@ -18,10 +18,10 @@ public class VaultSensor : Sensor
     private readonly float SECONDARY_SENSOR_SPREAD = .25f;
 
     //How far up from the hitpoint we cast the secondary rays, and how far down we cast.
-    private readonly float SECONDARY_SENSOR_HEIGHT_BUFFER = .25f;
+    private readonly float SECONDARY_SENSOR_HEIGHT_BUFFER = 1.25f;
 
     //How far down the secondary raycast should travel
-    private readonly float SECONDARY_SENSOR_RANGE = .27f;
+    private readonly float SECONDARY_SENSOR_RANGE = 2f;
 
     /*********************/
     /*** Unity Methods ***/
