@@ -246,14 +246,12 @@ public sealed class PawnMovement : MonoBehaviour
         //WALL JUMP
         else if(pawn.PawnInput.JumpedThisFrame && currentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
         {
-            Utils.Spawn(jumpBoostSensor.transform.position + (transform.forward * -1f));
-            Utils.Spawn(jumpBoostSensor.transform.position + (transform.forward * -1f) + (transform.forward * 2));
-
-            if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f), transform.forward, 2f, LayerMask.GetMask("MapGeometry"))) {
+            if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f),  transform.forward, out RaycastHit hit, 2f,  LayerMask.GetMask("MapGeometry"))) {
                 currentYSpeed = JUMP_FORCE;
-                currentZSpeed = Mathf.Clamp(currentZSpeed * -1, -10, -2.5f);
+                xzCalculatedVelocity = Vector3.Reflect(xzCalculatedVelocity, hit.normal);
+               // currentZSpeed = Mathf.Clamp(currentZSpeed * -1, -10, -2.5f);
                 pawn.AddVaultLock(.35f);
-                xzCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
+               // xzCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
             }
         }
 
@@ -282,10 +280,15 @@ public sealed class PawnMovement : MonoBehaviour
     /*** Class Methods ***/
     /*********************/
     
-    //Stop all movement on the character;
-    public void HaltMovement()
+    //Stop all movement on the pawns directions;
+    public void HaltMovement(bool haltX, bool haltY, bool haltZ)
     {
-        xzCalculatedVelocity = Vector3.zero;
+        if (haltX)
+            currentXSpeed = 0f;
+        if (haltY)
+            currentYSpeed = 0f;
+        if (haltZ)
+            currentZSpeed = 0f;
     }
 
     //Check to see if the player is moving faster than a certain speed;

@@ -63,7 +63,6 @@ public sealed class Pawn : MonoBehaviour
         SpeedCharges = 0;
     }
 
-
     /*****************************/
     /*** Additional Properties ***/
     /*****************************/
@@ -126,9 +125,9 @@ public sealed class Pawn : MonoBehaviour
     }
 
     //Stop all movement on the character;
-    public void HaltMovement()
+    public void HaltMovement(bool haltX, bool haltY, bool haltZ)
     {
-        pawnMovement.HaltMovement();
+        pawnMovement.HaltMovement(haltX, haltY, haltZ);
     }
 
     //Quick reference for moving the pawn's character controller.

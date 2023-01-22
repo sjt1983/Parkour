@@ -34,19 +34,7 @@ public sealed class PawnInput : MonoBehaviour
     //Jumping 
 
     //Player hit the jump button.
-    //We want to capture that the user jumped.
-    //but as soon as something checks that the user hit the jump button, set it to false so we dont get in a jump loop.
-    private bool jump = false;
-    public bool JumpedThisFrame
-    {
-        get
-        {
-            bool retval = jump;
-            jump = false;
-            return retval;
-        }
-        set => jump = value;
-    }
+    public bool JumpedThisFrame { get => actionController.PlayerControls.Jump.WasPressedThisFrame(); }
 
     //Simple notification for scripts to know if the jump button is pressed.
     public bool JumpIsPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
@@ -174,15 +162,6 @@ public sealed class PawnInput : MonoBehaviour
         if (actionController.PlayerControls.SecondaryUse.WasReleasedThisFrame())
         {
             SecondaryUse = false;
-        }
-
-        //Handle Jumping
-        if (actionController.PlayerControls.Jump.WasPressedThisFrame())
-        {
-            JumpedThisFrame = true;
-        }
-        else { 
-            JumpedThisFrame = false;
         }
 
         //Handle Reload

@@ -73,7 +73,7 @@ public class PawnVault : MonoBehaviour
     //MAX Velocity for raising;
     private readonly float RAISE_MAX_VELOCITY = 10f;
     //MAX Velocity for raising;
-    private readonly float RAISE_HEIGHT_BUFFER = 1.2f;
+    private readonly float RAISE_HEIGHT_BUFFER = .1f;
 
     //Velocity used for the raise.
     private float raiseVelocity;
@@ -116,6 +116,8 @@ public class PawnVault : MonoBehaviour
         if (!initialized)
             Initialize();
 
+        UIManager.Instance.DebugText1 = vaultState.ToString();
+
         //Check to see if we SHOULD vault.
         if (vaultState == VaultState.ATTEMPT_VAULT)
         {
@@ -127,7 +129,6 @@ public class PawnVault : MonoBehaviour
                 //lock the pawn and stop it, but before we do that, see if its falling and set the proper state
                 pawn.MovementLocked = true;
                 vaultState = pawn.IsFalling ? VaultState.DIP : VaultState.RAISE;
-                pawn.HaltMovement();
                         
                 //For some reason the position of the pawn is 1m above the bottom of the CharacterController.
                 vaultPoint = hitInfo.point + new Vector3(0, 1 + RAISE_HEIGHT_BUFFER);
@@ -153,7 +154,9 @@ public class PawnVault : MonoBehaviour
                 forwardTimer = 0f;
 
                 //Zero out the veocity
-                movementVelocity = Vector3.zero;                                   
+                movementVelocity = Vector3.zero;
+
+                Utils.Spawn(vaultPoint);
             }
         }
         else if (vaultState == VaultState.DIP)
@@ -196,10 +199,9 @@ public class PawnVault : MonoBehaviour
             //Release control after the raise phase
             if (transform.position.y >= vaultPoint.y)
             {
-                pawn.MovementLocked = false;
+                transform.position = new Vector3(transform.position.x, vaultPoint.y, transform.position.z);
                 vaultState = VaultState.FORWARD;
-                cooldownTimer = 0f;
-                pawn.HaltMovement();
+
             }
         }
         else if (vaultState == VaultState.FORWARD)
@@ -213,6 +215,9 @@ public class PawnVault : MonoBehaviour
             if (forwardTimer > FORWARD_TIME)
             {
                 vaultState = VaultState.COOLDOWN;
+                cooldownTimer = 0f;
+                pawn.HaltMovement(false, true, false);
+                pawn.MovementLocked = false;
             }
         }
         else if (vaultState == VaultState.COOLDOWN)
@@ -269,5 +274,5 @@ enum VaultState
     DIP,
     RAISE,
     FORWARD,
-    COOLDOWN
+    COOLDOWN, DEBUG
 }
