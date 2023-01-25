@@ -68,7 +68,13 @@ public sealed class PawnInput : MonoBehaviour
     private InputAction movementInput;
 
     //Calculated direction the player is moving
-    private Vector2 movementDirection;
+    private Vector2 inputMovementDirection;
+
+    //Vector used to Smooth out character movement.
+    private Vector2 smoothMovementDirection;
+
+    //Final smoothed out vector
+    private Vector2 finalMovementDirection;
 
     /*********************/
     /*** Unity Methods ***/
@@ -82,37 +88,21 @@ public sealed class PawnInput : MonoBehaviour
         actionController = new ActionController();
         movementInput = actionController.PlayerControls.Move;
 
-        //Interaction
         actionController.PlayerControls.Interact.Enable();
-
-        //Primary Use
         actionController.PlayerControls.PrimaryUse.Enable();
-
-        //Secondary Use
         actionController.PlayerControls.SecondaryUse.Enable();
-
-        //Reload
         actionController.PlayerControls.Reload.Enable();
-
-        //Jump
         actionController.PlayerControls.Jump.Enable();
-
-        //Crouch
         actionController.PlayerControls.Crouch.Enable();
 
-        //Menu
         actionController.PlayerControls.Menu.Enable();
         actionController.PlayerControls.Menu.performed += ctx =>
         {
             menuOpen = !menuOpen;
             if (menuOpen)
-            {
                 UIManager.Instance.Show<ActionMenuUI>();                
-            }
             else
-            {
                 UIManager.Instance.Show<ActionUI>();
-            }            
 
         };
 
@@ -122,63 +112,39 @@ public sealed class PawnInput : MonoBehaviour
 
     private void Update()
     {
-
         //Move the player.
-        //movementInput.ReadValue returns a Vector2 to see which movement buttons are pressed.
-        //We assigned those to variables to indicate certain directions are "on" (Forward/backward/strafe left/strafe right)
-        //PawnMovement script reads these values and determines what to do.
-        movementDirection = movementInput.ReadValue<Vector2>();
-        HorizontalDirection = movementDirection.x;
-        VerticalDirection = movementDirection.y;
+        //Standard 2d movement reads with SmoothDamp
+        inputMovementDirection = movementInput.ReadValue<Vector2>();
+        finalMovementDirection = Vector2.SmoothDamp(finalMovementDirection, inputMovementDirection, ref smoothMovementDirection, .2f);
+        HorizontalDirection = finalMovementDirection.x;
+        VerticalDirection = finalMovementDirection.y;
 
         //Handle Interaction
         if (actionController.PlayerControls.Interact.WasPressedThisFrame())
-        {
             Interacting = true;
-        }
-
-        if (actionController.PlayerControls.Interact.WasReleasedThisFrame())
-        {
+        else if (actionController.PlayerControls.Interact.WasReleasedThisFrame())
             Interacting = false;
-        }
 
         //Handle Primary Use
         if (actionController.PlayerControls.PrimaryUse.WasPressedThisFrame())
-        {
             PrimaryUse = true;
-        }
-
-        if (actionController.PlayerControls.PrimaryUse.WasReleasedThisFrame())
-        {
+        else if (actionController.PlayerControls.PrimaryUse.WasReleasedThisFrame())
             PrimaryUse = false;
-        }
 
         //Handle Secondary Use
         if (actionController.PlayerControls.SecondaryUse.WasPressedThisFrame())
-        {
             SecondaryUse = true;
-        }
-
-        if (actionController.PlayerControls.SecondaryUse.WasReleasedThisFrame())
-        {
+        else if (actionController.PlayerControls.SecondaryUse.WasReleasedThisFrame())
             SecondaryUse = false;
-        }
 
         //Handle Reload
         if (actionController.PlayerControls.Reload.WasPressedThisFrame())
-        {
             Reloading = true;
-        }
 
         //Handle Crouch
         if (actionController.PlayerControls.Crouch.WasPressedThisFrame())
-        {
             Crouching = true;
-        }
-
-        if (actionController.PlayerControls.Crouch.WasReleasedThisFrame())
-        {
+        else if (actionController.PlayerControls.Crouch.WasReleasedThisFrame())
             Crouching = false;
-        }
     }
 }

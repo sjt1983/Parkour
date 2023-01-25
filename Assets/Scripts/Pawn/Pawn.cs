@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 //Pawn is a class that represents the avatar which is controlled by the user.
 public sealed class Pawn : MonoBehaviour
@@ -7,9 +6,6 @@ public sealed class Pawn : MonoBehaviour
     /*****************************************/
     /*** Local References to Unity Objects ***/
     /*****************************************/
-
-    [SerializeField]
-    float test;
 
     [SerializeField]
     private PawnInput pawnInput;
@@ -106,8 +102,8 @@ public sealed class Pawn : MonoBehaviour
         if (!initialized)
             Initialize();
 
+        //Deduct the Vault Lock timer on the pawn.
         VaultLockTimer = Mathf.Clamp(VaultLockTimer - Time.deltaTime, 0, 555);
-        test = VaultLockTimer;
     }
 
     /*********************/

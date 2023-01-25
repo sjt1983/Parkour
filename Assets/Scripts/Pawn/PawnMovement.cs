@@ -39,18 +39,8 @@ public sealed class PawnMovement : MonoBehaviour
     //How fast the character walks when crouched.
     private const float MAX_CROUCH_WALK_SPEED = 1f;
 
-    //How fast the character accelerates when the input matches the direction
-    private const float WALK_ACCELERATION = 13f;
-
-    //How fast the character accelerates when NOT the input matches the direction
-    private const float WALK_ACCELERATION_ABRUPT = 26f;
-
-    //How fast the character stops moving.
-    private const float WALK_STOP_FORCE = 20f;
-
     //How hard the character jumps;
     private const float JUMP_FORCE = 10;
-    private const float STOP_ZERO_THRESHOLD = .3f;
 
     //How extra hard the character jumps while boosted
     private const float JUMP_BOOST_MULTIPLIER = 1f;
@@ -111,88 +101,19 @@ public sealed class PawnMovement : MonoBehaviour
         if (pawn.MovementLocked)
             return;
 
-        /*********************************/
-        /*** Calculate the X/Z changes ***/
-        /*********************************/
-
         //Check to see if we should land, if we are grounded this frame but were not the last.
         if (pawn.IsGrounded)
-        {
+        {   
             if (!wasGroundedLastFrame)
             {
-                Land();                
+                Land();
             }
             wasGroundedLastFrame = true;
+            lastGroundedFrameAngle = transform.rotation.eulerAngles.y;
         }
         else
         {
             wasGroundedLastFrame = false;
-        }
-
-
-        //If we are grounded, do the thing.
-        if (pawn.IsGrounded)
-        {
-            lastGroundedFrameAngle = transform.rotation.eulerAngles.y;
-            /****************************/
-            /***** Z - Forward/Back *****/
-            /****************************/
-
-            //If we are sliding, remove velocity on Z at a constant rate.
-            if (pawn.IsSliding)
-            {
-                currentZSpeed += (currentZSpeed < 0 ? pawn.Drag : -pawn.Drag) * Time.deltaTime;                
-            }
-            //If we are not sliding, and there is no input on this axis, stop the character.
-            else if (pawn.PawnInput.VerticalDirection == 0f)
-            {
-                //Slow the character down until they hit the threshold then stop all Z movement.
-                if (currentZSpeed > STOP_ZERO_THRESHOLD)
-                    currentZSpeed -= WALK_STOP_FORCE * Time.deltaTime;
-                else if (currentZSpeed < -STOP_ZERO_THRESHOLD)
-                    currentZSpeed += WALK_STOP_FORCE * Time.deltaTime;
-                else
-                    currentZSpeed = 0f;
-            }            
-            else
-            {
-                //Is my Input the same direction I am going, e.g. I am already moving forward and holding forward.
-                //if so, accelerate slowly, else, accelerate in the opposite direction abruptly
-                //Forward/back
-                if ((pawn.PawnInput.VerticalDirection > 0 && currentZSpeed > 0) || (pawn.PawnInput.VerticalDirection < 0 && currentZSpeed < 0))
-                    currentZSpeed += (WALK_ACCELERATION) * pawn.PawnInput.VerticalDirection * Time.deltaTime;
-                else
-                    currentZSpeed += (WALK_ACCELERATION_ABRUPT) * pawn.PawnInput.VerticalDirection * Time.deltaTime;
-            }
-
-            /**********************/
-            /***** X - Strafe *****/
-            /**********************/
-            //This is the same logic as above for Z.
-
-            if (pawn.IsSliding)
-            {
-                currentXSpeed += (currentXSpeed < 0 ? pawn.Drag : -pawn.Drag) * Time.deltaTime;
-            }
-            else if (pawn.PawnInput.HorizontalDirection == 0f)
-            {
-                if (currentXSpeed > STOP_ZERO_THRESHOLD)
-                    currentXSpeed -= WALK_STOP_FORCE * Time.deltaTime;
-                else if (currentXSpeed < -STOP_ZERO_THRESHOLD)
-                    currentXSpeed += WALK_STOP_FORCE * Time.deltaTime;
-                else
-                    currentXSpeed = 0f;
-            }
-            else
-            {
-                //Is my Input the same direction I am going, e.g. I am already moving forward and holding forward.
-                //if so, accelerate slowly, else, accelerate in the opposite direction abruptly
-                //Now for left/right
-                if ((pawn.PawnInput.HorizontalDirection > 0 && currentXSpeed > 0) || (pawn.PawnInput.HorizontalDirection < 0 && currentXSpeed < 0))
-                    currentXSpeed += (WALK_ACCELERATION) * pawn.PawnInput.HorizontalDirection * Time.deltaTime;
-                else
-                    currentXSpeed += (WALK_ACCELERATION_ABRUPT) * pawn.PawnInput.HorizontalDirection * Time.deltaTime;
-            }
         }
 
         //If the pawns speed goes below the default max speed we remove all speed charges
@@ -201,26 +122,31 @@ public sealed class PawnMovement : MonoBehaviour
             pawn.RemoveAllSpeedCharges();
         }
 
-        //Clamp how we need to
-        if (pawn.IsGrounded && pawn.IsCrouching && !pawn.IsSliding)
+        /*********************************/
+        /*** Calculate the X/Z changes ***/
+        /*********************************/
+
+        if (pawn.IsGrounded)
         {
-            currentZSpeed = Mathf.Clamp(currentZSpeed, -MAX_CROUCH_WALK_SPEED, MAX_CROUCH_WALK_SPEED);
-            currentXSpeed = Mathf.Clamp(currentXSpeed, -MAX_CROUCH_WALK_SPEED, MAX_CROUCH_WALK_SPEED);
-        }
-        else
-        {
-            currentZSpeed = Mathf.Clamp(currentZSpeed, -MAX_WALK_SPEED_FORWARD, MAX_WALK_SPEED_FORWARD + (currentZSpeed <= 0 ? 0 : (pawn.SpeedCharges * SPEED_CHARGE_MAX_VELOCITY)));
-            currentXSpeed = Mathf.Clamp(currentXSpeed, -MAX_WALK_SPEED_SIDEWAYS, MAX_WALK_SPEED_SIDEWAYS);
+            currentZSpeed = pawn.PawnInput.VerticalDirection * GetMaxZSpeed();
+            currentXSpeed = pawn.PawnInput.HorizontalDirection * GetMaxXSpeed();
+            //If we are sliding, remove velocity on Z at a constant rate.
+            if (pawn.IsSliding)
+            {
+                currentZSpeed += (currentZSpeed < 0 ? pawn.Drag : -pawn.Drag);
+                currentXSpeed = 0;
+            }
+            xzCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
         }
 
-        /*******************************/
+        /*******************************************/
         /*** Calculate the Y (Jump/Fall) changes ***/
-        /*******************************/
+        /*******************************************/
 
         //If the controller is on the ground already, cancel gravity
         if (pawn.IsGrounded)
         {
-            currentYSpeed = GRAVITY_DEFAULT; //Always ensure we are trying to push the character down due to slopes.
+           
             //Jump if the user pressed jump this frame, since holding jump will have significance
             if (pawn.PawnInput.JumpedThisFrame)
             {
@@ -242,11 +168,13 @@ public sealed class PawnMovement : MonoBehaviour
                     currentYSpeed = JUMP_FORCE;
                 }
             }
+            currentYSpeed = GRAVITY_DEFAULT; //Always ensure we are trying to push the character down due to slopes.
         }
         //WALL JUMP
-        else if(pawn.PawnInput.JumpedThisFrame && currentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
+        else if (pawn.PawnInput.JumpedThisFrame && currentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
         {
-            if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f),  transform.forward, out RaycastHit hit, 2f,  LayerMask.GetMask("MapGeometry"))) {
+            if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f), transform.forward, out RaycastHit hit, 2f, LayerMask.GetMask("MapGeometry")))
+            {
                 currentYSpeed = JUMP_FORCE;
                 xzCalculatedVelocity = Vector3.Reflect(xzCalculatedVelocity, hit.normal);
                 pawn.AddVaultLock(.35f);
@@ -256,22 +184,19 @@ public sealed class PawnMovement : MonoBehaviour
         //Apply Gravity
         currentYSpeed += Physics.gravity.y * UNITY_GRAVITY_BOOST_MULTIPLIER * Time.deltaTime;
 
-        //Now that we have all that done, calculate the velocity.
-        if (pawn.IsGrounded)
-        {
-            xzCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
-        }
-        
         yCalculatedVelocity = (transform.up * currentYSpeed);
+
+        /******************************/
+        /*** Finally, Move the pawn ***/
+        /******************************/
 
         //Finally, move the controller.
         CollisionFlags flags = pawn.Move((xzCalculatedVelocity + yCalculatedVelocity) * Time.deltaTime);
-      
+
         if ((flags & CollisionFlags.CollidedAbove) != 0)
         {
             currentYSpeed = GRAVITY_DEFAULT;
         }
-
     }
 
     /*********************/
@@ -301,9 +226,16 @@ public sealed class PawnMovement : MonoBehaviour
         return pawn.PawnInput.HorizontalDirection != 0f || pawn.PawnInput.VerticalDirection != 0f;
     }
 
+    //Generic Initialization function.
+    private void Initialize()
+    {
+        lastGroundedFrameAngle = transform.rotation.eulerAngles.y;
+        initialized = true;
+    }
+
     //Make sure the pawn loses momentum if they land in a direction they were not facing when they jumped.
     private void Land()
-    {  
+    {
         float landDifference = 180 - Mathf.Abs(Mathf.Abs(transform.rotation.eulerAngles.y - lastGroundedFrameAngle) - 180);
 
         //2 levels, pawn gets to keep some momentum if they dont stray too far
@@ -319,10 +251,17 @@ public sealed class PawnMovement : MonoBehaviour
         }
     }
 
-    //Generic Initialization function.
-    private void Initialize()
+    //Determine the maximum speed on the Z axis.
+    private float GetMaxZSpeed()
     {
-        lastGroundedFrameAngle = transform.rotation.eulerAngles.y;
-        initialized = true;
+        return pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : MAX_WALK_SPEED_FORWARD + (pawn.SpeedCharges * SPEED_CHARGE_MAX_VELOCITY);
     }
+
+
+    //Determine the maximum speed on the X axis.
+    private float GetMaxXSpeed()
+    {
+        return pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : MAX_WALK_SPEED_SIDEWAYS;
+    }
+
  }

@@ -37,10 +37,18 @@ public class PawnCrouch : MonoBehaviour
 
     //How fast the charatcer should crouch, essentially, meters per second.
     private const float CROUCH_SPEED = 6f;
-    private const float SLIDING_DRAG = 3f;
+
+    //How much drag we want to add per second;
+    private const float SLIDING_DRAG = 1f;
+
+    //How fast we need to be going to slide.
     private const int MINIMUM_SLIDE_VELOCITY = 2;
 
-    private float lastY;
+    //Minimum Angle to slide
+    private const float PAWN_DOWNHILL_SLIDE_ANGLE = 1f;
+
+    //Y positon of the last frame, if its higher than this frame, we can state we are sliding downhill.
+    private float lastFrameY;
 
     /*********************/
     /*** Unity Methods ***/
@@ -52,13 +60,17 @@ public class PawnCrouch : MonoBehaviour
             Initialize();
         
         //Rules for sliding
-        //Pawn has to be on the ground, crouching, and moving faster than 5 m/s.
+        //Pawn has to be on the ground, crouching, and moving faster than the MINIMUM_SLIDE_VELOCITY.
         if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > MINIMUM_SLIDE_VELOCITY)
         {
             //Set the pawn to a sliding state for the movement script to handle.
             pawn.IsSliding = true;
-            //Set the drag if we are on a sloped surface.
-            pawn.Drag = GetPawnSlopeAngle() < 1 && IsSlidingDownhill() ? 0f : SLIDING_DRAG;
+
+            //If we are on an angle and sliding downhill, allow infinite sliding, otherwise add to the drag.
+            if (GetPawnSlopeAngle() < PAWN_DOWNHILL_SLIDE_ANGLE && IsSlidingDownhill())
+                pawn.Drag = 0;
+            else
+                pawn.Drag += SLIDING_DRAG * Time.deltaTime;
         }
         else
         {
@@ -75,12 +87,15 @@ public class PawnCrouch : MonoBehaviour
 
         mainCameraMount.localPosition = new Vector3(mainCameraMount.localPosition.x, newCameraMountPosition, mainCameraMount.localPosition.z);
 
-        lastY = transform.position.y;
+        //Resize the character controller and recenter it based on what the height should be while crouching.
         characterController.height = Mathf.Clamp(pawn.IsCrouching ?
                                         characterController.height - (CROUCH_SPEED * Time.deltaTime) :
                                         characterController.height + (CROUCH_SPEED * Time.deltaTime),
                                         CROUCH_HEIGHT, STAND_HEIGHT);
         characterController.center = Vector3.down * (2f - characterController.height) / 2.0f;
+
+        //Store the lastY position so we know if we are going downhill or not.
+        lastFrameY = transform.position.y;
     }
 
     /*********************/
@@ -90,20 +105,22 @@ public class PawnCrouch : MonoBehaviour
     private void Initialize() {
         defaultCameraLocalY = mainCameraMount.localPosition.y;
         initialized = true;
-        lastY = transform.position.y;
+        lastFrameY = transform.position.y;
     }
 
+    //Determines if we are sliding downhill by checking the current Y position with last frames.
     private bool IsSlidingDownhill()
     {
-        return transform.position.y < lastY;
+        return transform.position.y < lastFrameY;
     }
 
+    //Try to raycast down and see if we are hitting a sloped surface, if we are not, just return 1 and assume we are not.
     private float GetPawnSlopeAngle()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2.02f))
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 2.02f, LayerMask.GetMask("MapGeometry")))
         {
             return hit.normal.y;
         }
-        return 5; //This may bite me later;
+        return 1; 
     }
 }
