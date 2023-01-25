@@ -33,11 +33,11 @@ public sealed class PawnMovement : MonoBehaviour
     /*** Default Upper Thresholds for movement ***/
 
     //How fast the character walks.
-    private const float MAX_WALK_SPEED_FORWARD = 5f;
-    private const float MAX_WALK_SPEED_SIDEWAYS = 3f;
+    private const float MAX_WALK_SPEED_FORWARD = 7f;
+    private const float MAX_WALK_SPEED_SIDEWAYS = 4f;
 
     //How fast the character walks when crouched.
-    private const float MAX_CROUCH_WALK_SPEED = 1f;
+    private const float MAX_CROUCH_WALK_SPEED = 3f;
 
     //How hard the character jumps;
     private const float JUMP_FORCE = 10;
@@ -78,6 +78,15 @@ public sealed class PawnMovement : MonoBehaviour
     private const float JUMP_MOMENTUM_TOLERANCE_LOW = 35.0f;
     private const float JUMP_MOMENTUM_TOLERANCE_HIGH = 75.0f;
 
+    //How much speed we deduce when the pawn lands after the low tolerance.
+    private const float LAND_LOW_DEDUCTION = 2;
+    //How much speed we deduce when the pawn lands after the high tolerance.
+    private const float LAND_HIGH_DEDUCTION = 5;
+    //How fast the pawn recovers from the landed deduction.
+    private const float LAND_DEDUCTION_RECOVERY_RATE = 3;
+    //The current landed deduction from speed.
+    private float landedSpeedDeduction = 0f;
+
     //Flag to see if the pawn was grounded last frame, so we know when to trigger "Landing".
     private bool wasGroundedLastFrame = false;
 
@@ -93,7 +102,6 @@ public sealed class PawnMovement : MonoBehaviour
 
     public void Update()
     {
-
         if (!initialized)
             Initialize();
 
@@ -115,6 +123,8 @@ public sealed class PawnMovement : MonoBehaviour
         {
             wasGroundedLastFrame = false;
         }
+        //Recover from landing if needed
+        landedSpeedDeduction = Mathf.Clamp(landedSpeedDeduction - (LAND_DEDUCTION_RECOVERY_RATE * Time.deltaTime), 0f, 100);
 
         //If the pawns speed goes below the default max speed we remove all speed charges
         if (currentZSpeed < MAX_WALK_SPEED_FORWARD)
@@ -145,8 +155,7 @@ public sealed class PawnMovement : MonoBehaviour
 
         //If the controller is on the ground already, cancel gravity
         if (pawn.IsGrounded)
-        {
-           
+        {           
             //Jump if the user pressed jump this frame, since holding jump will have significance
             if (pawn.PawnInput.JumpedThisFrame)
             {
@@ -168,7 +177,11 @@ public sealed class PawnMovement : MonoBehaviour
                     currentYSpeed = JUMP_FORCE;
                 }
             }
-            currentYSpeed = GRAVITY_DEFAULT; //Always ensure we are trying to push the character down due to slopes.
+            else
+            {
+                currentYSpeed = GRAVITY_DEFAULT; //Always ensure we are trying to push the character down due to slopes. 
+            }
+            
         }
         //WALL JUMP
         else if (pawn.PawnInput.JumpedThisFrame && currentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
@@ -241,24 +254,22 @@ public sealed class PawnMovement : MonoBehaviour
         //2 levels, pawn gets to keep some momentum if they dont stray too far
         if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW && landDifference < JUMP_MOMENTUM_TOLERANCE_HIGH) 
         {
-            currentXSpeed *= .5f;
-            currentZSpeed *= .5f;
+            landedSpeedDeduction = LAND_LOW_DEDUCTION;
         }
         else if (landDifference >= JUMP_MOMENTUM_TOLERANCE_HIGH)
         {
-            currentXSpeed *= .1f;
-            currentZSpeed *= .1f;
+            landedSpeedDeduction = LAND_HIGH_DEDUCTION;
         }
     }
 
     //Determine the maximum speed on the Z axis.
     private float GetMaxZSpeed()
     {
-        return pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : MAX_WALK_SPEED_FORWARD + (pawn.SpeedCharges * SPEED_CHARGE_MAX_VELOCITY);
+        return pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : (MAX_WALK_SPEED_FORWARD + (pawn.SpeedCharges * SPEED_CHARGE_MAX_VELOCITY)) - landedSpeedDeduction;
     }
 
 
-    //Determine the maximum speed on the X axis.
+    //Determine the maximum speed on the X axis.  
     private float GetMaxXSpeed()
     {
         return pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : MAX_WALK_SPEED_SIDEWAYS;
