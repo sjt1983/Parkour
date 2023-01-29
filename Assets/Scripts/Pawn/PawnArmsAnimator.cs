@@ -11,10 +11,13 @@ public class PawnArmsAnimator : MonoBehaviour
 
     public bool ikActive = false;
 
-    [SerializeField]
-    public Transform rightHandObj;
-    [SerializeField]
-    public Transform leftHandObj;
+    private Vector3 leftHandPosition;
+
+    private Vector3 rightHandPosition;
+
+    private Quaternion leftHandRotation;
+
+    private Quaternion rightHandRotation;
 
     private void Update()
     {
@@ -41,37 +44,26 @@ public class PawnArmsAnimator : MonoBehaviour
 
     void OnAnimatorIK()
     {
-
         if (pawnArmsAnimator)
         {
-
             //if the IK is active, set the position and rotation directly to the goal.
             if (ikActive)
             {
+                pawnArmsAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1);
+                pawnArmsAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1);
+                pawnArmsAnimator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandPosition);
+                pawnArmsAnimator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandRotation);
 
-                // Set the look target position, if one has been assigned
-                if (leftHandObj != null)
-                {
-                    pawnArmsAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1);
-                    pawnArmsAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1);
-                    pawnArmsAnimator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandObj.position);
-                    pawnArmsAnimator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandObj.rotation);
-                }
-
-                // Set the right hand target position and rotation, if one has been assigned
-                if (rightHandObj != null)
-                {
-                    pawnArmsAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
-                    pawnArmsAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
-                    pawnArmsAnimator.SetIKPosition(AvatarIKGoal.RightHand, rightHandObj.position);
-                    pawnArmsAnimator.SetIKRotation(AvatarIKGoal.RightHand, rightHandObj.rotation);
-                }
-
+                pawnArmsAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
+                pawnArmsAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
+                pawnArmsAnimator.SetIKPosition(AvatarIKGoal.RightHand, rightHandPosition);
+                pawnArmsAnimator.SetIKRotation(AvatarIKGoal.RightHand, rightHandRotation);
             }
-
             //if the IK is not active, set the position and rotation of the hand and head back to the original position
             else
             {
+                pawnArmsAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0);
+                pawnArmsAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0);
                 pawnArmsAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0);
                 pawnArmsAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0);
                 pawnArmsAnimator.SetLookAtWeight(0);
@@ -79,12 +71,15 @@ public class PawnArmsAnimator : MonoBehaviour
         }
     }
 
-    public void SetActiveIk(Vector3 leftHandTarget, Vector3 rightHandTarget)
+    public void SetActiveIk(Vector3 leftHandTargetPosition, Quaternion leftHandTargetRotation, Vector3 rightHandTargetPosition, Quaternion rightHandTargetRotation)
     {
         ikActive = true;
 
-        leftHandObj.position = leftHandTarget;
-        rightHandObj.position = rightHandTarget;
+        leftHandPosition = leftHandTargetPosition;
+        rightHandPosition = rightHandTargetPosition;
+        leftHandRotation = leftHandTargetRotation;
+        rightHandRotation = rightHandTargetRotation;
+
     }
 
     public void ClearIk()
