@@ -12,12 +12,22 @@ public class PawnArmsAnimator : MonoBehaviour
     public bool ikActive = false;
 
     [SerializeField]
-    public Transform rightHandObj = null;
+    public Transform rightHandObj;
     [SerializeField]
-    public Transform leftHandObj = null;
+    public Transform leftHandObj;
 
     private void Update()
     {
+
+        if (pawn.IsGrounded && !pawn.IsSliding)
+        {
+            pawnArmsAnimator.SetBool("Jump", false);
+        }
+        else if (!pawn.IsGrounded || pawn.IsSliding)
+        {
+            pawnArmsAnimator.SetBool("Jump", true);
+        }
+
         if (pawn.IsMovingFasterThan(2f))
         {
             pawnArmsAnimator.SetFloat("Speed", 1f, .2f, Time.deltaTime);
@@ -31,6 +41,7 @@ public class PawnArmsAnimator : MonoBehaviour
 
     void OnAnimatorIK()
     {
+
         if (pawnArmsAnimator)
         {
 
@@ -41,7 +52,6 @@ public class PawnArmsAnimator : MonoBehaviour
                 // Set the look target position, if one has been assigned
                 if (leftHandObj != null)
                 {
-                    Debug.Log("YES");
                     pawnArmsAnimator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1);
                     pawnArmsAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1);
                     pawnArmsAnimator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandObj.position);
@@ -51,7 +61,6 @@ public class PawnArmsAnimator : MonoBehaviour
                 // Set the right hand target position and rotation, if one has been assigned
                 if (rightHandObj != null)
                 {
-                    Debug.Log("YE2S");
                     pawnArmsAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
                     pawnArmsAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
                     pawnArmsAnimator.SetIKPosition(AvatarIKGoal.RightHand, rightHandObj.position);
@@ -68,6 +77,19 @@ public class PawnArmsAnimator : MonoBehaviour
                 pawnArmsAnimator.SetLookAtWeight(0);
             }
         }
+    }
+
+    public void SetActiveIk(Vector3 leftHandTarget, Vector3 rightHandTarget)
+    {
+        ikActive = true;
+
+        leftHandObj.position = leftHandTarget;
+        rightHandObj.position = rightHandTarget;
+    }
+
+    public void ClearIk()
+    {
+        ikActive = false;
     }
 
 }

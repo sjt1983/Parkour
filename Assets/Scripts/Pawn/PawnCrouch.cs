@@ -39,7 +39,7 @@ public class PawnCrouch : MonoBehaviour
     private const float CROUCH_SPEED = 6f;
 
     //How much drag we want to add per second;
-    private const float SLIDING_DRAG = 1f;
+    private const float SLIDING_DRAG = 3f;
 
     //How fast we need to be going to slide.
     private const int MINIMUM_SLIDE_VELOCITY = 2;
@@ -58,7 +58,7 @@ public class PawnCrouch : MonoBehaviour
     {
         if (!initialized)
             Initialize();
-        
+
         //Rules for sliding
         //Pawn has to be on the ground, crouching, and moving faster than the MINIMUM_SLIDE_VELOCITY.
         if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > MINIMUM_SLIDE_VELOCITY)
@@ -78,6 +78,8 @@ public class PawnCrouch : MonoBehaviour
             pawn.IsSliding = false;
             pawn.Drag = 0;
         }
+
+
         
         //Move the camera mount downward or upward over time. Determine the new position and set the 
         float newCameraMountPosition = Mathf.Clamp(pawn.IsCrouching ?

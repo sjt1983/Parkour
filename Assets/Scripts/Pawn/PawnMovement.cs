@@ -37,7 +37,7 @@ public sealed class PawnMovement : MonoBehaviour
     private const float MAX_WALK_SPEED_SIDEWAYS = 4f;
 
     //How fast the character walks when crouched.
-    private const float MAX_CROUCH_WALK_SPEED = 3f;
+    private const float MAX_CROUCH_WALK_SPEED = 2f;
 
     //How hard the character jumps;
     private const float JUMP_FORCE = 10;
@@ -104,6 +104,9 @@ public sealed class PawnMovement : MonoBehaviour
     {
         if (!initialized)
             Initialize();
+
+        UIManager.Instance.DebugText2 = "2: " + pawn.IsSliding.ToString();
+        UIManager.Instance.DebugText1 = "1: " + pawn.IsCrouching.ToString();
 
         //This means some other script has taken control of the character, e.g. the script to vault the character.
         if (pawn.MovementLocked)

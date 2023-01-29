@@ -18,6 +18,9 @@ public class PawnVault : MonoBehaviour
     [SerializeField]
     private Transform mainCamera;
 
+    [SerializeField]
+    private PawnArmsAnimator pawnArmsAnimator;
+
     /************************/
     /*** Class Properties ***/
     /************************/
@@ -30,7 +33,7 @@ public class PawnVault : MonoBehaviour
     //Flag for initialization, do it first! LOL
     private bool initialized = false;
 
-    private readonly float GLOBAL_SPEED = .9f;
+    private readonly float GLOBAL_SPEED = .8f;
 
     //The state of the scripts control over the character.
     private VaultState vaultState = VaultState.ATTEMPT_VAULT;
@@ -154,6 +157,8 @@ public class PawnVault : MonoBehaviour
                 //Zero out the veocity
                 movementVelocity = Vector3.zero;
 
+                pawnArmsAnimator.SetActiveIk(hitInfo.point + -transform.right * .4f, hitInfo.point + transform.right * .4f);
+
             }
         }
         else if (vaultState == VaultState.DIP)
@@ -203,6 +208,7 @@ public class PawnVault : MonoBehaviour
         }
         else if (vaultState == VaultState.FORWARD)
         {
+            pawnArmsAnimator.ClearIk();
             //Go forward if we are sure we will collide with something.
             movementVelocity = transform.forward * (FORWARD_VELOCITY * Time.deltaTime * GLOBAL_SPEED);
             movementVelocity.y = 0;
@@ -211,6 +217,7 @@ public class PawnVault : MonoBehaviour
             forwardTimer += Time.deltaTime;
             if (forwardTimer > FORWARD_TIME)
             {
+                pawnArmsAnimator.ClearIk();
                 vaultState = VaultState.COOLDOWN;
                 cooldownTimer = 0f;
                 pawn.HaltMovement(false, true, false);
