@@ -50,6 +50,8 @@ public class PawnCrouch : MonoBehaviour
     //Y positon of the last frame, if its higher than this frame, we can state we are sliding downhill.
     private float lastFrameY;
 
+    private float currentMaxSpeed;
+
     /*********************/
     /*** Unity Methods ***/
     /*********************/
@@ -61,26 +63,30 @@ public class PawnCrouch : MonoBehaviour
 
         //Rules for sliding
         //Pawn has to be on the ground, crouching, and moving faster than the MINIMUM_SLIDE_VELOCITY.
-        if (pawn.IsGrounded && pawn.IsCrouching && pawn.ForwardSpeed > MINIMUM_SLIDE_VELOCITY)
+        if (pawn.IsGrounded && pawn.IsCrouching && pawn.CurrentZSpeed > MINIMUM_SLIDE_VELOCITY)
         {
             //Set the pawn to a sliding state for the movement script to handle.
+            if (pawn.OverrideZSpeed == -1)
+            {
+                pawn.OverrideZSpeed = currentMaxSpeed;
+            }
+
             pawn.IsSliding = true;
 
             //If we are on an angle and sliding downhill, allow infinite sliding, otherwise add to the drag.
-            if (GetPawnSlopeAngle() < PAWN_DOWNHILL_SLIDE_ANGLE && IsSlidingDownhill())
-                pawn.Drag = 0;
+            if (GetPawnSlopeAngle() < PAWN_DOWNHILL_SLIDE_ANGLE && IsSlidingDownhill()) { }
+                //pawn.Drag = 0;
             else
-                pawn.Drag += SLIDING_DRAG * Time.deltaTime;
+                pawn.OverrideZSpeed -= SLIDING_DRAG * Time.deltaTime;
         }
         else
         {
             //If we aren't sliding, don't slide, LOL! GENIUS!
             pawn.IsSliding = false;
-            pawn.Drag = 0;
+            pawn.OverrideZSpeed = -1;
+            currentMaxSpeed = pawn.CurrentZSpeed;
         }
-
-
-        
+                
         //Move the camera mount downward or upward over time. Determine the new position and set the 
         float newCameraMountPosition = Mathf.Clamp(pawn.IsCrouching ?
                                         mainCameraMount.localPosition.y - (CROUCH_SPEED * Time.deltaTime) :

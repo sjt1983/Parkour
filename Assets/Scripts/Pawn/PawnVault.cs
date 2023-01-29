@@ -157,7 +157,7 @@ public class PawnVault : MonoBehaviour
                 //Zero out the veocity
                 movementVelocity = Vector3.zero;
 
-                pawnArmsAnimator.SetActiveIk(hitInfo.point + -transform.right * .4f, Quaternion.identity, hitInfo.point + transform.right * .4f, Quaternion.identity);
+                pawnArmsAnimator.SetActiveIk(hitInfo.point + (-transform.right * .4f) + (transform.up * .2f), Quaternion.identity, hitInfo.point + (transform.right * .4f) + (transform.up * .2f), Quaternion.identity);
 
             }
         }

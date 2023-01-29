@@ -75,8 +75,8 @@ public sealed class PawnMovement : MonoBehaviour
     private Vector3 yCalculatedVelocity;
 
     //How many degrees difference from the jump angle the pawn can be to maintain momentum
-    private const float JUMP_MOMENTUM_TOLERANCE_LOW = 35.0f;
-    private const float JUMP_MOMENTUM_TOLERANCE_HIGH = 75.0f;
+    private const float JUMP_MOMENTUM_TOLERANCE_LOW = 90.0f;
+    private const float JUMP_MOMENTUM_TOLERANCE_HIGH = 160.0f;
 
     //How much speed we deduce when the pawn lands after the low tolerance.
     private const float LAND_LOW_DEDUCTION = 2;
@@ -92,6 +92,9 @@ public sealed class PawnMovement : MonoBehaviour
 
     //The angle of the pawn when it was last grounded.
     private float lastGroundedFrameAngle;
+
+    private Vector3 lastZForward;
+    private Vector3 lastXRight;
 
     private bool initialized = false;
     //                ^-----------This guy!!!1
@@ -141,15 +144,24 @@ public sealed class PawnMovement : MonoBehaviour
 
         if (pawn.IsGrounded)
         {
-            currentZSpeed = pawn.PawnInput.VerticalDirection * GetMaxZSpeed();
-            currentXSpeed = pawn.PawnInput.HorizontalDirection * GetMaxXSpeed();
+            currentZSpeed = pawn.PawnInput.VerticalDirection * GetZSpeed();
+            currentXSpeed = pawn.PawnInput.HorizontalDirection * GetXSpeed();
             //If we are sliding, remove velocity on Z at a constant rate.
-            if (pawn.IsSliding)
+            if (pawn.IsSliding) //SLide script controls the Z speed.
             {
-                currentZSpeed += (currentZSpeed < 0 ? pawn.Drag : -pawn.Drag);
                 currentXSpeed = 0;
             }
-            xzCalculatedVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
+            else
+            {
+                lastXRight = transform.right;
+                lastZForward = transform.forward;
+            }
+            xzCalculatedVelocity = (lastZForward * currentZSpeed) + (lastXRight * currentXSpeed);
+            
+        }
+        else //aka in the air.
+        {
+            //Nothing for now.
         }
 
         /*******************************************/
@@ -266,15 +278,21 @@ public sealed class PawnMovement : MonoBehaviour
     }
 
     //Determine the maximum speed on the Z axis.
-    private float GetMaxZSpeed()
+    private float GetZSpeed()
     {
+        if (pawn.OverrideZSpeed != -1)
+            return pawn.OverrideZSpeed;
+
         return pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : (MAX_WALK_SPEED_FORWARD + (pawn.SpeedCharges * SPEED_CHARGE_MAX_VELOCITY)) - landedSpeedDeduction;
     }
 
 
     //Determine the maximum speed on the X axis.  
-    private float GetMaxXSpeed()
+    private float GetXSpeed()
     {
+        if (pawn.OverrideXSpeed != -1)
+            return pawn.OverrideXSpeed;
+
         return pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : MAX_WALK_SPEED_SIDEWAYS;
     }
 
