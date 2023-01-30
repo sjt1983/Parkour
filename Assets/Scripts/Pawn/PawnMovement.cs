@@ -21,7 +21,7 @@ public sealed class PawnMovement : MonoBehaviour
     public float ForwardSpeed { get => currentZSpeed; }
 
     //How fast we are moving upward.
-    public float UpwardSpeed { get => xzCalculatedVelocity.y; }
+    public float UpwardSpeed { get => xzGroundVelocity.y; }
 
     //Quick check to see if there is significant movement
     public bool IsMoving { get => Mathf.Abs(currentXSpeed + currentZSpeed) > .1f; }
@@ -35,6 +35,8 @@ public sealed class PawnMovement : MonoBehaviour
     //How fast the character walks.
     private const float MAX_WALK_SPEED_FORWARD = 7f;
     private const float MAX_WALK_SPEED_SIDEWAYS = 4f;
+
+    private const float MAX_AIR_SPEED = 2f;
 
     //How fast the character walks when crouched.
     private const float MAX_CROUCH_WALK_SPEED = 2f;
@@ -68,8 +70,11 @@ public sealed class PawnMovement : MonoBehaviour
     [SerializeField]
     private float currentZSpeed = 0;
 
-    //Velocity to move the pawn.
-    private Vector3 xzCalculatedVelocity;
+    //Velocity to move the pawn based on being grounded.
+    private Vector3 xzGroundVelocity = Vector3.zero;
+
+    //Velocity to move the pawn based on being grounded.
+    private Vector3 xzAirVelocity = Vector3.zero;
 
     //We calculate y separately because we need to do funky stuff to xz if the character is in the air.
     private Vector3 yCalculatedVelocity;
@@ -153,12 +158,14 @@ public sealed class PawnMovement : MonoBehaviour
                 lastXRight = transform.right;
                 lastZForward = transform.forward;
             }
-            xzCalculatedVelocity = (lastZForward * currentZSpeed) + (lastXRight * currentXSpeed);
-            
+            xzGroundVelocity = (lastZForward * currentZSpeed) + (lastXRight * currentXSpeed);
+            xzAirVelocity = Vector3.zero;
         }
         else //aka in the air.
         {
-            //Nothing for now.
+            currentZSpeed = pawn.PawnInput.VerticalDirection * MAX_AIR_SPEED;
+            currentXSpeed = pawn.PawnInput.HorizontalDirection * MAX_AIR_SPEED;
+            xzAirVelocity = (transform.forward * currentZSpeed) + (transform.right * currentXSpeed);
         }
 
         /*******************************************/
@@ -212,7 +219,7 @@ public sealed class PawnMovement : MonoBehaviour
 
                 currentYSpeed = JUMP_FORCE;
                 pawn.AddVaultLock(.35f);
-                xzCalculatedVelocity = Vector3.Reflect(xzCalculatedVelocity, hit.normal);
+                xzGroundVelocity = Vector3.Reflect(xzGroundVelocity, hit.normal);
 
                 //If we did some crazy rotation to hit the wall, reflect the angle, normalize it, then add a Vector3 to "push off" the wall instead of a "Bounce".
                 //JK also testing adding an additional force and NOT normalizing the initial vector.
@@ -220,7 +227,7 @@ public sealed class PawnMovement : MonoBehaviour
                 {                    
                     Quaternion targetRotation = Quaternion.LookRotation(hit.normal, transform.up);
                     Vector3 wallForce = Utils.GenerateDirectionalForceVector(targetRotation, 3f);
-                    xzCalculatedVelocity = xzCalculatedVelocity + wallForce;
+                    xzGroundVelocity = xzGroundVelocity + wallForce;
                 }
 
             }
@@ -236,7 +243,7 @@ public sealed class PawnMovement : MonoBehaviour
         /******************************/
 
         //Finally, move the controller.
-        CollisionFlags flags = pawn.Move((xzCalculatedVelocity + yCalculatedVelocity) * Time.deltaTime);
+        CollisionFlags flags = pawn.Move((xzGroundVelocity + xzAirVelocity + yCalculatedVelocity) * Time.deltaTime);
 
         if ((flags & CollisionFlags.CollidedAbove) != 0)
         {
