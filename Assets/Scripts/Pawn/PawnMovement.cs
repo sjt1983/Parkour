@@ -108,9 +108,6 @@ public sealed class PawnMovement : MonoBehaviour
         if (!initialized)
             Initialize();
 
-        UIManager.Instance.DebugText2 = "2: " + pawn.IsSliding.ToString();
-        UIManager.Instance.DebugText1 = "1: " + pawn.IsCrouching.ToString();
-
         //This means some other script has taken control of the character, e.g. the script to vault the character.
         if (pawn.MovementLocked)
             return;
@@ -147,7 +144,7 @@ public sealed class PawnMovement : MonoBehaviour
             currentZSpeed = pawn.PawnInput.VerticalDirection * GetZSpeed();
             currentXSpeed = pawn.PawnInput.HorizontalDirection * GetXSpeed();
             //If we are sliding, remove velocity on Z at a constant rate.
-            if (pawn.IsSliding) //SLide script controls the Z speed.
+            if (pawn.IsSliding) //Slide script controls the Z speed.
             {
                 currentXSpeed = 0;
             }
@@ -201,11 +198,31 @@ public sealed class PawnMovement : MonoBehaviour
         //WALL JUMP
         else if (pawn.PawnInput.JumpedThisFrame && currentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
         {
+            //Basically, Raycast in front of the player and see if we hit a wall.
             if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f), transform.forward, out RaycastHit hit, 2f, LayerMask.GetMask("MapGeometry")))
             {
+                //We hit a wall, two scenarios.
+                //IF we are running at a decent angle towards the wall we will perfectly reflect the wall jump
+                //In a scenario where we run perpendicular to it, a reflect will not do much, so push the player away from the wall.
+
+                //Validate the current angle we jumped at.
+                //IMPROVEMENT - figure out which euler y the vector is traveling instead of locking in the angles at certain times.
+                //If we have a difference of less than 45 degrees between the current angle and the angle we jumped at, reflect all velocity perfectly.
+                var currentYAngle = transform.rotation.eulerAngles.y;
+
                 currentYSpeed = JUMP_FORCE;
-                xzCalculatedVelocity = Vector3.Reflect(xzCalculatedVelocity, hit.normal);
                 pawn.AddVaultLock(.35f);
+                xzCalculatedVelocity = Vector3.Reflect(xzCalculatedVelocity, hit.normal);
+
+                //If we did some crazy rotation to hit the wall, reflect the angle, normalize it, then add a Vector3 to "push off" the wall instead of a "Bounce".
+                //JK also testing adding an additional force and NOT normalizing the initial vector.
+                if (Utils.DifferenceInBetweenTwoAngles(currentYAngle, lastGroundedFrameAngle) >= 45)
+                {                    
+                    Quaternion targetRotation = Quaternion.LookRotation(hit.normal, transform.up);
+                    Vector3 wallForce = Utils.GenerateDirectionalForceVector(targetRotation, 3f);
+                    xzCalculatedVelocity = xzCalculatedVelocity + wallForce;
+                }
+
             }
         }
 
