@@ -22,4 +22,9 @@ public class Utils : MonoBehaviour
         dic = new Dictionary<string, string>();
         inc = 0;
     }
+
+    public static float DifferenceInBetweenTwoAngles (float angle1, float angle2)
+    {
+        return 180 - Mathf.Abs(Mathf.Abs(angle1 - angle2) - 180);
+    }
 }

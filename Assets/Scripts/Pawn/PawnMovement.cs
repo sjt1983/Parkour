@@ -264,8 +264,8 @@ public sealed class PawnMovement : MonoBehaviour
     //Make sure the pawn loses momentum if they land in a direction they were not facing when they jumped.
     private void Land()
     {
-        float landDifference = 180 - Mathf.Abs(Mathf.Abs(transform.rotation.eulerAngles.y - lastGroundedFrameAngle) - 180);
-
+        float landDifference = Utils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, lastGroundedFrameAngle);
+ 
         //2 levels, pawn gets to keep some momentum if they dont stray too far
         if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW && landDifference < JUMP_MOMENTUM_TOLERANCE_HIGH) 
         {
