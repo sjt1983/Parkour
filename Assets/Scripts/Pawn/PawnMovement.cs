@@ -267,6 +267,10 @@ public sealed class PawnMovement : MonoBehaviour
                     xzGroundVelocity = xzGroundVelocity + wallForce;
                 }
 
+                //Finally, Re-adjust the current Locked Vectors pointing towards the angle from the wall jump.
+                lastXRight = Quaternion.LookRotation(xzGroundVelocity) * Vector3.right;
+                lastZForward = Quaternion.LookRotation(xzGroundVelocity) * Vector3.forward;
+
             }
         }
 
