@@ -40,11 +40,6 @@ public sealed class Pawn : MonoBehaviour
     //The angle the camera is looking at.
     public float LookAngle { get; set; }
 
-    //How much Drag is on the player, as in the force to slow them down over time.
-    public float OverrideXSpeed { get; set; }
-
-    public float OverrideZSpeed { get; set; }
-
     //Quick check to see if the pawn is TRYING to move along x/z due to input.
     public bool IsTryingToMove { get => pawnMovement.IsTryingToMove(); }
 
@@ -115,8 +110,6 @@ public sealed class Pawn : MonoBehaviour
     //Do any class initializations here.
     private void Initialize()
     {
-        OverrideXSpeed = -1f;
-        OverrideZSpeed = -1f;
         SpeedCharges = 0;
         IsSliding = false;
         VaultLockTimer = 0f;

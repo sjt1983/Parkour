@@ -29,7 +29,7 @@ public sealed class PawnInput : MonoBehaviour
     public bool SecondaryUse { get; set; }
 
     //Crouching
-    public bool Crouching { get; set; }
+    public bool Crouching { get => actionController.PlayerControls.Crouch.IsPressed(); }
 
     //Jumping 
 
@@ -141,10 +141,5 @@ public sealed class PawnInput : MonoBehaviour
         if (actionController.PlayerControls.Reload.WasPressedThisFrame())
             Reloading = true;
 
-        //Handle Crouch
-        if (actionController.PlayerControls.Crouch.WasPressedThisFrame())
-            Crouching = true;
-        else if (actionController.PlayerControls.Crouch.WasReleasedThisFrame())
-            Crouching = false;
     }
 }
