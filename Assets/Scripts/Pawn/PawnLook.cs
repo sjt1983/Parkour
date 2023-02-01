@@ -126,17 +126,27 @@ public sealed class PawnLook : MonoBehaviour
     //Eventually used to help pickup objects.
     private void checkToWhatPlayerIsLookingAt()
     {
-       /* if (Physics.Raycast(pawnCamera.position, pawnCamera.forward, out var hit, 3, lookLayerMask))
-        {
-            GameObject gameObjectPlayerIsLookingAt = hit.collider.gameObject;
-            if (gameObjectPlayerIsLookingAt.layer == 6)
+        Item[] items = GameObject.FindObjectsOfType<Item>();
+        Item closestItem = null;
+        float closestDot = 3.1f;
+        float currentDot = 0f;
+        foreach (Item item in items) {
+            Debug.Log(item.name);
+            if (Vector3.Distance(item.gameObject.transform.position, transform.position) < 3)
             {
-                pawn.ItemPawnIsLookingAt = gameObjectPlayerIsLookingAt.GetComponent<InteractableItem>();
+                currentDot = Vector3.Dot(item.gameObject.transform.position, transform.position);
+                if (currentDot < closestDot)
+                {
+                    closestItem = item;
+                    closestDot = currentDot;
+                }
             }
         }
-        else
+        pawn.ItemPawnIsLookingAt = closestItem;
+
+        if (closestItem != null)
         {
-            pawn.ItemPawnIsLookingAt = null;
-        }*/
+            UIManager.Instance.DebugText1 = closestItem.name;
+        }
     }
 }

@@ -90,6 +90,9 @@ public sealed class Pawn : MonoBehaviour
     //Quick Reference for Upward Speed.
     public float UpwardSpeed { get => pawnMovement.UpwardSpeed; }
 
+    //Item the pawn is looking at
+    public Item ItemPawnIsLookingAt { get; set; }
+    
     /*********************/
     /*** Unity Methods ***/
     /*********************/
