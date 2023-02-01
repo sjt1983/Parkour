@@ -17,6 +17,9 @@ public sealed class Pawn : MonoBehaviour
     private PawnMovement pawnMovement;
 
     [SerializeField]
+    private PawnInventory pawnInventory;
+
+    [SerializeField]
     private CharacterController characterController;
 
     /***************************/
@@ -91,7 +94,7 @@ public sealed class Pawn : MonoBehaviour
     public float UpwardSpeed { get => pawnMovement.UpwardSpeed; }
 
     //Item the pawn is looking at
-    public Item ItemPawnIsLookingAt { get; set; }
+    public GroundItem ItemPawnIsLookingAt { get; set; }
     
     /*********************/
     /*** Unity Methods ***/
@@ -104,6 +107,8 @@ public sealed class Pawn : MonoBehaviour
 
         //Deduct the Vault Lock timer on the pawn.
         VaultLockTimer = Mathf.Clamp(VaultLockTimer - Time.deltaTime, 0, 555);
+
+        Interact();
     }
 
     /*********************/
@@ -141,6 +146,19 @@ public sealed class Pawn : MonoBehaviour
     public void AddVaultLock(float time)
     {
         VaultLockTimer = time < .25f ? ACTION_LOCK_MINIMUM_TIME : time;
+    }
+
+    public void PickupItem(Item item)
+    {
+        pawnInventory.ItemSlot1 = item;
+    }
+
+    private void Interact()
+    {
+        if (pawnInput.Interacting && ItemPawnIsLookingAt != null)
+        {
+            ItemPawnIsLookingAt.Interact(this);
+        }
     }
 
 }

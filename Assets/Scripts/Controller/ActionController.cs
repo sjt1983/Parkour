@@ -203,7 +203,7 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""180e6b5e-cc72-44fc-9515-02b9dd685b2a"",
-                    ""path"": ""<Keyboard>/f"",
+                    ""path"": ""<Mouse>/backButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

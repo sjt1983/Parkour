@@ -133,13 +133,13 @@ public sealed class PawnLook : MonoBehaviour
     //Used to see which item the player is looking at.
     private void checkToWhatPlayerIsLookingAt()
     {
-        Item[] items = GameObject.FindObjectsOfType<Item>();
-        Item closestItem = null;
+        GroundItem[] items = GameObject.FindObjectsOfType<GroundItem>();
+        GroundItem closestItem = null;
         float closestDot = 0f;
         float currentDot;
 
         //Loop thru each Item to see if its being looked at.
-        foreach (Item item in items) {
+        foreach (GroundItem item in items) {
 
             //Is it in range?
             if (Vector3.Distance(item.gameObject.transform.position, mainCamera.transform.position) <= ITEM_LOOK_DISTANCE_METERS)
@@ -154,19 +154,9 @@ public sealed class PawnLook : MonoBehaviour
                 {
                     closestItem = item;
                     closestDot = currentDot;
-                    UIManager.Instance.DebugText2 = closestDot.ToString() ;
                 }
             }
         }
-        pawn.ItemPawnIsLookingAt = closestItem;
-
-        if (closestItem != null)
-        {
-            UIManager.Instance.DebugText1 = closestItem.name;
-        }
-        else
-        {
-            UIManager.Instance.DebugText1 = "";
-        }
+        pawn.ItemPawnIsLookingAt = closestItem;        
     }
 }
