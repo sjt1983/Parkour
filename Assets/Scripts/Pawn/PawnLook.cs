@@ -43,6 +43,8 @@ public sealed class PawnLook : MonoBehaviour
     private float adjustedMouseX;
     private float adjustedMouseY;
 
+    //Mouse Sensitivity
+    public float MouseSensitivity = 15;
 
     /*** Crouching Properties ***/
 
@@ -58,8 +60,13 @@ public sealed class PawnLook : MonoBehaviour
     //How fast the charatcer should crouch, essentially, meters per second.
     private const float CROUCH_SPEED = 6f;
 
-    //Mouse Sensitivity
-    public float MouseSensitivity = 15;
+    /************** Looking At Item Properties ****************/
+
+    //How close someone needs to be to the item.
+    private const float ITEM_LOOK_DISTANCE_METERS = 3f;
+
+    //How well they need to be looking at the item, aka the dot product
+    private const float ITEM_LOOK_DOT_MAX = .95f;
 
     //You know what this flag do.
     private bool initialized = false;
@@ -123,22 +130,31 @@ public sealed class PawnLook : MonoBehaviour
         initialized = true;
     }
 
-    //Eventually used to help pickup objects.
+    //Used to see which item the player is looking at.
     private void checkToWhatPlayerIsLookingAt()
     {
         Item[] items = GameObject.FindObjectsOfType<Item>();
         Item closestItem = null;
-        float closestDot = 3.1f;
-        float currentDot = 0f;
+        float closestDot = 0f;
+        float currentDot;
+
+        //Loop thru each Item to see if its being looked at.
         foreach (Item item in items) {
-            Debug.Log(item.name);
-            if (Vector3.Distance(item.gameObject.transform.position, transform.position) < 3)
+
+            //Is it in range?
+            if (Vector3.Distance(item.gameObject.transform.position, mainCamera.transform.position) <= ITEM_LOOK_DISTANCE_METERS)
             {
-                currentDot = Vector3.Dot(item.gameObject.transform.position, transform.position);
-                if (currentDot < closestDot)
+                //Are we looking at it, and in the event of multiples meeting the above criteria, prefer the closest.
+                currentDot = Vector3.Dot(mainCamera.transform.forward, (item.gameObject.transform.position - mainCamera.position).normalized);
+                if (currentDot < ITEM_LOOK_DOT_MAX)
+                    continue;
+
+                //The higher the dot product, the closer we are to looking at it over others.
+                if (currentDot > closestDot)
                 {
                     closestItem = item;
                     closestDot = currentDot;
+                    UIManager.Instance.DebugText2 = closestDot.ToString() ;
                 }
             }
         }
@@ -147,6 +163,10 @@ public sealed class PawnLook : MonoBehaviour
         if (closestItem != null)
         {
             UIManager.Instance.DebugText1 = closestItem.name;
+        }
+        else
+        {
+            UIManager.Instance.DebugText1 = "";
         }
     }
 }
