@@ -91,6 +91,10 @@ public sealed class PawnMovement : MonoBehaviour
     //We calculate y separately because we need to do funky stuff to xz if the character is in the air.
     private Vector3 yVelocity;
 
+    //Gravity
+    [SerializeField]
+    private float Gravity = -30;
+
     //How many degrees difference from the jump angle the pawn can be to maintain momentum
     private const float JUMP_MOMENTUM_TOLERANCE_LOW = 90.0f;
     private const float JUMP_MOMENTUM_TOLERANCE_HIGH = 160.0f;
@@ -275,7 +279,7 @@ public sealed class PawnMovement : MonoBehaviour
         }
 
         //Apply Gravity
-        currentYSpeed += Physics.gravity.y * UNITY_GRAVITY_BOOST_MULTIPLIER * Time.deltaTime;
+        currentYSpeed += Gravity * Time.deltaTime; //Magic Number for now
 
         //Calculate the Y
         yVelocity = (transform.up * currentYSpeed);
