@@ -53,8 +53,9 @@ public sealed class PawnMovement : MonoBehaviour
     //Default Gravity if the character is grounded to ensure we stay grounded when going down slopes.
     private const int GRAVITY_DEFAULT = -5;
 
-    //A boost to how much gravity is applied to a character, using Unity's Physics.Gravity as a baseline.
-    private const float UNITY_GRAVITY_BOOST_MULTIPLIER = 3.5f;
+    //Gravity
+    [SerializeField]
+    private float Gravity = -30;
 
     //How many speed charges the character can have.
     private const int MAX_SPEED_CHARGES = 2;
@@ -90,10 +91,6 @@ public sealed class PawnMovement : MonoBehaviour
 
     //We calculate y separately because we need to do funky stuff to xz if the character is in the air.
     private Vector3 yVelocity;
-
-    //Gravity
-    [SerializeField]
-    private float Gravity = -30;
 
     //How many degrees difference from the jump angle the pawn can be to maintain momentum
     private const float JUMP_MOMENTUM_TOLERANCE_LOW = 90.0f;
