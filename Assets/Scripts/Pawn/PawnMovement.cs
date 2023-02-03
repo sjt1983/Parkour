@@ -111,8 +111,12 @@ public sealed class PawnMovement : MonoBehaviour
     //The angle of the pawn when it was last grounded.
     private float lastGroundedFrameAngle;
 
+    //Last forward/right vectors from when we were last in a state in which they should be recalculated.
     private Vector3 lastZForward;
     private Vector3 lastXRight;
+
+    //Collision flags from the last time we moved.
+    private CollisionFlags lastFrameCollisionFlags;
 
     private bool initialized = false;
     //                ^-----------This guy!!!1
@@ -130,6 +134,30 @@ public sealed class PawnMovement : MonoBehaviour
         if (pawn.MovementLocked)
             return;
 
+        Slide();
+        Land();
+        MoveXZ();
+        MoveY();
+
+        /******************************/
+        /*** Finally, Move the pawn ***/
+        /******************************/
+
+        //Finally, move the controller.
+        lastFrameCollisionFlags = pawn.Move((xzGroundVelocity + xzAirVelocity + yVelocity) * Time.deltaTime);
+
+        if ((lastFrameCollisionFlags & CollisionFlags.CollidedAbove) != 0)
+        {
+            currentYSpeed = GRAVITY_DEFAULT;
+        }
+    }
+
+    /*********************/
+    /*** Class Methods ***/
+    /*********************/
+
+    private void Slide()
+    {
         /************************/
         /********Sliding*********/
         /************************/
@@ -140,15 +168,18 @@ public sealed class PawnMovement : MonoBehaviour
             pawn.IsSliding = true;
 
             //If we are on an angle and sliding downhill, allow infinite sliding, otherwise add to the drag.
-            if (GetPawnSlopeAngle() < SLIDE_DRAG_ANGLE && IsSlidingDownhill()) { }
-            //pawn.Drag = 0;
-            else
+            if (transform.position.y >= slidingLastFrameYCheck && GetPawnSlopeAngle() >= SLIDE_DRAG_ANGLE)
                 currentZSpeed -= SLIDING_DRAG * Time.deltaTime;
         }
         else //If we aren't sliding, don't slide, LOL! GENIUS!
             pawn.IsSliding = false;
 
         slidingLastFrameYCheck = transform.position.y;
+    }
+
+    //Make sure the pawn loses momentum if they land in a direction they were not facing when they jumped.
+    private void Land()
+    {
 
         /************************/
         /********Landing*********/
@@ -156,21 +187,31 @@ public sealed class PawnMovement : MonoBehaviour
 
         //Check to see if we should land, if we are grounded this frame but were not the last.
         if (pawn.IsGrounded)
-        {   
+        {
             if (!wasGroundedLastFrame && !pawn.IsSliding)
-                Land();
+            {
+
+                float landDifference = Utils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, lastGroundedFrameAngle);
+
+                //2 levels, pawn gets to keep some momentum if they dont stray too far
+                if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW && landDifference < JUMP_MOMENTUM_TOLERANCE_HIGH)
+                    landedSpeedDeduction = LAND_LOW_DEDUCTION;
+                else if (landDifference >= JUMP_MOMENTUM_TOLERANCE_HIGH)
+                    landedSpeedDeduction = LAND_HIGH_DEDUCTION;
+            }
+
             wasGroundedLastFrame = true;
             lastGroundedFrameAngle = transform.rotation.eulerAngles.y;
         }
         else
             wasGroundedLastFrame = false;
+
         //Recover from landing if needed
         landedSpeedDeduction = Mathf.Clamp(landedSpeedDeduction - (LAND_DEDUCTION_RECOVERY_RATE * Time.deltaTime), 0f, 100);
+    }
 
-        /******************************************/
-        /********** Speed Charge Falloff **********/
-        /******************************************/
-
+    private void MoveXZ()
+    {
         //If the pawns speed goes below the default max speed we remove all speed charges
         if (currentZSpeed < MAX_WALK_SPEED_FORWARD)
         {
@@ -199,43 +240,30 @@ public sealed class PawnMovement : MonoBehaviour
             xzAirVelocity = Vector3.zero;
         }
         else //aka in the air.
-        {            
+        {
             xzAirVelocity = (transform.forward * pawn.PawnInput.VerticalDirection * MAX_AIR_SPEED) + (transform.right * pawn.PawnInput.HorizontalDirection * MAX_AIR_SPEED);
         }
+    }
 
+    private void MoveY()
+    {
         /*******************************************/
         /*** Calculate the Y (Jump/Fall) changes ***/
         /*******************************************/
 
         //If the controller is on the ground already, cancel gravity
         if (pawn.IsGrounded)
-        {           
+        {
             //Jump if the user pressed jump this frame, since holding jump will have significance
             if (pawn.PawnInput.JumpedThisFrame)
             {
-                //If the jump boost sensor isnt colliding, we are near an egde, so lets boost the character!
-                if (jumpBoostSensor.CollidedObjects == 0)
-                {
-                    //If we are moving forward or stopped, you get a speed charge and momentum boost
-                    if (pawn.SpeedCharges < MAX_SPEED_CHARGES && currentZSpeed >= 0f)
-                    {
-                        pawn.AddSpeedCharge();
-                        currentZSpeed += SPEED_CHARGE_MAX_VELOCITY;
-                    }
-                    //Jump with the boost multiplier.
-                    currentYSpeed = JUMP_FORCE + JUMP_BOOST_MULTIPLIER;
-                }
-                //Or just jump this frame.
-                else
-                {
-                    currentYSpeed = JUMP_FORCE;
-                }
+                Jump();
             }
             else
             {
                 currentYSpeed = GRAVITY_DEFAULT; //Always ensure we are trying to push the character down due to slopes. 
             }
-            
+
         }
         /****************************/
         /*********Wall Jump**********/
@@ -243,36 +271,7 @@ public sealed class PawnMovement : MonoBehaviour
 
         else if (pawn.PawnInput.JumpedThisFrame && currentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
         {
-            //Basically, Raycast in front of the player and see if we hit a wall.
-            if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f), transform.forward, out RaycastHit hit, 2f, LayerMask.GetMask("MapGeometry")))
-            {
-                //We hit a wall, two scenarios.
-                //IF we are running at a decent angle towards the wall we will perfectly reflect the wall jump
-                //In a scenario where we run perpendicular to it, a reflect will not do much, so push the player away from the wall.
-
-                //Validate the current angle we jumped at.
-                //IMPROVEMENT - figure out which euler y the vector is traveling instead of locking in the angles at certain times.
-                //If we have a difference of less than 45 degrees between the current angle and the angle we jumped at, reflect all velocity perfectly.
-                var currentYAngle = transform.rotation.eulerAngles.y;
-
-                currentYSpeed = JUMP_FORCE;
-                pawn.AddVaultLock(.35f);
-                xzGroundVelocity = Vector3.Reflect(xzGroundVelocity, hit.normal);
-
-                //If we did some crazy rotation to hit the wall, reflect the angle, normalize it, then add a Vector3 to "push off" the wall instead of a "Bounce".
-                //JK also testing adding an additional force and NOT normalizing the initial vector.
-                if (Utils.DifferenceInBetweenTwoAngles(currentYAngle, lastGroundedFrameAngle) >= 45)
-                {                    
-                    Quaternion targetRotation = Quaternion.LookRotation(hit.normal, transform.up);
-                    Vector3 wallForce = Utils.GenerateDirectionalForceVector(targetRotation, 3f);
-                    xzGroundVelocity = xzGroundVelocity + wallForce;
-                }
-
-                //Finally, Re-adjust the current Locked Vectors pointing towards the angle from the wall jump.
-                lastXRight = Quaternion.LookRotation(xzGroundVelocity) * Vector3.right;
-                lastZForward = Quaternion.LookRotation(xzGroundVelocity) * Vector3.forward;
-
-            }
+            WallJump();
         }
 
         //Apply Gravity
@@ -280,24 +279,64 @@ public sealed class PawnMovement : MonoBehaviour
 
         //Calculate the Y
         yVelocity = (transform.up * currentYSpeed);
+    }
 
-        /******************************/
-        /*** Finally, Move the pawn ***/
-        /******************************/
-
-        //Finally, move the controller.
-        CollisionFlags flags = pawn.Move((xzGroundVelocity + xzAirVelocity + yVelocity) * Time.deltaTime);
-
-        if ((flags & CollisionFlags.CollidedAbove) != 0)
+    private void Jump()
+    {
+        //If the jump boost sensor isnt colliding, we are near an egde, so lets boost the character!
+        if (jumpBoostSensor.CollidedObjects == 0)
         {
-            currentYSpeed = GRAVITY_DEFAULT;
+            //If we are moving forward or stopped, you get a speed charge and momentum boost
+            if (pawn.SpeedCharges < MAX_SPEED_CHARGES && currentZSpeed >= 0f)
+            {
+                pawn.AddSpeedCharge();
+                currentZSpeed += SPEED_CHARGE_MAX_VELOCITY;
+            }
+            //Jump with the boost multiplier.
+            currentYSpeed = JUMP_FORCE + JUMP_BOOST_MULTIPLIER;
+        }
+        //Or just jump this frame.
+        else
+        {
+            currentYSpeed = JUMP_FORCE;
         }
     }
 
-    /*********************/
-    /*** Class Methods ***/
-    /*********************/
-    
+    private void WallJump()
+    {
+        //Basically, Raycast in front of the player and see if we hit a wall.
+        if (Physics.Raycast(jumpBoostSensor.transform.position + (transform.forward * -1f), transform.forward, out RaycastHit hit, 2f, LayerMask.GetMask("MapGeometry")))
+        {
+            //We hit a wall, two scenarios.
+            //IF we are running at a decent angle towards the wall we will perfectly reflect the wall jump
+            //In a scenario where we run perpendicular to it, a reflect will not do much, so push the player away from the wall.
+
+            //Validate the current angle we jumped at.
+            //IMPROVEMENT - figure out which euler y the vector is traveling instead of locking in the angles at certain times.
+            //If we have a difference of less than 45 degrees between the current angle and the angle we jumped at, reflect all velocity perfectly.
+            var currentYAngle = transform.rotation.eulerAngles.y;
+
+            currentYSpeed = JUMP_FORCE;
+            pawn.AddVaultLock(.35f);
+            xzGroundVelocity = Vector3.Reflect(xzGroundVelocity, hit.normal);
+
+            //If we did some crazy rotation to hit the wall, reflect the angle, normalize it, then add a Vector3 to "push off" the wall instead of a "Bounce".
+            //JK also testing adding an additional force and NOT normalizing the initial vector.
+            if (Utils.DifferenceInBetweenTwoAngles(currentYAngle, lastGroundedFrameAngle) >= 45)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(hit.normal, transform.up);
+                Vector3 wallForce = Utils.GenerateDirectionalForceVector(targetRotation, 3f);
+                xzGroundVelocity = xzGroundVelocity + wallForce;
+            }
+
+            //Finally, Re-adjust the current Locked Vectors pointing towards the angle from the wall jump.
+            lastXRight = Quaternion.LookRotation(xzGroundVelocity) * Vector3.right;
+            lastZForward = Quaternion.LookRotation(xzGroundVelocity) * Vector3.forward;
+
+        }
+    }
+
+
     //Stop all movement on the pawns directions;
     public void HaltMovement(bool haltX, bool haltY, bool haltZ)
     {
@@ -327,19 +366,7 @@ public sealed class PawnMovement : MonoBehaviour
         lastGroundedFrameAngle = transform.rotation.eulerAngles.y;
         initialized = true;
     }
-
-    //Make sure the pawn loses momentum if they land in a direction they were not facing when they jumped.
-    private void Land()
-    {
-        float landDifference = Utils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, lastGroundedFrameAngle);
- 
-        //2 levels, pawn gets to keep some momentum if they dont stray too far
-        if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW && landDifference < JUMP_MOMENTUM_TOLERANCE_HIGH) 
-            landedSpeedDeduction = LAND_LOW_DEDUCTION;
-        else if (landDifference >= JUMP_MOMENTUM_TOLERANCE_HIGH)
-            landedSpeedDeduction = LAND_HIGH_DEDUCTION;
-     }
-
+    
     //Determine the maximum speed on the Z axis.
     private float GetRunningZSpeed()
     {
@@ -350,12 +377,6 @@ public sealed class PawnMovement : MonoBehaviour
     private float GetRunningXSpeed()
     {
         return pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : MAX_WALK_SPEED_SIDEWAYS;
-    }
-
-    //Determines if we are sliding downhill by checking the current Y position with last frames.
-    private bool IsSlidingDownhill()
-    {
-        return transform.position.y < slidingLastFrameYCheck;
     }
 
     //Try to raycast down and see if we are hitting a sloped surface, if we are not, just return 1 and assume we are not.
