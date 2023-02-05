@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9066725415656921644}
-  - component: {fileID: 7524094167560907496}
+  - component: {fileID: 8548749899960769357}
   m_Layer: 0
-  m_Name: Item
+  m_Name: PogoStick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,7 +33,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7524094167560907496
+--- !u!114 &8548749899960769357
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,9 +42,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6801862393261091516}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e08335dec705ad748ac43890fcc7871d, type: 3}
+  m_Script: {fileID: 11500000, guid: 1537f53aefc81364f9008e23a6d79b0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainMeshRenderer: {fileID: 264297890388914863}
+  ItemName: PogoStick
 --- !u!1 &7985632795969349784
 GameObject:
   m_ObjectHideFlags: 0

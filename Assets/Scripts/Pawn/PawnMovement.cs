@@ -55,7 +55,7 @@ public sealed class PawnMovement : MonoBehaviour
 
     //Gravity
     [SerializeField]
-    private float Gravity = -30;
+    public float Gravity = -30;
 
     //How many speed charges the character can have.
     private const int MAX_SPEED_CHARGES = 2;

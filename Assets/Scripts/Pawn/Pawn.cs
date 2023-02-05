@@ -49,16 +49,6 @@ public sealed class Pawn : MonoBehaviour
     //How many Speed Charges the pawn has, which increases max velocity
     public int SpeedCharges { get; private set; }
 
-    public void AddSpeedCharge()
-    {
-        SpeedCharges += 1;
-    }
-
-    public void RemoveAllSpeedCharges()
-    {
-        SpeedCharges = 0;
-    }
-
     /*****************************/
     /*** Additional Properties ***/
     /*****************************/
@@ -94,7 +84,7 @@ public sealed class Pawn : MonoBehaviour
     public float UpwardSpeed { get => pawnMovement.UpwardSpeed; }
 
     //Item the pawn is looking at
-    public GroundItem ItemPawnIsLookingAt { get; set; }
+    public EquippableItem ItemPawnIsLookingAt { get; set; }
     
     /*********************/
     /*** Unity Methods ***/
@@ -124,6 +114,16 @@ public sealed class Pawn : MonoBehaviour
         initialized = true;
     }
 
+    public void AddSpeedCharge()
+    {
+        SpeedCharges += 1;
+    }
+
+    public void RemoveAllSpeedCharges()
+    {
+        SpeedCharges = 0;
+    }
+
     //Stop all movement on the character;
     public void HaltMovement(bool haltX, bool haltY, bool haltZ)
     {
@@ -148,11 +148,14 @@ public sealed class Pawn : MonoBehaviour
         VaultLockTimer = time < .25f ? ACTION_LOCK_MINIMUM_TIME : time;
     }
 
-    public void PickupItem(Item item)
+    //Have the pawn pickup the item and put it in their inventory.
+    public void PickupItem(EquippableItem item)
     {
-        pawnInventory.ItemSlot1 = item;
+        item.AssignToPawn(this);
+        pawnInventory.PickupItem(item);
     }
 
+    //Have the pawn interact with the item if they are looking at one AND interacrtoing.
     private void Interact()
     {
         if (pawnInput.Interacting && ItemPawnIsLookingAt != null)

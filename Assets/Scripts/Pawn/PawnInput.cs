@@ -15,7 +15,6 @@ public sealed class PawnInput : MonoBehaviour
     //2D Movement Directions
     public float HorizontalDirection { get; set; }
     public float VerticalDirection { get; set; }
-
     
     /*** Actions ***/
 
@@ -28,15 +27,20 @@ public sealed class PawnInput : MonoBehaviour
     //Player is using their selected item with alternate action, e.g. ADS/Zoom
     public bool SecondaryUse { get; set; }
 
+    //Equipment Slots / Unequip button.
+    public bool EquipSlot1PressedThisFrame { get => actionController.PlayerControls.EquipSlot1.WasPressedThisFrame(); }
+    public bool EquipSlot2PressedThisFrame { get => actionController.PlayerControls.EquipSlot2.WasPressedThisFrame(); }
+    public bool EquipSlot3PressedThisFrame { get => actionController.PlayerControls.EquipSlot3.WasPressedThisFrame(); }
+    public bool EquipSlot4PressedThisFrame { get => actionController.PlayerControls.EquipSlot4.WasPressedThisFrame(); }
+    public bool UnequipPressedThisFrame { get => actionController.PlayerControls.Unequip.WasPressedThisFrame(); }
+
     //Crouching
     public bool Crouching { get => actionController.PlayerControls.Crouch.IsPressed(); }
-
-    //Jumping 
 
     //Player hit the jump button.
     public bool JumpedThisFrame { get => actionController.PlayerControls.Jump.WasPressedThisFrame(); }
 
-    //Simple notification for scripts to know if the jump button is pressed.
+    //Player is holding the jump button.
     public bool JumpIsPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
 
     //Player attempted to reload a weapon.
@@ -94,6 +98,12 @@ public sealed class PawnInput : MonoBehaviour
         actionController.PlayerControls.Reload.Enable();
         actionController.PlayerControls.Jump.Enable();
         actionController.PlayerControls.Crouch.Enable();
+
+        actionController.PlayerControls.EquipSlot1.Enable();
+        actionController.PlayerControls.EquipSlot2.Enable();
+        actionController.PlayerControls.EquipSlot3.Enable();
+        actionController.PlayerControls.EquipSlot4.Enable();
+        actionController.PlayerControls.Unequip.Enable();
 
         actionController.PlayerControls.Menu.Enable();
         actionController.PlayerControls.Menu.performed += ctx =>
