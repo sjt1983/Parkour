@@ -144,7 +144,7 @@ public sealed class PawnLook : MonoBehaviour
 
             //If this item is owned by a pawn, we cannot be looking at it.
             if (item.IsAssignedToPawn)
-                return;
+                continue;
 
             //Is it in range?
             if (Vector3.Distance(item.gameObject.transform.position, mainCamera.transform.position) <= ITEM_LOOK_DISTANCE_METERS)
