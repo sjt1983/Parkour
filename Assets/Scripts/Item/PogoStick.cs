@@ -56,7 +56,12 @@ public class PogoStick : EquippableItem
 
         jumpForce += pawn.PawnMovement.Gravity * Time.deltaTime;
 
-        characterController.Move((xzAirVelocity + (pawn.transform.up * jumpForce)) * Time.deltaTime);
+        CollisionFlags lastFrameCollisionFlags = characterController.Move((xzAirVelocity + (pawn.transform.up * jumpForce)) * Time.deltaTime);
+
+        if ((lastFrameCollisionFlags & CollisionFlags.CollidedAbove) != 0)
+        {
+            jumpForce = -5;
+        }
     }
 
     private void WallJump()

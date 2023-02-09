@@ -108,7 +108,7 @@ public class PawnVault : MonoBehaviour
     //Flag to indicate we should zob
     private bool zobFlag;
     //How far away from the default Z we should go.
-    private float ZOB_DISTANCE = .45f;
+    private const float ZOB_DISTANCE = .45f;
 
     /*********************/
     /*** Unity Methods ***/
