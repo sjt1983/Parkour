@@ -40,6 +40,9 @@ public sealed class Pawn : MonoBehaviour
     //Flag to indicate that a certain script has control over the pawn and that nothing else should touch it.
     public bool MovementLocked { get; set; }
 
+    //Indicated the effects of items should be ignored.
+    public bool ItemLocked { get; set; }
+
     //The angle the camera is looking at.
     public float LookAngle { get; set; }
 
@@ -83,6 +86,10 @@ public sealed class Pawn : MonoBehaviour
     //Quick Reference for Upward Speed.
     public float UpwardSpeed { get => pawnMovement.UpwardSpeed; }
 
+    public Vector3 ForwardVector { get; set; }
+
+    public Vector3 RightVector { get; set; }
+
     //Item the pawn is looking at
     public EquippableItem ItemPawnIsLookingAt { get; set; }
     
@@ -111,7 +118,12 @@ public sealed class Pawn : MonoBehaviour
         SpeedCharges = 0;
         IsSliding = false;
         VaultLockTimer = 0f;
+        ItemLocked = false;
+        ForwardVector = Vector3.zero;
+        RightVector = Vector3.zero;
+
         initialized = true;
+
     }
 
     public void AddSpeedCharge()

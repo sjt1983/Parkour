@@ -10,6 +10,9 @@ public class PawnVault : MonoBehaviour
     private Pawn pawn;
 
     [SerializeField]
+    private PawnInventory pawnInventory;
+
+    [SerializeField]
     private VaultSensor vaultHighSensor;
 
     [SerializeField]
@@ -157,7 +160,11 @@ public class PawnVault : MonoBehaviour
                 //Zero out the veocity
                 movementVelocity = Vector3.zero;
 
+                //Set the IK Points.
                 pawnArmsAnimator.SetActiveIk(hitInfo.point + (-transform.right * .4f) + (transform.up * .2f), Quaternion.identity, hitInfo.point + (transform.right * .4f) + (transform.up * .2f), Quaternion.identity);
+
+                //Lock the item.
+                pawn.ItemLocked = true;
 
             }
         }
@@ -203,7 +210,6 @@ public class PawnVault : MonoBehaviour
             {
                 transform.position = new Vector3(transform.position.x, vaultPoint.y, transform.position.z);
                 vaultState = VaultState.FORWARD;
-
             }
         }
         else if (vaultState == VaultState.FORWARD)
@@ -221,6 +227,7 @@ public class PawnVault : MonoBehaviour
                 vaultState = VaultState.COOLDOWN;
                 cooldownTimer = 0f;
                 pawn.HaltMovement(false, true, false);
+                pawn.ItemLocked = false;
                 pawn.MovementLocked = false;
             }
         }

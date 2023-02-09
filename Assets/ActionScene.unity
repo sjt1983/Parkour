@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 2737.5586, g: 2735.8203, b: 3823.4375, a: 1}
+  m_IndirectSpecularColor: {r: 2737.9492, g: 2761.9023, b: 3933.1797, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -7657,7 +7657,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1041797160}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &832993080
 PrefabInstance:
@@ -7734,6 +7734,11 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: b1b5952096d121843ab598ce9f393b4b,
         type: 3}
       propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6258713952542026108, guid: b1b5952096d121843ab598ce9f393b4b,
+        type: 3}
+      propertyPath: m_CastShadows
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6258713952542026108, guid: b1b5952096d121843ab598ce9f393b4b,
@@ -9234,37 +9239,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af84258437d99aa4e934e885ce14e1b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1022805569
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1022805570}
-  m_Layer: 0
-  m_Name: Arms
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1022805570
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1022805569}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1041797160}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1041797159
 GameObject:
   m_ObjectHideFlags: 0
@@ -9303,7 +9277,6 @@ Transform:
   m_Children:
   - {fileID: 1267646542}
   - {fileID: 1682031801}
-  - {fileID: 1022805570}
   - {fileID: 804842805}
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -9406,6 +9379,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 1041797165}
+  pawnInventory: {fileID: 1041797169}
   vaultHighSensor: {fileID: 1022092206}
   vaultLowSensor: {fileID: 1924691758}
   mainCamera: {fileID: 1823688467}

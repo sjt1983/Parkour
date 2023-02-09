@@ -111,10 +111,6 @@ public sealed class PawnMovement : MonoBehaviour
     //The angle of the pawn when it was last grounded.
     private float lastGroundedFrameAngle;
 
-    //Last forward/right vectors from when we were last in a state in which they should be recalculated.
-    private Vector3 lastZForward;
-    private Vector3 lastXRight;
-
     //Collision flags from the last time we moved.
     private CollisionFlags lastFrameCollisionFlags;
 
@@ -231,12 +227,12 @@ public sealed class PawnMovement : MonoBehaviour
             }
             else
             {
-                lastXRight = transform.right;
-                lastZForward = transform.forward;
+                pawn.RightVector = transform.right;
+                pawn.ForwardVector = transform.forward;
                 currentZSpeed = pawn.PawnInput.VerticalDirection * GetRunningZSpeed();
                 currentXSpeed = pawn.PawnInput.HorizontalDirection * GetRunningXSpeed();
             }
-            xzGroundVelocity = (lastZForward * currentZSpeed) + (lastXRight * currentXSpeed);
+            xzGroundVelocity = (pawn.ForwardVector * currentZSpeed) + (pawn.RightVector * currentXSpeed);
             xzAirVelocity = Vector3.zero;
         }
         else //aka in the air.
@@ -330,8 +326,8 @@ public sealed class PawnMovement : MonoBehaviour
             }
 
             //Finally, Re-adjust the current Locked Vectors pointing towards the angle from the wall jump.
-            lastXRight = Quaternion.LookRotation(xzGroundVelocity) * Vector3.right;
-            lastZForward = Quaternion.LookRotation(xzGroundVelocity) * Vector3.forward;
+            pawn.RightVector = Quaternion.LookRotation(xzGroundVelocity) * Vector3.right;
+            pawn.ForwardVector = Quaternion.LookRotation(xzGroundVelocity) * Vector3.forward;
 
         }
     }

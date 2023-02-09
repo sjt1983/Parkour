@@ -84,6 +84,11 @@ public class PawnInventory : MonoBehaviour
         activeSlot = -1;
     }
 
+    public EquippableItem GetEquippableItem()
+    {
+        return activeSlot == -1 ? null : ItemSlots[activeSlot];
+    }
+
     //Drop an item.
     //NOT really implemented yet.
     public void DropItem(EquippableItem equippableItem)

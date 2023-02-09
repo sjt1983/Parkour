@@ -22,9 +22,12 @@ public abstract class EquippableItem: Interactable
     //SUPER IMPORTANT PROPERTY - scripts needs to determine if the item is equipped to know whether or not to execute.
     public bool Equipped { get; set; }
 
+    public bool ItemEnabled { get; set; }
+
     public void Awake()
     {
         Equipped = false;
+        ItemEnabled = false;
     }
 
     //Assign to the selected pawn.
