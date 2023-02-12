@@ -80,6 +80,9 @@ public sealed class Pawn : MonoBehaviour
     //Quick reference for if the pawn is sliding. Set by the PawnCrouch script.
     public bool IsFalling { get => pawnMovement.UpwardSpeed < 0f; }
 
+    //Quick reference for if the pawn is landing penalized
+    public bool IsLandingPenalized { get; set; }
+
     //Quick Reference for Forward Speed
     public float CurrentZSpeed { get => pawnMovement.ForwardSpeed; }
 
@@ -118,6 +121,7 @@ public sealed class Pawn : MonoBehaviour
         SpeedCharges = 0;
         IsSliding = false;
         VaultLockTimer = 0f;
+        IsLandingPenalized = false;
         ItemLocked = false;
         ForwardVector = Vector3.zero;
         RightVector = Vector3.zero;

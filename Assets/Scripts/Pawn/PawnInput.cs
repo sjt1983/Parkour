@@ -13,8 +13,8 @@ public sealed class PawnInput : MonoBehaviour
     /************************/
 
     //2D Movement Directions
-    public float HorizontalDirection { get; set; }
-    public float VerticalDirection { get; set; }
+    public float XDirection { get; set; }
+    public float ZDirection { get; set; }
     
     /*** Actions ***/
 
@@ -126,8 +126,8 @@ public sealed class PawnInput : MonoBehaviour
         //Standard 2d movement reads with SmoothDamp
         inputMovementDirection = movementInput.ReadValue<Vector2>();
         finalMovementDirection = Vector2.SmoothDamp(finalMovementDirection, inputMovementDirection, ref smoothMovementDirection, .2f);
-        HorizontalDirection = finalMovementDirection.x;
-        VerticalDirection = finalMovementDirection.y;
+        XDirection = finalMovementDirection.x;
+        ZDirection = finalMovementDirection.y;
 
         //Handle Interaction
         if (actionController.PlayerControls.Interact.WasPressedThisFrame())
