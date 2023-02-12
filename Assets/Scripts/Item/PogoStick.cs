@@ -12,15 +12,20 @@ public class PogoStick : EquippableItem
     //Local ref to the pawn input so we can do our own Input Detection.
     private PawnInput pawnInput;
 
+    private PawnMovement pawnMovement;
+
     //How Fast we move along X/Z when in the air.
     private Vector3 xzAirVelocity;
 
     //In-Air movement speeds.
-    private const float AIR_MOVEMENT_Z_SPEED = 8f;
+    private const float AIR_MOVEMENT_Z_SPEED = 12f;
     private const float AIR_MOVEMENT_X_SPEED = 2f;
 
     //How much force we are jumping with at the end of the frame.
-    private float jumpForce = 0f;
+    private float currentXSpeed = 0f;
+    private float currentYSpeed = 0f;
+    private float currentZSpeed = 0f;
+
 
     //Number of "Jump Charges", to simulate getting higher with each bounce.
     private int jumpCharges = 0;
@@ -32,7 +37,7 @@ public class PogoStick : EquippableItem
     private const float JUMP_CHARGES_FORCE_PER_CHARGE = 4;
 
     //How much jump force before the bonus charges are applied.
-    private const int STARTING_JUMP_FORCE = 3;
+    private const int STARTING_JUMP_FORCE = 6;
 
     //How much force generated from a wall jump.
     private const float WALL_JUMP_FORCE = 10f;
@@ -48,6 +53,7 @@ public class PogoStick : EquippableItem
 
         //Grab local refs to needed Components.
         characterController = pawn.gameObject.GetComponent<CharacterController>();
+        pawnMovement = pawn.gameObject.GetComponent<PawnMovement>();
         pawnInput = pawn.gameObject.GetComponent<PawnInput>();        
         jumpBoostSensor = pawn.transform.Find("Sensors/JumpBoostSensor").gameObject;
 
@@ -114,28 +120,40 @@ public class PogoStick : EquippableItem
             pawn.ForwardVector = pawn.transform.forward;
             //Also set the last grounded frame angle
             lastGroundedFrameAngle = pawn.transform.rotation.eulerAngles.y;
-
+            pawnMovement.LastGroundedFrameAngle = lastGroundedFrameAngle;
             //JUMP!!!!!!!
-            jumpForce = STARTING_JUMP_FORCE + (JUMP_CHARGES_FORCE_PER_CHARGE * jumpCharges);            
+            currentYSpeed = STARTING_JUMP_FORCE + (JUMP_CHARGES_FORCE_PER_CHARGE * jumpCharges);
+            pawnMovement.WasGroundedLastFrame = true;
         }
         else //aka in the air.
         {
-            //In-Air movement
-            xzAirVelocity = (pawn.ForwardVector * pawn.PawnInput.VerticalDirection * AIR_MOVEMENT_Z_SPEED) + (pawn.RightVector * pawn.PawnInput.HorizontalDirection * AIR_MOVEMENT_X_SPEED);
+            currentZSpeed = pawn.PawnInput.VerticalDirection * AIR_MOVEMENT_Z_SPEED;
+            currentXSpeed = pawn.PawnInput.HorizontalDirection * AIR_MOVEMENT_X_SPEED;
 
+            //In-Air movement
+            xzAirVelocity = (pawn.ForwardVector * currentZSpeed) + (pawn.RightVector * currentXSpeed);
+
+            pawnMovement.CurrentZSpeed = currentZSpeed;
+            pawnMovement.CurrentXSpeed = currentXSpeed;
+            pawnMovement.XZAirVelocity = Vector3.zero;
+            pawnMovement.XZGroundVelocity = xzAirVelocity;
+            
             //If the pawn tried to jump this frame, it has to be a wall jump.
             if (pawnInput.JumpedThisFrame)
                WallJump();
+
+            pawnMovement.WasGroundedLastFrame = false;
         }
 
         //Apply gravity.
-        jumpForce += pawn.PawnMovement.Gravity * Time.deltaTime;
+        currentYSpeed += pawn.PawnMovement.Gravity * Time.deltaTime;
 
         //Move the pawn, if we hit our heads, we fall next frame.
-        CollisionFlags lastFrameCollisionFlags = characterController.Move((xzAirVelocity + (pawn.transform.up * jumpForce)) * Time.deltaTime);
+        CollisionFlags lastFrameCollisionFlags = characterController.Move((xzAirVelocity + (pawn.transform.up * currentYSpeed)) * Time.deltaTime);
+
         if ((lastFrameCollisionFlags & CollisionFlags.CollidedAbove) != 0)
         {
-            jumpForce = -5;
+            currentYSpeed = -5;
         }
     }
 
@@ -152,7 +170,7 @@ public class PogoStick : EquippableItem
             //IMPROVEMENT - figure out which euler y the vector is traveling instead of locking in the angles at certain times.
             //If we have a difference of less than 45 degrees between the current angle and the angle we jumped at, reflect all velocity perfectly.
             var currentYAngle = pawn.transform.rotation.eulerAngles.y;
-            jumpForce = WALL_JUMP_FORCE;
+            currentYSpeed = WALL_JUMP_FORCE;
             xzAirVelocity = Vector3.Reflect(xzAirVelocity, hit.normal);
 
             //If we did some crazy rotation to hit the wall, reflect the angle, normalize it, then add a Vector3 to "push off" the wall instead of a "Bounce".
@@ -177,6 +195,8 @@ public class PogoStick : EquippableItem
         ItemEnabled = false;
         jumpCharges = 0;
         if (IsAssignedToPawn)
+        {
             pawn.MovementLocked = false;
+        }
     }
 }
