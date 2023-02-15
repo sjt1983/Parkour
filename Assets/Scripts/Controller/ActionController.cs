@@ -98,6 +98,51 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""EquipSlot1"",
+                    ""type"": ""Button"",
+                    ""id"": ""2903436f-3acd-4670-aa52-b797a0318f02"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""EquipSlot2"",
+                    ""type"": ""Button"",
+                    ""id"": ""f16616f0-e838-483d-b2cc-ee59ab0aa32e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""EquipSlot3"",
+                    ""type"": ""Button"",
+                    ""id"": ""be17ace1-5a02-411c-9a21-9076389976f8"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""EquipSlot4"",
+                    ""type"": ""Button"",
+                    ""id"": ""4ece33cb-c5e9-4fcb-9241-549414b9340d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Unequip"",
+                    ""type"": ""Button"",
+                    ""id"": ""a9fe161d-52c3-4292-b94c-da3e5f0802b9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -203,7 +248,7 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""180e6b5e-cc72-44fc-9515-02b9dd685b2a"",
-                    ""path"": ""<Keyboard>/f"",
+                    ""path"": ""<Mouse>/backButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -254,6 +299,61 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                     ""action"": ""Menu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""99790450-e4a1-44c1-81e6-182deaafe01f"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""EquipSlot1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""67f45a70-fc2b-4aed-899f-99db4136ab6f"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""EquipSlot2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5a166dfa-356d-432e-98f1-6db7f516ff25"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""EquipSlot3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""618586e3-e11e-44f3-9398-e17bafa5973c"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""EquipSlot4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""54c659be-b3e5-4d5a-87a0-d0a51a7c2a13"",
+                    ""path"": ""<Keyboard>/backquote"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Unequip"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -270,6 +370,11 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
         m_PlayerControls_Reload = m_PlayerControls.FindAction("Reload", throwIfNotFound: true);
         m_PlayerControls_Crouch = m_PlayerControls.FindAction("Crouch", throwIfNotFound: true);
         m_PlayerControls_Menu = m_PlayerControls.FindAction("Menu", throwIfNotFound: true);
+        m_PlayerControls_EquipSlot1 = m_PlayerControls.FindAction("EquipSlot1", throwIfNotFound: true);
+        m_PlayerControls_EquipSlot2 = m_PlayerControls.FindAction("EquipSlot2", throwIfNotFound: true);
+        m_PlayerControls_EquipSlot3 = m_PlayerControls.FindAction("EquipSlot3", throwIfNotFound: true);
+        m_PlayerControls_EquipSlot4 = m_PlayerControls.FindAction("EquipSlot4", throwIfNotFound: true);
+        m_PlayerControls_Unequip = m_PlayerControls.FindAction("Unequip", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -337,6 +442,11 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerControls_Reload;
     private readonly InputAction m_PlayerControls_Crouch;
     private readonly InputAction m_PlayerControls_Menu;
+    private readonly InputAction m_PlayerControls_EquipSlot1;
+    private readonly InputAction m_PlayerControls_EquipSlot2;
+    private readonly InputAction m_PlayerControls_EquipSlot3;
+    private readonly InputAction m_PlayerControls_EquipSlot4;
+    private readonly InputAction m_PlayerControls_Unequip;
     public struct PlayerControlsActions
     {
         private @ActionController m_Wrapper;
@@ -349,6 +459,11 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
         public InputAction @Reload => m_Wrapper.m_PlayerControls_Reload;
         public InputAction @Crouch => m_Wrapper.m_PlayerControls_Crouch;
         public InputAction @Menu => m_Wrapper.m_PlayerControls_Menu;
+        public InputAction @EquipSlot1 => m_Wrapper.m_PlayerControls_EquipSlot1;
+        public InputAction @EquipSlot2 => m_Wrapper.m_PlayerControls_EquipSlot2;
+        public InputAction @EquipSlot3 => m_Wrapper.m_PlayerControls_EquipSlot3;
+        public InputAction @EquipSlot4 => m_Wrapper.m_PlayerControls_EquipSlot4;
+        public InputAction @Unequip => m_Wrapper.m_PlayerControls_Unequip;
         public InputActionMap Get() { return m_Wrapper.m_PlayerControls; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -382,6 +497,21 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                 @Menu.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMenu;
                 @Menu.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMenu;
                 @Menu.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMenu;
+                @EquipSlot1.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot1;
+                @EquipSlot1.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot1;
+                @EquipSlot1.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot1;
+                @EquipSlot2.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot2;
+                @EquipSlot2.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot2;
+                @EquipSlot2.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot2;
+                @EquipSlot3.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot3;
+                @EquipSlot3.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot3;
+                @EquipSlot3.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot3;
+                @EquipSlot4.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot4;
+                @EquipSlot4.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot4;
+                @EquipSlot4.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnEquipSlot4;
+                @Unequip.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnUnequip;
+                @Unequip.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnUnequip;
+                @Unequip.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnUnequip;
             }
             m_Wrapper.m_PlayerControlsActionsCallbackInterface = instance;
             if (instance != null)
@@ -410,6 +540,21 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                 @Menu.started += instance.OnMenu;
                 @Menu.performed += instance.OnMenu;
                 @Menu.canceled += instance.OnMenu;
+                @EquipSlot1.started += instance.OnEquipSlot1;
+                @EquipSlot1.performed += instance.OnEquipSlot1;
+                @EquipSlot1.canceled += instance.OnEquipSlot1;
+                @EquipSlot2.started += instance.OnEquipSlot2;
+                @EquipSlot2.performed += instance.OnEquipSlot2;
+                @EquipSlot2.canceled += instance.OnEquipSlot2;
+                @EquipSlot3.started += instance.OnEquipSlot3;
+                @EquipSlot3.performed += instance.OnEquipSlot3;
+                @EquipSlot3.canceled += instance.OnEquipSlot3;
+                @EquipSlot4.started += instance.OnEquipSlot4;
+                @EquipSlot4.performed += instance.OnEquipSlot4;
+                @EquipSlot4.canceled += instance.OnEquipSlot4;
+                @Unequip.started += instance.OnUnequip;
+                @Unequip.performed += instance.OnUnequip;
+                @Unequip.canceled += instance.OnUnequip;
             }
         }
     }
@@ -424,5 +569,10 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
         void OnReload(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
         void OnMenu(InputAction.CallbackContext context);
+        void OnEquipSlot1(InputAction.CallbackContext context);
+        void OnEquipSlot2(InputAction.CallbackContext context);
+        void OnEquipSlot3(InputAction.CallbackContext context);
+        void OnEquipSlot4(InputAction.CallbackContext context);
+        void OnUnequip(InputAction.CallbackContext context);
     }
 }

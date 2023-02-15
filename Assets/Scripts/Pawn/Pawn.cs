@@ -17,6 +17,9 @@ public sealed class Pawn : MonoBehaviour
     private PawnMovement pawnMovement;
 
     [SerializeField]
+    private PawnInventory pawnInventory;
+
+    [SerializeField]
     private CharacterController characterController;
 
     /***************************/
@@ -37,6 +40,9 @@ public sealed class Pawn : MonoBehaviour
     //Flag to indicate that a certain script has control over the pawn and that nothing else should touch it.
     public bool MovementLocked { get; set; }
 
+    //Indicated the effects of items should be ignored.
+    public bool ItemLocked { get; set; }
+
     //The angle the camera is looking at.
     public float LookAngle { get; set; }
 
@@ -45,16 +51,6 @@ public sealed class Pawn : MonoBehaviour
 
     //How many Speed Charges the pawn has, which increases max velocity
     public int SpeedCharges { get; private set; }
-
-    public void AddSpeedCharge()
-    {
-        SpeedCharges += 1;
-    }
-
-    public void RemoveAllSpeedCharges()
-    {
-        SpeedCharges = 0;
-    }
 
     /*****************************/
     /*** Additional Properties ***/
@@ -84,12 +80,22 @@ public sealed class Pawn : MonoBehaviour
     //Quick reference for if the pawn is sliding. Set by the PawnCrouch script.
     public bool IsFalling { get => pawnMovement.UpwardSpeed < 0f; }
 
+    //Quick reference for if the pawn is landing penalized
+    public bool IsLandingPenalized { get; set; }
+
     //Quick Reference for Forward Speed
     public float CurrentZSpeed { get => pawnMovement.ForwardSpeed; }
 
     //Quick Reference for Upward Speed.
     public float UpwardSpeed { get => pawnMovement.UpwardSpeed; }
 
+    public Vector3 ForwardVector { get; set; }
+
+    public Vector3 RightVector { get; set; }
+
+    //Item the pawn is looking at
+    public EquippableItem ItemPawnIsLookingAt { get; set; }
+    
     /*********************/
     /*** Unity Methods ***/
     /*********************/
@@ -101,6 +107,8 @@ public sealed class Pawn : MonoBehaviour
 
         //Deduct the Vault Lock timer on the pawn.
         VaultLockTimer = Mathf.Clamp(VaultLockTimer - Time.deltaTime, 0, 555);
+
+        Interact();
     }
 
     /*********************/
@@ -113,7 +121,23 @@ public sealed class Pawn : MonoBehaviour
         SpeedCharges = 0;
         IsSliding = false;
         VaultLockTimer = 0f;
+        IsLandingPenalized = false;
+        ItemLocked = false;
+        ForwardVector = Vector3.zero;
+        RightVector = Vector3.zero;
+
         initialized = true;
+
+    }
+
+    public void AddSpeedCharge()
+    {
+        SpeedCharges += 1;
+    }
+
+    public void RemoveAllSpeedCharges()
+    {
+        SpeedCharges = 0;
     }
 
     //Stop all movement on the character;
@@ -138,6 +162,22 @@ public sealed class Pawn : MonoBehaviour
     public void AddVaultLock(float time)
     {
         VaultLockTimer = time < .25f ? ACTION_LOCK_MINIMUM_TIME : time;
+    }
+
+    //Have the pawn pickup the item and put it in their inventory.
+    public void PickupItem(EquippableItem item)
+    {
+        item.AssignToPawn(this);
+        pawnInventory.PickupItem(item);
+    }
+
+    //Have the pawn interact with the item if they are looking at one AND interacrtoing.
+    private void Interact()
+    {
+        if (pawnInput.Interacting && ItemPawnIsLookingAt != null)
+        {
+            ItemPawnIsLookingAt.Interact(this);
+        }
     }
 
 }
