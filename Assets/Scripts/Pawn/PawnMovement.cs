@@ -24,7 +24,7 @@ public sealed class PawnMovement : MonoBehaviour
     public float ForwardSpeed { get => CurrentZSpeed; }
 
     //How fast we are moving upward.
-    public float UpwardSpeed { get => XZGroundVelocity.y; }
+    public float UpwardSpeed { get => CurrentYSpeed; }
 
     //Quick check to see if there is significant movement
     public bool IsMoving { get => Mathf.Abs(CurrentXSpeed + CurrentZSpeed) > .1f; }

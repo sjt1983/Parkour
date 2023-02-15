@@ -39,8 +39,6 @@ public class PawnVault : MonoBehaviour
     //Flag for initialization, do it first! LOL
     private bool initialized = false;
 
-    private readonly float GLOBAL_SPEED = .8f;
-
     //The state of the scripts control over the character.
     private VaultState vaultState = VaultState.ATTEMPT_VAULT;
 
@@ -58,52 +56,33 @@ public class PawnVault : MonoBehaviour
 
     /*** Pause ***/
     //How long we pause before vaulting
-    private readonly float PAUSE_TIME = .1f;
+    private readonly float PAUSE_TIME = .3f;
     //Calculated Pause Time;
     private float pauseTimer;
 
-    /*** Dip ***/
-    //How far we dip
-    private readonly float DIP_AMOUNT = 1.5f;
-    //How fast we dip initially.
-    private readonly float DIP_INITIAL_GRAVITY = 2f;
-    //How much the dip slows down.
-    private readonly float DIP_GRAVITY_DECREMENT = .6f;
-    //The coordinate we should dip to.
-    private float dipY;
-    //Velocity used for the dip
-    private float dipVelocity;
-
     /*** Raise ***/
-    //Initial Velocity at which we raise.
-    private readonly float RAISE_INITIAL_VELOCITY = 8f;
-    //How much the velocity increment per second.
-    private readonly float RAISE_INCREMENT = 2f;
-    //MAX Velocity for raising;
-    private readonly float RAISE_MAX_VELOCITY = 10f;
     //MAX Velocity for raising;
     private readonly float RAISE_HEIGHT_BUFFER = .1f;
 
-    //Velocity used for the raise.
-    private float raiseVelocity;
+    //SmoothDamp smooth reference float.
+    private float smoothY;
 
     //Camera Dip params for wall jumping.
-    private const float VAULT_DIP_ANGLE = 16f;
+    private const float VAULT_DIP_ANGLE = 8f;
     private const float VAULT_DIP_SMOOTH_TIME = .1f;
     private const float VAULT_DIP_RAISE_TIME = .1f;
+    private const float VAULT_MINIMUM_FORWARD_SPEED = 5f;
+    
+    //Extra height buffer to ensure SmoothDamp hits the target, because .2999999999999999999999 < 3
+    private const float VAULT_SMOOTH_HEIGHT_BUFFER = .05f;
+    //Used to smooth out the SmoothDamp on the raise
+    private const float VAULT_SMOOTH_TIME = .15f;
 
     /*** Forward ***/
-    //How long in between vaults we allow.
-    private readonly float FORWARD_TIME = .2f;
+    //Amount of time we should move forward before releasing control
+    private readonly float FORWARD_TIME = .1f;
     //Calculated forward time.
     private float forwardTimer;
-    private readonly float FORWARD_VELOCITY = 4f;
-
-    /*** Cooldown ***/
-    //How long in between vaults we allow.
-    private readonly float COOLDOWN_TIME = .2f;
-    //Calculated cooldown time.
-    private float cooldownTimer;
 
     /*********************/
     /*** Unity Methods ***/
@@ -124,24 +103,15 @@ public class PawnVault : MonoBehaviour
                 //If here, lets vault, do some housekeeping on the pawn.
                 //lock the pawn and stop it, but before we do that, see if its falling and set the proper state
                 pawn.MovementLocked = true;
-                vaultState = pawn.IsFalling ? VaultState.DIP : VaultState.RAISE;
+                vaultState = pawn.IsFalling ? VaultState.PAUSE : VaultState.RAISE;
                         
                 //For some reason the position of the pawn is 1m above the bottom of the CharacterController.
                 vaultPoint = hitInfo.point + new Vector3(0, 1 + RAISE_HEIGHT_BUFFER);
 
                 //Set how long we pause in the air.
                 pauseTimer = PAUSE_TIME;
-                        
-                //Set the variables for the dip if were are falling
-                dipY = vaultPoint.y - DIP_AMOUNT;
-                dipVelocity = -DIP_INITIAL_GRAVITY;
 
-                //Initial velocity of the player when pulling them selves up.
-                raiseVelocity = RAISE_INITIAL_VELOCITY;
-
-                //Set the cooldown timer, time before the player can vault again
-                cooldownTimer = 0f;
-
+                //Reset the forward timer.
                 forwardTimer = 0f;
 
                 //Zero out the veocity
@@ -154,39 +124,19 @@ public class PawnVault : MonoBehaviour
                 pawn.ItemLocked = true;
             }
         }
-        else if (vaultState == VaultState.DIP)
-        {            
-            //Do the dip logic, fall, then pull yourself up, while the camera slerps.
-            movementVelocity.y = dipVelocity * Time.deltaTime * GLOBAL_SPEED; ;
-            dipVelocity += DIP_GRAVITY_DECREMENT * Time.deltaTime * GLOBAL_SPEED;
-            pawn.Move(movementVelocity);
-
-            //End logic for this state
-            if (vaultLowSensor.transform.position.y <= dipY)
-            {
-                vaultState = VaultState.PAUSE;
-            }
-        }
         else if (vaultState == VaultState.PAUSE)
         {
+            pawnLook.Dip(VAULT_DIP_ANGLE, VAULT_DIP_SMOOTH_TIME, VAULT_DIP_RAISE_TIME, true);
             //Just sit for a bit but also slerp the camera.
             pauseTimer -= Time.deltaTime;
             if (pauseTimer <= 0)
-            {
                 vaultState = VaultState.RAISE;
-            }
         }
         //Now vault.
         else if (vaultState == VaultState.RAISE)
         {
-            pawnLook.Dip(VAULT_DIP_ANGLE, VAULT_DIP_RAISE_TIME, VAULT_DIP_RAISE_TIME, true);
-            //Go forward if we are sure we will collide with something.
-            movementVelocity = transform.forward * (FORWARD_VELOCITY * Time.deltaTime * GLOBAL_SPEED);
-            //Raise up, progressively faster
-            movementVelocity.y = raiseVelocity * Time.deltaTime * GLOBAL_SPEED;
-            raiseVelocity += RAISE_INCREMENT * Time.deltaTime * GLOBAL_SPEED;
-            raiseVelocity = Mathf.Clamp(raiseVelocity, -RAISE_MAX_VELOCITY, RAISE_MAX_VELOCITY);
-            pawn.Move(movementVelocity);
+            pawnLook.Dip(VAULT_DIP_ANGLE, VAULT_DIP_SMOOTH_TIME, VAULT_DIP_RAISE_TIME, true);
+            transform.position = new Vector3(transform.position.x, Mathf.SmoothDamp(transform.position.y, vaultPoint.y + VAULT_SMOOTH_HEIGHT_BUFFER, ref smoothY, VAULT_SMOOTH_TIME), transform.position.z);
 
             //Release control after the raise phase
             if (transform.position.y >= vaultPoint.y)
@@ -199,28 +149,16 @@ public class PawnVault : MonoBehaviour
         {
             pawnArmsAnimator.ClearIk();
             //Go forward if we are sure we will collide with something.
-            movementVelocity = transform.forward * (FORWARD_VELOCITY * Time.deltaTime * GLOBAL_SPEED);
+            movementVelocity = transform.forward * ((pawn.CurrentZSpeed > VAULT_MINIMUM_FORWARD_SPEED ? pawn.CurrentZSpeed : VAULT_MINIMUM_FORWARD_SPEED) * Time.deltaTime);
             movementVelocity.y = 0;
             pawn.Move(movementVelocity);
-
             forwardTimer += Time.deltaTime;
             if (forwardTimer > FORWARD_TIME)
             {
-                pawnArmsAnimator.ClearIk();
-                vaultState = VaultState.COOLDOWN;
-                cooldownTimer = 0f;
+                vaultState = VaultState.ATTEMPT_VAULT;
                 pawn.HaltMovement(false, true, false);
                 pawn.ItemLocked = false;
                 pawn.MovementLocked = false;
-            }
-        }
-        else if (vaultState == VaultState.COOLDOWN)
-        {
-            //After cooldown, reset the script state
-            cooldownTimer += Time.deltaTime;
-            if (cooldownTimer > COOLDOWN_TIME)
-            {
-                vaultState = VaultState.ATTEMPT_VAULT;
             }
         }
     }
@@ -241,8 +179,6 @@ enum VaultState
 {
     ATTEMPT_VAULT,
     PAUSE,
-    DIP,
     RAISE,
-    FORWARD,
-    COOLDOWN, DEBUG
+    FORWARD
 }
