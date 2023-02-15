@@ -36,8 +36,8 @@ public sealed class PawnMovement : MonoBehaviour
     /*** Default Upper Thresholds for movement ***/
 
     //How fast the character walks.
-    private const float MAX_WALK_SPEED_FORWARD = 7f;
-    private const float MAX_WALK_SPEED_SIDEWAYS = 4f;
+    private const float MAX_WALK_SPEED_FORWARD = 9f;
+    private const float MAX_WALK_SPEED_SIDEWAYS = 7f;
 
     private float airAccelerationZ = 0f;
     private float airAccelerationX = 0f;

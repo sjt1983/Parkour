@@ -120,11 +120,11 @@ public sealed class PawnLook : MonoBehaviour
         targetRotation.x = cameraVerticalRotation + dipTargetAmount;
         mainCamera.transform.eulerAngles = targetRotation;
 
-        checkToWhatPlayerIsLookingAt();
+        CheckToWhatPlayerIsLookingAt();
 
         //Do stuff with the camera when crouching
         //Move the camera mount downward or upward over time. Determine the new position and set the 
-        float newCameraMountPosition = Mathf.Clamp(pawn.IsCrouching ?
+        float newCameraMountPosition = Mathf.Clamp(pawn.IsCrouching && pawn.IsGrounded ?
                                         mainCameraMount.localPosition.y - (CROUCH_SPEED * Time.deltaTime) :
                                         mainCameraMount.localPosition.y + (CROUCH_SPEED * Time.deltaTime),
                                         defaultCameraLocalY - CROUCH_HEIGHT, defaultCameraLocalY);
@@ -132,7 +132,7 @@ public sealed class PawnLook : MonoBehaviour
         mainCameraMount.localPosition = new Vector3(mainCameraMount.localPosition.x, newCameraMountPosition, mainCameraMount.localPosition.z);
 
         //Resize the character controller and recenter it based on what the height should be while crouching.
-        characterController.height = Mathf.Clamp(pawn.IsCrouching ?
+        characterController.height = Mathf.Clamp(pawn.IsCrouching && pawn.IsGrounded ?
                                         characterController.height - (CROUCH_SPEED * Time.deltaTime) :
                                         characterController.height + (CROUCH_SPEED * Time.deltaTime),
                                         CROUCH_HEIGHT, STAND_HEIGHT);
@@ -154,7 +154,7 @@ public sealed class PawnLook : MonoBehaviour
     }
 
     //Used to see which item the player is looking at.
-    private void checkToWhatPlayerIsLookingAt()
+    private void CheckToWhatPlayerIsLookingAt()
     {
         //Grab all equippable items.
         EquippableItem[] items = GameObject.FindObjectsOfType<EquippableItem>();
