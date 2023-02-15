@@ -10,6 +10,9 @@ public class PawnVault : MonoBehaviour
     private Pawn pawn;
 
     [SerializeField]
+    private PawnLook pawnLook;
+
+    [SerializeField]
     private PawnInventory pawnInventory;
 
     [SerializeField]
@@ -84,6 +87,11 @@ public class PawnVault : MonoBehaviour
     //Velocity used for the raise.
     private float raiseVelocity;
 
+    //Camera Dip params for wall jumping.
+    private const float VAULT_DIP_ANGLE = 16f;
+    private const float VAULT_DIP_SMOOTH_TIME = .1f;
+    private const float VAULT_DIP_RAISE_TIME = .1f;
+
     /*** Forward ***/
     //How long in between vaults we allow.
     private readonly float FORWARD_TIME = .2f;
@@ -96,22 +104,6 @@ public class PawnVault : MonoBehaviour
     private readonly float COOLDOWN_TIME = .2f;
     //Calculated cooldown time.
     private float cooldownTimer;
-
-    /*** Camera Zob ***/
-
-    //Vars used for moving the head back and forth.
-    //How fast the camera should move back and forth.
-    private float VAULT_CAMERA_ZOB_SPEED = 5f;
-    //Where the camera starts
-    private float zobZDefault;
-    
-    //Original Position of the camera
-    private Vector3 zobDefautVector;
-
-    //Flag to indicate we should zob
-    private bool zobFlag;
-    //How far away from the default Z we should go.
-    private const float ZOB_DISTANCE = .45f;
 
     /*********************/
     /*** Unity Methods ***/
@@ -147,11 +139,6 @@ public class PawnVault : MonoBehaviour
                 //Initial velocity of the player when pulling them selves up.
                 raiseVelocity = RAISE_INITIAL_VELOCITY;
 
-                //ZOB settings
-                zobFlag = true;
-                zobZDefault = mainCamera.localPosition.z;
-                zobDefautVector = mainCamera.localPosition;
-
                 //Set the cooldown timer, time before the player can vault again
                 cooldownTimer = 0f;
 
@@ -165,7 +152,6 @@ public class PawnVault : MonoBehaviour
 
                 //Lock the item.
                 pawn.ItemLocked = true;
-
             }
         }
         else if (vaultState == VaultState.DIP)
@@ -174,7 +160,6 @@ public class PawnVault : MonoBehaviour
             movementVelocity.y = dipVelocity * Time.deltaTime * GLOBAL_SPEED; ;
             dipVelocity += DIP_GRAVITY_DECREMENT * Time.deltaTime * GLOBAL_SPEED;
             pawn.Move(movementVelocity);
-            ZobCamera();
 
             //End logic for this state
             if (vaultLowSensor.transform.position.y <= dipY)
@@ -193,7 +178,8 @@ public class PawnVault : MonoBehaviour
         }
         //Now vault.
         else if (vaultState == VaultState.RAISE)
-        {            
+        {
+            pawnLook.Dip(VAULT_DIP_ANGLE, VAULT_DIP_RAISE_TIME, VAULT_DIP_RAISE_TIME, true);
             //Go forward if we are sure we will collide with something.
             movementVelocity = transform.forward * (FORWARD_VELOCITY * Time.deltaTime * GLOBAL_SPEED);
             //Raise up, progressively faster
@@ -201,9 +187,6 @@ public class PawnVault : MonoBehaviour
             raiseVelocity += RAISE_INCREMENT * Time.deltaTime * GLOBAL_SPEED;
             raiseVelocity = Mathf.Clamp(raiseVelocity, -RAISE_MAX_VELOCITY, RAISE_MAX_VELOCITY);
             pawn.Move(movementVelocity);
-
-            //Move the camera
-            ZobCamera();
 
             //Release control after the raise phase
             if (transform.position.y >= vaultPoint.y)
@@ -249,30 +232,6 @@ public class PawnVault : MonoBehaviour
     private void Initialize()
     {
         initialized = true;
-    }
-
-    //Gives the illusion of head movement when vaulting.
-    private void ZobCamera()
-    {
-        //Zob
-        if (zobFlag)
-        {
-            mainCamera.transform.localPosition -= new Vector3(0, 0, VAULT_CAMERA_ZOB_SPEED * Time.deltaTime * GLOBAL_SPEED);
-            if (mainCamera.transform.localPosition.z < zobZDefault - ZOB_DISTANCE)
-            {
-                zobFlag = false;
-            }
-        }
-        else
-        {
-            mainCamera.transform.localPosition += new Vector3(0, 0, VAULT_CAMERA_ZOB_SPEED * Time.deltaTime * GLOBAL_SPEED);
-
-            if (mainCamera.transform.localPosition.z > zobZDefault)
-            {
-                mainCamera.transform.localPosition = zobDefautVector;
-                zobFlag = false;
-            }
-        }
     }
 }
 

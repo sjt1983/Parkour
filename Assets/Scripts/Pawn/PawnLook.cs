@@ -37,6 +37,8 @@ public sealed class PawnLook : MonoBehaviour
     private float cameraVerticalRotation = 0f;
     private readonly float CAMERA_MAX_VERTICAL_ROTATION = 85;
 
+    private Vector3 targetRotation = Vector3.zero;
+
     /*** Mouse Properties ***/
 
     //Values of the mouse delta from the last frame, adjusted for sensitivity.
@@ -68,6 +70,23 @@ public sealed class PawnLook : MonoBehaviour
     //How well they need to be looking at the item, aka the dot product
     private const float ITEM_LOOK_DOT_MAX = .95f;
 
+    /*********** Dip Properties ************/
+
+    //Flag to determine if we should dip;
+    private DipState dipState = DipState.WAITING;
+
+    //SmoothDamp dip holder
+    private float dipSmoothDamp = 0f;
+
+    //The target amount to dip the camera.
+    private float dipTargetAmount = 0f;
+
+    //Local versions of the parameters for dipping to ensure the script can be interrupted.
+    private float dipAngle, dipTime, dipRaiseTime;
+
+    //Semaphore for blocking a dip reset because we are already resetting it.
+    bool dipResetBlock = false;
+
     //You know what this flag do.
     private bool initialized = false;
 
@@ -97,12 +116,13 @@ public sealed class PawnLook : MonoBehaviour
         cameraVerticalRotation -= adjustedMouseY;
         cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
         pawn.LookAngle = cameraVerticalRotation;
-        Vector3 targetRoation = transform.eulerAngles;
-        targetRoation.x = cameraVerticalRotation;
-        mainCamera.transform.eulerAngles = targetRoation;
+        targetRotation = transform.eulerAngles;
+        targetRotation.x = cameraVerticalRotation + dipTargetAmount;
+        mainCamera.transform.eulerAngles = targetRotation;
 
         checkToWhatPlayerIsLookingAt();
 
+        //Do stuff with the camera when crouching
         //Move the camera mount downward or upward over time. Determine the new position and set the 
         float newCameraMountPosition = Mathf.Clamp(pawn.IsCrouching ?
                                         mainCameraMount.localPosition.y - (CROUCH_SPEED * Time.deltaTime) :
@@ -118,6 +138,8 @@ public sealed class PawnLook : MonoBehaviour
                                         CROUCH_HEIGHT, STAND_HEIGHT);
         characterController.center = Vector3.down * (2f - characterController.height) / 2.0f;
 
+        //Handle the head dip if needed.
+        DoDip();
     }
 
     /*********************/
@@ -127,6 +149,7 @@ public sealed class PawnLook : MonoBehaviour
     private void Initialize()
     {
         defaultCameraLocalY = mainCameraMount.localPosition.y;
+        dipState = DipState.WAITING;
         initialized = true;
     }
 
@@ -166,4 +189,73 @@ public sealed class PawnLook : MonoBehaviour
         //Cool, set the item we are looking at, even if its null (Can be looking at nothing)
         pawn.ItemPawnIsLookingAt = closestItem;        
     }
+
+    //Shorthand Dip for skipping the forceReset param and assume false.
+    public void Dip(float dipAngle, float dipSmoothTime, float dipRaiseSmoothTime)
+    {
+        Dip(dipAngle, dipSmoothTime, dipRaiseSmoothTime, false);            
+    }
+
+    //Dip and raise the camera to make vertical transicitons (jumping, landing, etc) look less basic
+    public void Dip(float dipAngle, float dipSmoothTime, float dipRaiseSmoothTime, bool forceReset)
+    {
+        //If we are just waiting, calibrate the engine!!!!1
+        if (dipState == DipState.WAITING)
+        {
+            this.dipAngle = dipAngle;
+            this.dipTime = dipSmoothTime;
+            this.dipRaiseTime = dipRaiseSmoothTime;
+            dipState = DipState.LOWERING;
+        }
+        //If we are mid dip and someone wants to override the dip, then do so.
+        else if (dipState != DipState.WAITING && !dipResetBlock && forceReset)
+        {
+            dipResetBlock = true;
+            this.dipAngle = dipAngle;
+            this.dipTime = dipSmoothTime;
+            this.dipRaiseTime = dipRaiseSmoothTime;
+            dipState = DipState.LOWERING;
+        }
+    }
+    
+    //DO the actual dip!!
+    private void DoDip()
+    {
+        //First state, do nothing
+        if (dipState == DipState.WAITING)
+        {
+            dipTargetAmount = 0f;
+        }
+        //Lowering state, the camera will sort of "Drag" down when you jump or land.
+        else if (dipState == DipState.LOWERING)
+        {
+            //Smoothdamp may not actually hit the value we pass in, it may be millionths off, so append .1 to the value to ensure we hit out target.
+            dipTargetAmount = Mathf.SmoothDamp(dipTargetAmount, dipAngle + .1f, ref dipSmoothDamp, dipTime);
+            if (dipTargetAmount >= dipAngle)
+            {
+                dipTargetAmount = dipAngle;
+                dipState = DipState.RAISING;
+            }
+        }
+        //Raising state, basically, SmoothDamp back to angle '0'.
+        else if (dipState == DipState.RAISING) {
+
+            //Smoothdamp may not actually hit the value we pass in, it may be millionths off, so append -.1 to the value to ensure we hit out target.
+            dipTargetAmount = Mathf.SmoothDamp(dipTargetAmount, -.1f, ref dipSmoothDamp, dipRaiseTime);
+            if (dipTargetAmount <= 0)
+            {
+                dipTargetAmount = 0;
+                dipResetBlock = false;
+                dipState = DipState.WAITING;
+            }
+        }
+    }
+}
+
+enum DipState
+{
+    WAITING,
+    RESET,
+    LOWERING,
+    RAISING
 }

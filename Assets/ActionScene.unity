@@ -9312,11 +9312,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 1041797165}
+  pawnLook: {fileID: 1041797163}
   jumpBoostSensor: {fileID: 498790685}
   Gravity: -30
-  currentXSpeed: 0
-  currentYSpeed: 0
-  currentZSpeed: 0
+  CurrentXSpeed: 0
+  CurrentYSpeed: 0
+  CurrentZSpeed: 0
+  XZGroundVelocity: {x: 0, y: 0, z: 0}
+  XZAirVelocity: {x: 0, y: 0, z: 0}
+  WasGroundedLastFrame: 0
+  LastGroundedFrameAngle: 0
 --- !u!114 &1041797163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9379,6 +9384,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 1041797165}
+  pawnLook: {fileID: 1041797163}
   pawnInventory: {fileID: 1041797169}
   vaultHighSensor: {fileID: 1022092206}
   vaultLowSensor: {fileID: 1924691758}

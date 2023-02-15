@@ -58,26 +58,22 @@ public class PawnHeadBob : MonoBehaviour
             return;
 
         //DO the head bobbing if we are moving fast enough.
-        if (pawn.IsMovingFasterThan(.1f) && pawn.IsTryingToMove)
+        if (pawn.IsMovingFasterThan(3f) && pawn.IsTryingToMove)
         {
-            bobTheHead();
+            //Simple SIN wave timer to move the camera vertically.
+            timer += Time.deltaTime * (pawn.IsCrouching ? crouchBobSpeed : walkBobSpeed);
+            increment = Mathf.Sin(timer) * (pawn.IsCrouching ? crouchBobAmount : walkBobAmount);
+
+            mainCamera.localPosition = new Vector3(mainCamera.localPosition.x, defaultYPosition + increment, mainCamera.localPosition.z);
         }
-        //ELSE, keep bobbing until the camera is home.
-        else if (mainCamera.localPosition.y != defaultYPosition)
+        //ELSE, Lerp the camera back into place.
+        else 
         {
-            bobTheHead();
+            mainCamera.localPosition = new Vector3(mainCamera.localPosition.x, Mathf.Lerp(mainCamera.localPosition.y, defaultYPosition, .1f), mainCamera.localPosition.z);
 
             if (Mathf.Abs(mainCamera.localPosition.y - defaultYPosition) < .001f)
               mainCamera.localPosition = new Vector3(mainCamera.localPosition.x, defaultYPosition, mainCamera.localPosition.z);
         }      
     }
 
-    //Magic, I sort of get how it works with a SIN wave.
-    private void bobTheHead()
-    {
-        timer += Time.deltaTime * (pawn.IsCrouching ? crouchBobSpeed : walkBobSpeed);
-        increment = Mathf.Sin(timer) * (pawn.IsCrouching ? crouchBobAmount : walkBobAmount);
-
-        mainCamera.localPosition = new Vector3(mainCamera.localPosition.x, defaultYPosition + increment, mainCamera.localPosition.z);
-    }
 }

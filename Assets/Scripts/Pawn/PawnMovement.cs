@@ -11,6 +11,9 @@ public sealed class PawnMovement : MonoBehaviour
     private Pawn pawn;
 
     [SerializeField]
+    private PawnLook pawnLook;
+
+    [SerializeField]
     private Sensor jumpBoostSensor;
 
     /************************/
@@ -36,10 +39,6 @@ public sealed class PawnMovement : MonoBehaviour
     private const float MAX_WALK_SPEED_FORWARD = 7f;
     private const float MAX_WALK_SPEED_SIDEWAYS = 4f;
 
-    private const float MAX_AIR_SPEED = .5f;
-    private const float MAX_AIR_SPEED_ACCEL_Z = 1f;
-    private const float MAX_AIR_SPEED_ACCEL_X = 1f;
-
     private float airAccelerationZ = 0f;
     private float airAccelerationX = 0f;
 
@@ -61,6 +60,9 @@ public sealed class PawnMovement : MonoBehaviour
     //Gravity
     [SerializeField]
     public float Gravity = -30;
+
+    //Used to know to dip the camera when we land if the pawn is falling fast enough
+    private const float GRAVITY_CAMERA_DIP_THRESHOLD = -9f;
 
     //How many speed charges the character can have.
     private const int MAX_SPEED_CHARGES = 2;
@@ -91,8 +93,6 @@ public sealed class PawnMovement : MonoBehaviour
     //Velocity to move the pawn based on being grounded.
     public Vector3 XZAirVelocity = Vector3.zero;
 
-    public Vector3 XZLandingVelocity = Vector3.zero;
-
     //Final clamped XZ Vector for this script;
     Vector3 finalXZVector = Vector3.zero;
 
@@ -102,9 +102,33 @@ public sealed class PawnMovement : MonoBehaviour
     //How many degrees difference from the jump angle the pawn can be to maintain momentum
     private const float JUMP_MOMENTUM_TOLERANCE_LOW = 70.0f;
 
-    //How fast the pawn slows down whne a bad landing happens
-    private const float LANDING_DRAG = 13f;
+    //Camera Dip params for jumping.
+    private const float JUMP_DIP_ANGLE = 3f;
+    private const float JUMP_DIP_SMOOTH_TIME = .1f;
+    private const float JUMP_DIP_RAISE_TIME = .1f;
 
+    //Camera Dip params for landing.
+    private const float LAND_DIP_ANGLE = 3f;
+    private const float LAND_DIP_SMOOTH_TIME = .1f;
+    private const float LAND_DIP_RAISE_TIME = .1f;
+
+    //Camera Dip params for wall jumping.
+    private const float WALLJUMP_DIP_ANGLE = 3f;
+    private const float WALLJUMP_DIP_SMOOTH_TIME = .1f;
+    private const float WALLJUMP_DIP_RAISE_TIME = .1f;
+
+    //How fast velocity falls off when you land while exceeding your max speed.
+    private const float MAX_SPEED_EXCEEDED_FALLOFF = .1f;
+
+    //How much you "Push off" the wall when you wall jump due to the direction of the pawn being "too perpendicular" to the wall you jump off of.
+    private const float WALLJUMP_OFF_ANGLE_BONUS_FORCE = 3f;
+    //The angle in which the pawn is "too perpendicular" for a reflected walljump.
+    private const float WALL_JUMP_OFF_ANGLE_THRESHOLD = 45f;
+
+    //How fast you accelerate in the air.
+    private const float AIR_ACCELERATION_Z = 1f;
+    private const float AIR_ACCELERATION_X = 1f;
+    
     //Flag to see if the pawn was grounded last frame, so we know when to trigger "Landing".
     public bool WasGroundedLastFrame = false;
 
@@ -140,7 +164,7 @@ public sealed class PawnMovement : MonoBehaviour
         /******************************/
 
         //Finally, move the controller.
-        lastFrameCollisionFlags = pawn.Move((finalXZVector + yVelocity + XZLandingVelocity) * Time.deltaTime);
+        lastFrameCollisionFlags = pawn.Move((finalXZVector + yVelocity) * Time.deltaTime);
 
         if ((lastFrameCollisionFlags & CollisionFlags.CollidedAbove) != 0)
         {
@@ -185,16 +209,17 @@ public sealed class PawnMovement : MonoBehaviour
         if (pawn.IsGrounded)
         {
             if (!WasGroundedLastFrame && !pawn.IsSliding)
-            {                
-                float landDifference = Utils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, LastGroundedFrameAngle);
+            {
+                if (CurrentYSpeed < GRAVITY_CAMERA_DIP_THRESHOLD)
+                    pawnLook.Dip(LAND_DIP_ANGLE, LAND_DIP_SMOOTH_TIME, LAND_DIP_RAISE_TIME);
 
-                Debug.Log(landDifference + " " + LastGroundedFrameAngle + " " + transform.rotation.eulerAngles.y);
+                float landDifference = Utils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, LastGroundedFrameAngle);
 
                 //2 levels, pawn gets to keep some momentum if they dont stray too far
                 if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW) 
                 {
-                    XZLandingVelocity = pawn.RightVector * CurrentXSpeed + pawn.ForwardVector * CurrentZSpeed;
-                    pawn.IsLandingPenalized = true;
+                    CurrentZSpeed = 0f;
+                    CurrentXSpeed = 0f;
                 }
             }
 
@@ -203,21 +228,11 @@ public sealed class PawnMovement : MonoBehaviour
         }
         else
             WasGroundedLastFrame = false;
-
-        if (pawn.IsLandingPenalized)
-        {
-            XZLandingVelocity = Vector3.ClampMagnitude(XZLandingVelocity, XZLandingVelocity.magnitude - LANDING_DRAG * Time.deltaTime);
-            if (XZLandingVelocity.magnitude < .1f)
-            {
-                pawn.IsLandingPenalized = false;
-                XZLandingVelocity = Vector3.zero;
-            }
-        }
+       
     }
 
     private void MoveXZ()
     {
-
         //If the pawns speed goes below the default max speed we remove all speed charges
         if (CurrentZSpeed < MAX_WALK_SPEED_FORWARD)
             pawn.RemoveAllSpeedCharges();
@@ -246,8 +261,8 @@ public sealed class PawnMovement : MonoBehaviour
         }
         else //aka in the air. 
         {
-            airAccelerationZ += pawn.PawnInput.ZDirection * 1f * Time.deltaTime;
-            airAccelerationX += pawn.PawnInput.XDirection * 1f * Time.deltaTime;
+            airAccelerationZ += pawn.PawnInput.ZDirection * AIR_ACCELERATION_Z * Time.deltaTime;
+            airAccelerationX += pawn.PawnInput.XDirection * AIR_ACCELERATION_X * Time.deltaTime;
             XZAirVelocity = (transform.forward * airAccelerationZ) + (transform.right * airAccelerationX);
         }
 
@@ -284,6 +299,7 @@ public sealed class PawnMovement : MonoBehaviour
 
     private void Jump()
     {
+        pawnLook.Dip(JUMP_DIP_ANGLE, JUMP_DIP_SMOOTH_TIME, JUMP_DIP_RAISE_TIME);
         //If the jump boost sensor isnt colliding, we are near an egde, so lets boost the character!
         if (jumpBoostSensor.CollidedObjects == 0)
         {
@@ -314,18 +330,18 @@ public sealed class PawnMovement : MonoBehaviour
             //IMPROVEMENT - figure out which euler y the vector is traveling instead of locking in the angles at certain times.
             //If we have a difference of less than 45 degrees between the current angle and the angle we jumped at, reflect all velocity perfectly.
             var currentYAngle = transform.rotation.eulerAngles.y;
-
+            pawnLook.Dip(WALLJUMP_DIP_ANGLE, WALLJUMP_DIP_SMOOTH_TIME, WALLJUMP_DIP_RAISE_TIME);
             CurrentYSpeed = JUMP_FORCE;
             pawn.AddVaultLock(.35f);
             XZGroundVelocity = Vector3.Reflect(XZGroundVelocity, hit.normal);
 
             //If we did some crazy rotation to hit the wall, reflect the angle, normalize it, then add a Vector3 to "push off" the wall instead of a "Bounce".
             //JK also testing adding an additional force and NOT normalizing the initial vector.
-            if (Utils.DifferenceInBetweenTwoAngles(currentYAngle, LastGroundedFrameAngle) >= 45)
+            if (Utils.DifferenceInBetweenTwoAngles(currentYAngle, LastGroundedFrameAngle) >= WALL_JUMP_OFF_ANGLE_THRESHOLD)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(hit.normal, transform.up);
-                Vector3 wallForce = Utils.GenerateDirectionalForceVector(targetRotation, 3f);
-                XZGroundVelocity = XZGroundVelocity + wallForce;
+                Vector3 wallForce = Utils.GenerateDirectionalForceVector(targetRotation, WALLJUMP_OFF_ANGLE_BONUS_FORCE);
+                XZGroundVelocity += wallForce;
             }
 
             //Finally, Re-adjust the current Locked Vectors pointing towards the angle from the wall jump.
@@ -370,10 +386,9 @@ public sealed class PawnMovement : MonoBehaviour
     {
         float maxScriptZSpeed = pawn.IsCrouching && !pawn.IsSliding ? MAX_CROUCH_WALK_SPEED : (MAX_WALK_SPEED_FORWARD + (pawn.SpeedCharges * SPEED_CHARGE_MAX_VELOCITY));
 
-
         if (CurrentZSpeed > maxScriptZSpeed)
         {
-            CurrentZSpeed -= .1f * Time.deltaTime;
+            CurrentZSpeed -= MAX_SPEED_EXCEEDED_FALLOFF * Time.deltaTime;
             return pawn.PawnInput.ZDirection * CurrentZSpeed;
         }
 
@@ -387,7 +402,7 @@ public sealed class PawnMovement : MonoBehaviour
 
         if (CurrentXSpeed > maxScriptXSpeed)
         {
-            CurrentXSpeed -= .1f * Time.deltaTime;
+            CurrentXSpeed -= MAX_SPEED_EXCEEDED_FALLOFF * Time.deltaTime;
             return pawn.PawnInput.XDirection * CurrentXSpeed;
         }
 
