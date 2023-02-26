@@ -117,11 +117,9 @@ public class PawnVault : MonoBehaviour
                 //Zero out the veocity
                 movementVelocity = Vector3.zero;
 
-                //Set the IK Points.
-                pawnArmsAnimator.SetActiveIk(hitInfo.point + (-transform.right * .4f) + (transform.up * .2f), Quaternion.identity, hitInfo.point + (transform.right * .4f) + (transform.up * .2f), Quaternion.identity);
-
                 //Lock the item.
                 pawn.ItemLocked = true;
+                pawnArmsAnimator.SetTrigger("Vault");
             }
         }
         else if (vaultState == VaultState.PAUSE)
@@ -130,11 +128,16 @@ public class PawnVault : MonoBehaviour
             //Just sit for a bit but also slerp the camera.
             pauseTimer -= Time.deltaTime;
             if (pauseTimer <= 0)
+            {
                 vaultState = VaultState.RAISE;
+               
+            }
+                
         }
         //Now vault.
         else if (vaultState == VaultState.RAISE)
         {
+
             pawnLook.Dip(VAULT_DIP_ANGLE, VAULT_DIP_SMOOTH_TIME, VAULT_DIP_RAISE_TIME, true);
             transform.position = new Vector3(transform.position.x, Mathf.SmoothDamp(transform.position.y, vaultPoint.y + VAULT_SMOOTH_HEIGHT_BUFFER, ref smoothY, VAULT_SMOOTH_TIME), transform.position.z);
 
@@ -147,7 +150,6 @@ public class PawnVault : MonoBehaviour
         }
         else if (vaultState == VaultState.FORWARD)
         {
-            pawnArmsAnimator.ClearIk();
             //Go forward if we are sure we will collide with something.
             movementVelocity = transform.forward * ((pawn.CurrentZSpeed > VAULT_MINIMUM_FORWARD_SPEED ? pawn.CurrentZSpeed : VAULT_MINIMUM_FORWARD_SPEED) * Time.deltaTime);
             movementVelocity.y = 0;
@@ -155,6 +157,7 @@ public class PawnVault : MonoBehaviour
             forwardTimer += Time.deltaTime;
             if (forwardTimer > FORWARD_TIME)
             {
+                pawnArmsAnimator.ResetTrigger("Vault");
                 vaultState = VaultState.ATTEMPT_VAULT;
                 pawn.HaltMovement(false, true, false);
                 pawn.ItemLocked = false;
