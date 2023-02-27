@@ -7,7 +7,7 @@ public abstract class EquippableItem: Interactable
 {
     //The main mesh renderer for the model to show/hide, should be easily found during Runtime.
     [SerializeField]
-    protected Renderer mainMeshRenderer;
+    protected Renderer[] mainMeshRenderer;
 
     //The pawn which currently owns the item.
     protected Pawn pawn;
@@ -41,21 +41,22 @@ public abstract class EquippableItem: Interactable
     public override void Interact(Pawn pawn)
     {
         pawn.PickupItem(this);
-        mainMeshRenderer.enabled = false;
+
+        HideMeshes();
     }
 
     //Equip the item, which sets Equipped to true, shows the mesh, eventually does neat animation stuff.
     public virtual void EquipItem()
     {
         Equipped = true;
-        mainMeshRenderer.enabled = true;
+        ShowMeshes();
     }
 
     //Unequip the item, which should stop the script and hide the mesh.
     public virtual void UnequipItem()
     {
         Equipped = false;
-        mainMeshRenderer.enabled = false;
+        HideMeshes();
     }
 
     //Drop the item back on the ground.
@@ -63,6 +64,22 @@ public abstract class EquippableItem: Interactable
     {
         pawn = null;
         Equipped = false;
-        mainMeshRenderer.enabled = true;
+        ShowMeshes();
+    }
+
+    private void HideMeshes()
+    {
+        foreach (Renderer r in mainMeshRenderer)
+        {
+            r.enabled = false;
+        }
+    }
+
+    private void ShowMeshes()
+    {
+        foreach (Renderer r in mainMeshRenderer)
+        {
+            r.enabled = true;
+        }
     }
 }

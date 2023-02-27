@@ -45,7 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1537f53aefc81364f9008e23a6d79b0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMeshRenderer: {fileID: 264297890388914863}
+  mainMeshRenderer:
+  - {fileID: 264297890388914863}
   ItemName: PogoStick
 --- !u!1 &7985632795969349784
 GameObject:

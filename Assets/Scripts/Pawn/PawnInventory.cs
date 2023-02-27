@@ -12,6 +12,10 @@ public class PawnInventory : MonoBehaviour
     [SerializeField]
     private Transform inventoryGameObject;
 
+    //The transform to assign items the player picks up to
+    [SerializeField]
+    private Transform itemBone;
+
     //All the players equipment slots.
     public EquippableItem[] ItemSlots = new EquippableItem[4];
 
@@ -70,7 +74,11 @@ public class PawnInventory : MonoBehaviour
 
         //Equip the item in the slot, if there is one.
         if (ItemSlots[slot] != null)
+        {
+            ItemSlots[slot].transform.parent = itemBone;
             ItemSlots[slot].EquipItem();
+        }
+            
     }
 
     //Unequip any active Item
@@ -78,7 +86,11 @@ public class PawnInventory : MonoBehaviour
     {
         //aka if there is an active slot with an item.
         if (activeSlot > -1 && ItemSlots[activeSlot] != null)
+        {
             ItemSlots[activeSlot].UnequipItem();
+            ItemSlots[activeSlot].transform.parent = inventoryGameObject;
+        }
+            
 
         //Set the active slot to -1;
         activeSlot = -1;
