@@ -9,6 +9,9 @@ public abstract class EquippableItem: Interactable
     [SerializeField]
     protected Renderer[] mainMeshRenderer;
 
+    [SerializeField]
+    protected AnimatorOverrideController animatorOverrideController;
+
     //The pawn which currently owns the item.
     protected Pawn pawn;
 
@@ -58,6 +61,9 @@ public abstract class EquippableItem: Interactable
         Equipped = false;
         HideMeshes();
     }
+
+    //Returns this weapons animator override controller
+    public AnimatorOverrideController AnimatorOverrideController => animatorOverrideController; 
 
     //Drop the item back on the ground.
     public virtual void DropItem()

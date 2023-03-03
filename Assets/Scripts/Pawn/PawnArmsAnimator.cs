@@ -9,10 +9,15 @@ public class PawnArmsAnimator : MonoBehaviour
     [SerializeField]
     private Animator pawnArmsAnimator;
 
+    RuntimeAnimatorController defaultRuntimeAnimationController;
+
+    private void Start()
+    {
+        defaultRuntimeAnimationController = pawnArmsAnimator.runtimeAnimatorController;
+    }
 
     private void Update()
     {
-
         if (pawn.IsGrounded && pawn.IsMovingFasterThan(2f) && !pawn.IsSliding)
         {
             pawnArmsAnimator.SetBool("Running", true);
@@ -23,7 +28,6 @@ public class PawnArmsAnimator : MonoBehaviour
         }
     }
     
-
     public void SetTrigger(string trigger)
     {
         pawnArmsAnimator.SetTrigger("Vault");
@@ -37,5 +41,15 @@ public class PawnArmsAnimator : MonoBehaviour
     public void Play(string animation)
     {
         pawnArmsAnimator.Play(animation);
+    }
+
+    public void OverrideAnimations(AnimatorOverrideController animatorOverrideController)
+    {
+        pawnArmsAnimator.runtimeAnimatorController = animatorOverrideController;
+    }
+
+    public void ClearOverrides()
+    {
+        pawnArmsAnimator.runtimeAnimatorController = defaultRuntimeAnimationController;
     }
 }

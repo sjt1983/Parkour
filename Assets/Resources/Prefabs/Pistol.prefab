@@ -873,6 +873,8 @@ MonoBehaviour:
   - {fileID: 392536211065890084}
   - {fileID: 6552257036635735301}
   - {fileID: 8461863169991345560}
+  animatorOverrideController: {fileID: 22100000, guid: 9399a9a92e934c74a946a1ebb6fa8d6c,
+    type: 2}
   ItemName: Pistol
 --- !u!1 &6734493037342541469
 GameObject:

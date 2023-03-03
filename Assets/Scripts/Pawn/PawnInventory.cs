@@ -4,6 +4,9 @@ using UnityEngine;
 //Class representing the pawns inventory.
 public class PawnInventory : MonoBehaviour
 {
+    [SerializeField]
+    private PawnArmsAnimator pawnArmsAnimator;
+
     //The input for the pawn
     [SerializeField]
     private PawnInput pawnInput;
@@ -67,7 +70,10 @@ public class PawnInventory : MonoBehaviour
 
         //If we do have an active slot, AND it has an item, unequip the item.
         if (activeSlot != -1 && ItemSlots[activeSlot] != null)
+        {
             ItemSlots[activeSlot].UnequipItem();
+            pawnArmsAnimator.ClearOverrides();
+        }            
 
         //Set the active slot.
         activeSlot = slot;
@@ -77,8 +83,8 @@ public class PawnInventory : MonoBehaviour
         {
             ItemSlots[slot].transform.parent = itemBone;
             ItemSlots[slot].EquipItem();
-        }
-            
+            pawnArmsAnimator.OverrideAnimations(ItemSlots[slot].AnimatorOverrideController);
+        }            
     }
 
     //Unequip any active Item
@@ -88,9 +94,9 @@ public class PawnInventory : MonoBehaviour
         if (activeSlot > -1 && ItemSlots[activeSlot] != null)
         {
             ItemSlots[activeSlot].UnequipItem();
+            pawnArmsAnimator.ClearOverrides();
             ItemSlots[activeSlot].transform.parent = inventoryGameObject;
-        }
-            
+        }            
 
         //Set the active slot to -1;
         activeSlot = -1;
