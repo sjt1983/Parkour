@@ -51,8 +51,6 @@ public class PawnArmsAnimator : MonoBehaviour
 
         //See if we need to equip the item.
         DoEquipItem();
-
-        UIManager.Instance.DebugText3 = equipState.ToString();
     }
     
     //Trigger an animation.

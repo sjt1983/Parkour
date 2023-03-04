@@ -22,13 +22,16 @@ public class PawnInventory : MonoBehaviour
     //All the players equipment slots.
     public EquippableItem[] ItemSlots = new EquippableItem[4];
 
+    [SerializeField]
     //Current active inventory slow.
     public int activeSlot = -1;
 
+    [SerializeField]
     //Flag to indicate a current "item switch" is happening.
     private bool equippingItem = false;
 
-    private const float ITEM_SWITCH_DELAY = .25f;
+    //How long to delay the coroutine to switch weapons
+    private const float ITEM_SWITCH_COROUTINE_DELAY = .25f;
         
     private void Update()
     {
@@ -46,7 +49,6 @@ public class PawnInventory : MonoBehaviour
             else if (pawnInput.UnequipPressedThisFrame)
                 UnequipItem();
         }
-
     }
 
     //Pickup an item.
@@ -57,13 +59,14 @@ public class PawnInventory : MonoBehaviour
         {
             if (ItemSlots[x] == null)
             {
-                //Set the transform.
+                //Set the transform to the inventory game object.
                 equippableItem.transform.parent = inventoryGameObject;
                 ItemSlots[x] = equippableItem;
                 return;
             }
         }
 
+        //TODO - Switch with the current slot here eventually.
         Debug.Log("ADD OVERFLOW LOGIC");
     }
 
@@ -77,11 +80,12 @@ public class PawnInventory : MonoBehaviour
         //Equip the item in the slot, if there is one.
         if (ItemSlots[slot] != null)
         {
+            //Block weapon switching until we fully switched this weapon.
             equippingItem = true;
+            //Trigger the start of the weapon switch animation.
             pawnArmsAnimator.HandleEquipItem(ItemSlots[slot]);
-
             //We need to take into account animations before doing the switch because switching triggers showing/hiding of meshes.
-            StartCoroutine(DoEquipItem(slot, ITEM_SWITCH_DELAY));
+            StartCoroutine(DoEquipItem(slot, ITEM_SWITCH_COROUTINE_DELAY));
         }            
     }
 
@@ -95,9 +99,11 @@ public class PawnInventory : MonoBehaviour
         {
             ItemSlots[activeSlot].UnequipItem();
         }
+
+        //Set the items parent, which should be the item bone.
         ItemSlots[slot].transform.parent = itemBone;
         ItemSlots[slot].EquipItem();
-
+        
         activeSlot = slot;
         equippingItem = false;
     }
@@ -105,11 +111,14 @@ public class PawnInventory : MonoBehaviour
     //Unequip any active Item
     public void UnequipItem()
     {
-        equippingItem = true;
-        pawnArmsAnimator.HandleEquipItem(null);
+        if (activeSlot > -1 && ItemSlots[activeSlot] != null)
+        {
+            equippingItem = true;
+            pawnArmsAnimator.HandleEquipItem(null);
 
-        //We need to take into account animations before doing the switch because switching triggers showing/hiding of meshes.
-        StartCoroutine(DoUnequipItem(ITEM_SWITCH_DELAY));
+            //We need to take into account animations before doing the switch because switching triggers showing/hiding of meshes.
+            StartCoroutine(DoUnequipItem(ITEM_SWITCH_COROUTINE_DELAY));
+        }
     }
 
     //Coroutine for unequipping an item.
@@ -117,14 +126,10 @@ public class PawnInventory : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
 
-        //If there is an active slot with an item.
-        if (activeSlot > -1 && ItemSlots[activeSlot] != null)
-        {
-            ItemSlots[activeSlot].UnequipItem();
-            ItemSlots[activeSlot].transform.parent = inventoryGameObject;
-            activeSlot = -1;
-            equippingItem = false;
-        }
+        ItemSlots[activeSlot].UnequipItem();
+        ItemSlots[activeSlot].transform.parent = inventoryGameObject;
+        activeSlot = -1;
+        equippingItem = false;
     }
 
     //Drop an item.
