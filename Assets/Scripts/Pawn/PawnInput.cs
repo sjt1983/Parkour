@@ -15,17 +15,24 @@ public sealed class PawnInput : MonoBehaviour
     //2D Movement Directions
     public float XDirection { get; set; }
     public float ZDirection { get; set; }
-    
+
     /*** Actions ***/
 
     //Player is attempting to Interact with an object in the world, e.g. Pickup Item
-    public bool Interacting { get; set; }
+    public bool InteractPressedThisFrame { get => actionController.PlayerControls.Interact.WasPressedThisFrame(); }
+    public bool InteractPressed { get => actionController.PlayerControls.Interact.IsPressed(); }
 
     //Player is using their selected item, e.g. shoot gun.
-    public bool PrimaryUse { get; set; }
+    public bool PrimaryUsePressedThisFrame { get => actionController.PlayerControls.PrimaryUse.WasPressedThisFrame(); }
+    public bool PrimaryUsePressed { get => actionController.PlayerControls.PrimaryUse.IsPressed(); }
 
     //Player is using their selected item with alternate action, e.g. ADS/Zoom
-    public bool SecondaryUse { get; set; }
+    public bool SecondaryUsePressedThisFrame { get => actionController.PlayerControls.SecondaryUse.WasPressedThisFrame(); }
+    public bool SecondaryUsePressed { get => actionController.PlayerControls.SecondaryUse.IsPressed(); }
+
+    //Reload
+    public bool ReloadPressedThisFrame { get => actionController.PlayerControls.Reload.WasPressedThisFrame(); }
+    public bool ReloadPressed { get => actionController.PlayerControls.Reload.IsPressed(); }
 
     //Equipment Slots / Unequip button.
     public bool EquipSlot1PressedThisFrame { get => actionController.PlayerControls.EquipSlot1.WasPressedThisFrame(); }
@@ -35,28 +42,16 @@ public sealed class PawnInput : MonoBehaviour
     public bool UnequipPressedThisFrame { get => actionController.PlayerControls.Unequip.WasPressedThisFrame(); }
 
     //Crouching
-    public bool Crouching { get => actionController.PlayerControls.Crouch.IsPressed(); }
+    public bool CrouchPressedThisFrame { get => actionController.PlayerControls.Crouch.WasPressedThisFrame(); }
+    public bool CrouchPressed { get => actionController.PlayerControls.Crouch.IsPressed(); }
 
     //Player hit the jump button.
-    public bool JumpedThisFrame { get => actionController.PlayerControls.Jump.WasPressedThisFrame(); }
+    public bool JumpPressedThisFrame { get => actionController.PlayerControls.Jump.WasPressedThisFrame(); }
 
     //Player is holding the jump button.
-    public bool JumpIsPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
+    public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
 
-    //Player attempted to reload a weapon.
-    //Same deal as before, we want to ensure we capture the input but as soon as we check for it, set it to false.
-    //This pattern may kind of suck and be changes later.
-    private bool reloading;
-    public bool Reloading
-    {
-        get
-        {
-            bool retval = reloading;
-            reloading = false;
-            return retval;
-        }
-        set => reloading = value;
-    }
+   
 
     /*************************/
     /*** Private variables ***/
@@ -128,28 +123,5 @@ public sealed class PawnInput : MonoBehaviour
         finalMovementDirection = Vector2.SmoothDamp(finalMovementDirection, inputMovementDirection, ref smoothMovementDirection, .2f);
         XDirection = finalMovementDirection.x;
         ZDirection = finalMovementDirection.y;
-
-        //Handle Interaction
-        if (actionController.PlayerControls.Interact.WasPressedThisFrame())
-            Interacting = true;
-        else if (actionController.PlayerControls.Interact.WasReleasedThisFrame())
-            Interacting = false;
-
-        //Handle Primary Use
-        if (actionController.PlayerControls.PrimaryUse.WasPressedThisFrame())
-            PrimaryUse = true;
-        else if (actionController.PlayerControls.PrimaryUse.WasReleasedThisFrame())
-            PrimaryUse = false;
-
-        //Handle Secondary Use
-        if (actionController.PlayerControls.SecondaryUse.WasPressedThisFrame())
-            SecondaryUse = true;
-        else if (actionController.PlayerControls.SecondaryUse.WasReleasedThisFrame())
-            SecondaryUse = false;
-
-        //Handle Reload
-        if (actionController.PlayerControls.Reload.WasPressedThisFrame())
-            Reloading = true;
-
     }
 }

@@ -85,14 +85,14 @@ public class PogoStick : EquippableItem
         if (!ItemEnabled && !pawn.MovementLocked)
         {
             //If jump is not currently presset, exit.
-            if (!pawnInput.JumpIsPressed)
+            if (!pawnInput.JumpPressed)
                 return;
             //If Jump is pressed, lets enable it.
             ItemEnabled = true;
         }
 
         //If we hit the ground crouched, lets release control of the pawn and exit.
-        if (pawn.IsGrounded && pawnInput.Crouching)
+        if (pawn.IsGrounded && pawnInput.CrouchPressed)
         {
             GracefullyReleaseControl();
             return;
@@ -112,7 +112,7 @@ public class PogoStick : EquippableItem
         if (pawn.IsGrounded)
         {
             //IF jump is pressed, add a charge up to the max.
-            if (pawnInput.JumpIsPressed)
+            if (pawnInput.JumpPressed)
                 jumpCharges = Mathf.Clamp(jumpCharges + 1, 0, JUMP_CHARGES_MAX);
 
             //Lets set the X/Z Vectors on the pawn
@@ -139,7 +139,7 @@ public class PogoStick : EquippableItem
             pawnMovement.XZGroundVelocity = xzAirVelocity;
             
             //If the pawn tried to jump this frame, it has to be a wall jump.
-            if (pawnInput.JumpedThisFrame)
+            if (pawnInput.JumpPressedThisFrame)
                WallJump();
 
             pawnMovement.WasGroundedLastFrame = false;

@@ -72,7 +72,7 @@ public sealed class Pawn : MonoBehaviour
     public bool IsMoving { get => pawnMovement.IsMoving; }
 
     //Quick reference for if the pawn is crouching.
-    public bool IsCrouching { get => pawnInput.Crouching; }
+    public bool IsCrouching { get => pawnInput.CrouchPressed; }
 
     //Quick reference for if the pawn is sliding. Set by the PawnCrouch script.
     public bool IsSliding { get; set; }

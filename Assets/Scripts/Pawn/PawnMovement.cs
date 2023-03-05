@@ -279,7 +279,7 @@ public sealed class PawnMovement : MonoBehaviour
         if (pawn.IsGrounded)
         {
             //Jump if the user pressed jump this frame, since holding jump will have significance
-            if (pawn.PawnInput.JumpedThisFrame)
+            if (pawn.PawnInput.JumpPressedThisFrame)
                 Jump();
             else
                 CurrentYSpeed = GRAVITY_DEFAULT; //Always ensure we are trying to push the character down due to slopes. 
@@ -287,7 +287,7 @@ public sealed class PawnMovement : MonoBehaviour
         /****************************/
         /*********Wall Jump**********/
         /****************************/
-        else if (pawn.PawnInput.JumpedThisFrame && CurrentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
+        else if (pawn.PawnInput.JumpPressedThisFrame && CurrentYSpeed >= WALL_JUMP_MINIMUM_VELOCITY)
             WallJump();
 
         //Apply Gravity
