@@ -49,9 +49,7 @@ public sealed class PawnInput : MonoBehaviour
     public bool JumpPressedThisFrame { get => actionController.PlayerControls.Jump.WasPressedThisFrame(); }
 
     //Player is holding the jump button.
-    public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
-
-   
+    public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }   
 
     /*************************/
     /*** Private variables ***/
@@ -108,7 +106,6 @@ public sealed class PawnInput : MonoBehaviour
                 UIManager.Instance.Show<ActionMenuUI>();                
             else
                 UIManager.Instance.Show<ActionUI>();
-
         };
 
         //Enable the controller.

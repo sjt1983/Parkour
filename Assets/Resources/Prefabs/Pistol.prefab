@@ -823,6 +823,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6223796603733823129}
   - component: {fileID: -2424076095151117293}
+  - component: {fileID: 7563101532707291230}
   m_Layer: 0
   m_Name: Pistol
   m_TagString: Untagged
@@ -876,6 +877,27 @@ MonoBehaviour:
   animatorOverrideController: {fileID: 22100000, guid: 9399a9a92e934c74a946a1ebb6fa8d6c,
     type: 2}
   ItemName: Pistol
+  pistolAnimator: {fileID: 7563101532707291230}
+--- !u!95 &7563101532707291230
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6707142587291407395}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 603eb133a4950ca419d5d3dfe4e90e40, type: 3}
+  m_Controller: {fileID: 9100000, guid: 1f6e3d8a7cbc7c14882eb483d3ca41bb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!1 &6734493037342541469
 GameObject:
   m_ObjectHideFlags: 0

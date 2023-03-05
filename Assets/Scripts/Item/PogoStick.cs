@@ -12,6 +12,7 @@ public class PogoStick : EquippableItem
     //Local ref to the pawn input so we can do our own Input Detection.
     private PawnInput pawnInput;
 
+    //Local r ef to the pawnMovement script
     private PawnMovement pawnMovement;
 
     //How Fast we move along X/Z when in the air.
@@ -25,7 +26,6 @@ public class PogoStick : EquippableItem
     private float currentXSpeed = 0f;
     private float currentYSpeed = 0f;
     private float currentZSpeed = 0f;
-
 
     //Number of "Jump Charges", to simulate getting higher with each bounce.
     private int jumpCharges = 0;

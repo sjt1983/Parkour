@@ -174,10 +174,8 @@ public sealed class Pawn : MonoBehaviour
     //Have the pawn interact with the item if they are looking at one AND interacrtoing.
     private void Interact()
     {
-        if (pawnInput.Interacting && ItemPawnIsLookingAt != null)
-        {
+        if (pawnInput.InteractPressedThisFrame && ItemPawnIsLookingAt != null)
             ItemPawnIsLookingAt.Interact(this);
-        }
     }
 
 }

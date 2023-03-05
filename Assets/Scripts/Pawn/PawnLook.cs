@@ -87,6 +87,14 @@ public sealed class PawnLook : MonoBehaviour
     //Semaphore for blocking a dip reset because we are already resetting it.
     bool dipResetBlock = false;
 
+    /********** Recoil Properties *************/
+
+    private float recoilTimer = 0f;
+    private float recoilX = 0f;
+    private float recoilY = 0f;
+    private float recoilFrameX = 0f;
+    private float recoilFrameY = 0f;
+
     //You know what this flag do.
     private bool initialized = false;
 
@@ -103,10 +111,22 @@ public sealed class PawnLook : MonoBehaviour
         if (UIManager.Instance.IsCursorVisible)
             return;
 
+        if (recoilTimer > 0)
+        {
+            recoilFrameY = recoilY * Time.deltaTime;
+            recoilFrameX = recoilX * Time.deltaTime;
+            recoilTimer -= Time.deltaTime;
+        }
+        else
+        {
+            recoilFrameX = 0f;
+            recoilFrameY = 0f;
+        }
+
         //Calculate the mouse delta since the last frame.
         Vector2 targetMouseDelta = Mouse.current.delta.ReadValue() * Time.smoothDeltaTime;
 
-        adjustedMouseX = targetMouseDelta.x * MouseSensitivity;
+        adjustedMouseX = (targetMouseDelta.x * MouseSensitivity) + recoilFrameX;
         adjustedMouseY = targetMouseDelta.y * MouseSensitivity;
 
         //Rotate player along the Y axis.
@@ -114,10 +134,12 @@ public sealed class PawnLook : MonoBehaviour
 
         //Rotate the camera pitch.
         cameraVerticalRotation -= adjustedMouseY;
-        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
+        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation + dipTargetAmount + -recoilFrameY, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
         pawn.LookAngle = cameraVerticalRotation;
         targetRotation = transform.eulerAngles;
-        targetRotation.x = cameraVerticalRotation + dipTargetAmount;
+        targetRotation.x = cameraVerticalRotation;
+
+        
         mainCamera.transform.eulerAngles = targetRotation;
 
         CheckToWhatPlayerIsLookingAt();
@@ -250,6 +272,13 @@ public sealed class PawnLook : MonoBehaviour
             }
         }
     }
+
+    public void Recoil(float x, float y, float time)
+    {
+        recoilTimer = time;
+        recoilX = x * (Random.Range(1, 3) == 1 ? -1 : 1);
+        recoilY = y;
+    }   
 }
 
 enum DipState

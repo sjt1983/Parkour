@@ -6,7 +6,7 @@ AnimatorOverrideController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PistolsArmsOverrideAnimator
+  m_Name: PistolArmsOverrideAnimator
   m_Controller: {fileID: 9100000, guid: eed10a536ed822a4bb74ca7731a82fd3, type: 2}
   m_Clips:
   - m_OriginalClip: {fileID: -2870084914991471164, guid: b1b5952096d121843ab598ce9f393b4b,
@@ -16,6 +16,10 @@ AnimatorOverrideController:
   - m_OriginalClip: {fileID: 4681926678790117819, guid: b1b5952096d121843ab598ce9f393b4b,
       type: 3}
     m_OverrideClip: {fileID: -5623428074702682760, guid: b1b5952096d121843ab598ce9f393b4b,
+      type: 3}
+  - m_OriginalClip: {fileID: -7715109138961788242, guid: b1b5952096d121843ab598ce9f393b4b,
+      type: 3}
+    m_OverrideClip: {fileID: -6848326437444266340, guid: b1b5952096d121843ab598ce9f393b4b,
       type: 3}
   - m_OriginalClip: {fileID: -2083817953817031982, guid: b1b5952096d121843ab598ce9f393b4b,
       type: 3}
