@@ -132,14 +132,16 @@ public sealed class PawnLook : MonoBehaviour
         //Rotate player along the Y axis.
         gameObject.transform.Rotate(Vector3.up, adjustedMouseX);
 
+        UIManager.Instance.DebugText2 = dipTargetAmount.ToString();
+
+
         //Rotate the camera pitch.
         cameraVerticalRotation -= adjustedMouseY;
-        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation + dipTargetAmount + -recoilFrameY, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
+        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation + -recoilFrameY, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
         pawn.LookAngle = cameraVerticalRotation;
         targetRotation = transform.eulerAngles;
-        targetRotation.x = cameraVerticalRotation;
+        targetRotation.x = cameraVerticalRotation + dipTargetAmount;
 
-        
         mainCamera.transform.eulerAngles = targetRotation;
 
         CheckToWhatPlayerIsLookingAt();

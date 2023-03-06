@@ -90,6 +90,9 @@ public sealed class PawnMovement : MonoBehaviour
     //Velocity to move the pawn based on being grounded.
     public Vector3 XZGroundVelocity = Vector3.zero;
 
+    //Velocity to move the pawn based on sliding.
+    public Vector3 XZSlideVelocity = Vector3.zero;
+
     //Velocity to move the pawn based on being grounded.
     public Vector3 XZAirVelocity = Vector3.zero;
 
@@ -245,9 +248,12 @@ public sealed class PawnMovement : MonoBehaviour
         {
             //If we are sliding, remove velocity on Z at a constant rate.
             if (pawn.IsSliding) //Slide script controls the Z speed.
-                CurrentXSpeed = 0;
+            {
+                XZSlideVelocity = (transform.right * 1.5f * pawn.PawnInput.XDirection) + (transform.forward * 1.5f * pawn.PawnInput.ZDirection);
+            }
             else
             {
+                XZSlideVelocity = Vector3.zero;
                 pawn.RightVector = transform.right;
                 pawn.ForwardVector = transform.forward;
                 CurrentZSpeed = GetRunningZSpeed();
@@ -261,12 +267,13 @@ public sealed class PawnMovement : MonoBehaviour
         }
         else //aka in the air. 
         {
+            XZSlideVelocity = Vector3.zero;
             airAccelerationZ += pawn.PawnInput.ZDirection * AIR_ACCELERATION_Z * Time.deltaTime;
             airAccelerationX += pawn.PawnInput.XDirection * AIR_ACCELERATION_X * Time.deltaTime;
             XZAirVelocity = (transform.forward * airAccelerationZ) + (transform.right * airAccelerationX);
         }
 
-        finalXZVector = XZGroundVelocity + XZAirVelocity;
+        finalXZVector = XZGroundVelocity + XZAirVelocity + XZSlideVelocity;
     }
 
     private void MoveY()

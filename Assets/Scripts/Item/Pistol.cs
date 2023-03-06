@@ -18,7 +18,7 @@ public class Pistol : EquippableItem
     private int ammoCount = 10;
     private int MAX_CLIP_AMMO = 10;
 
-    private const float COOLDOWN_TIME = .15f;
+    private const float COOLDOWN_TIME = .1f;
     private float cooldownTimer = 0f;
 
     //Local ref to the pawn input so we can do our own Input Detection.
@@ -61,7 +61,7 @@ public class Pistol : EquippableItem
             pawnArmsAnimator.SetTrigger("Shoot");
             cooldownTimer = COOLDOWN_TIME;
             ammoCount--;
-            pawnLook.Recoil(5, 15, .5f);
+            pawnLook.Recoil(5, 15, .1f);
         }
         else if (pawnInput.ReloadPressedThisFrame)
         {
