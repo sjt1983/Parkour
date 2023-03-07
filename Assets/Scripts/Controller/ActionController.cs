@@ -149,7 +149,7 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                 {
                     ""name"": ""Walk"",
                     ""id"": ""a8126c85-c481-4f23-ba19-2f45ceca7681"",
-                    ""path"": ""2DVector(mode=1)"",
+                    ""path"": ""2DVector"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

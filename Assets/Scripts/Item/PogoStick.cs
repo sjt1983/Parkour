@@ -133,8 +133,8 @@ public class PogoStick : EquippableItem
             //In-Air movement
             xzAirVelocity = (pawn.ForwardVector * currentZSpeed) + (pawn.RightVector * currentXSpeed);
 
-            pawnMovement.CurrentZSpeed = currentZSpeed;
-            pawnMovement.CurrentXSpeed = currentXSpeed;
+            pawnMovement.CurrentGroundedZSpeed = currentZSpeed;
+            pawnMovement.CurrentGroundedXSpeed = currentXSpeed;
             pawnMovement.XZAirVelocity = Vector3.zero;
             pawnMovement.XZGroundVelocity = xzAirVelocity;
             
