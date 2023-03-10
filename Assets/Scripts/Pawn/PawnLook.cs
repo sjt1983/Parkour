@@ -31,6 +31,10 @@ public sealed class PawnLook : MonoBehaviour
     /*** Class properties ***/
     /************************/
 
+    /*** Public ***/
+
+    public Transform MainCamera { get => mainCamera; }
+
     /*** Camera Properties ***/
 
     //Used to clamp the camera to prevent the users neck from doing vertical 360s.
@@ -89,11 +93,12 @@ public sealed class PawnLook : MonoBehaviour
 
     /********** Recoil Properties *************/
 
-    private float recoilTimer = 0f;
+    private float recoilTargetX = 0f;
+    private float recoilTargetY = 0f;
     private float recoilX = 0f;
     private float recoilY = 0f;
-    private float recoilFrameX = 0f;
-    private float recoilFrameY = 0f;
+    private float recoilTimer = 0f;
+    private RecoilState recoilState = RecoilState.WAITING;    
 
     //You know what this flag do.
     private bool initialized = false;
@@ -111,22 +116,14 @@ public sealed class PawnLook : MonoBehaviour
         if (UIManager.Instance.IsCursorVisible)
             return;
 
-        if (recoilTimer > 0)
-        {
-            recoilFrameY = recoilY * Time.deltaTime;
-            recoilFrameX = recoilX * Time.deltaTime;
-            recoilTimer -= Time.deltaTime;
-        }
-        else
-        {
-            recoilFrameX = 0f;
-            recoilFrameY = 0f;
-        }
+        //Handle the head dip if needed.
+        DoDip();
+        DoRecoil();
 
         //Calculate the mouse delta since the last frame.
         Vector2 targetMouseDelta = Mouse.current.delta.ReadValue() * Time.smoothDeltaTime;
 
-        adjustedMouseX = (targetMouseDelta.x * MouseSensitivity) + recoilFrameX;
+        adjustedMouseX = (targetMouseDelta.x * MouseSensitivity);
         adjustedMouseY = targetMouseDelta.y * MouseSensitivity;
 
         //Rotate player along the Y axis.
@@ -134,13 +131,12 @@ public sealed class PawnLook : MonoBehaviour
 
         UIManager.Instance.DebugText2 = dipTargetAmount.ToString();
 
-
         //Rotate the camera pitch.
         cameraVerticalRotation -= adjustedMouseY;
-        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation + -recoilFrameY, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
+        cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
         pawn.LookAngle = cameraVerticalRotation;
         targetRotation = transform.eulerAngles;
-        targetRotation.x = cameraVerticalRotation + dipTargetAmount;
+        targetRotation.x = cameraVerticalRotation + dipTargetAmount + -recoilY;
 
         mainCamera.transform.eulerAngles = targetRotation;
 
@@ -161,9 +157,6 @@ public sealed class PawnLook : MonoBehaviour
                                         characterController.height + (CROUCH_SPEED * Time.deltaTime),
                                         CROUCH_HEIGHT, STAND_HEIGHT);
         characterController.center = Vector3.down * (2f - characterController.height) / 2.0f;
-
-        //Handle the head dip if needed.
-        DoDip();
     }
 
     /*********************/
@@ -275,18 +268,56 @@ public sealed class PawnLook : MonoBehaviour
         }
     }
 
-    public void Recoil(float x, float y, float time)
+    public void Recoil(float x, float y)
     {
-        recoilTimer = time;
-        recoilX = x * (Random.Range(1, 3) == 1 ? -1 : 1);
-        recoilY = y;
-    }   
+        recoilState = RecoilState.LOWERING;
+        recoilTimer = 0;
+        recoilTargetX = x * (Random.Range(1, 3) == 1 ? -1 : 1);
+        recoilTargetY = y;
+    } 
+    
+    private void DoRecoil()
+    {
+        if (recoilState == RecoilState.WAITING)
+            return;
+
+        if (recoilState == RecoilState.LOWERING)
+        {
+            recoilTimer += Time.deltaTime;
+
+            recoilX = Mathf.Lerp(0, recoilTargetX, recoilTimer);
+            recoilY = Mathf.Lerp(0, recoilTargetY, recoilTimer);
+            if (recoilTimer >= .05)
+            {
+                recoilState = RecoilState.RAISING;
+                recoilTimer = 0;
+            }
+        }
+        else if (recoilState == RecoilState.RAISING)
+        {
+            recoilTimer += Time.deltaTime;
+            float t = recoilTimer / 1;
+            t = Easing.Exponential.Out(t);
+            recoilX = Mathf.Lerp(recoilTargetX, 0, t);
+            recoilY = Mathf.Lerp(recoilTargetY, 0, t);
+            if (recoilTimer >= 1)
+            {
+                recoilState = RecoilState.RAISING;
+            }
+        }
+    }
+}
+
+enum RecoilState
+{
+    WAITING,
+    LOWERING,
+    RAISING
 }
 
 enum DipState
 {
     WAITING,
-    RESET,
     LOWERING,
     RAISING
 }

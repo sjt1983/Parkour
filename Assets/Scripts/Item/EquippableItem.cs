@@ -36,6 +36,7 @@ public abstract class EquippableItem: Interactable
     //Assign to the selected pawn.
     public virtual void AssignToPawn(Pawn pawn)
     {
+
         this.pawn = pawn;
     }
 
@@ -45,21 +46,21 @@ public abstract class EquippableItem: Interactable
     {
         pawn.PickupItem(this);
 
-        HideMeshes();
+        HideMeshes(9);
     }
 
     //Equip the item, which sets Equipped to true, shows the mesh, eventually does neat animation stuff.
     public virtual void EquipItem()
     {
         Equipped = true;
-        ShowMeshes();
+        ShowMeshes(9);
     }
 
     //Unequip the item, which should stop the script and hide the mesh.
     public virtual void UnequipItem()
     {
         Equipped = false;
-        HideMeshes();
+        HideMeshes(9);
     }
 
     //Returns this weapons animator override controller
@@ -70,22 +71,25 @@ public abstract class EquippableItem: Interactable
     {
         pawn = null;
         Equipped = false;
-        ShowMeshes();
+        ShowMeshes(1);
     }
 
-    private void HideMeshes()
+    private void HideMeshes(int layerToAssignMeshes)
     {
         foreach (Renderer r in mainMeshRenderer)
         {
             r.enabled = false;
+            r.gameObject.layer = layerToAssignMeshes;
         }
     }
 
-    private void ShowMeshes()
+    private void ShowMeshes(int layerToAssignMeshes)
     {
         foreach (Renderer r in mainMeshRenderer)
         {
             r.enabled = true;
+            r.gameObject.layer = layerToAssignMeshes;
         }
     }
+
 }

@@ -27,12 +27,15 @@ public class ActionMenuUI : BaseUI
 
     private Camera mainCamera;
 
+    private Camera armsCamera;
+
     /*** Unity Methods ***/
 
     private void Awake()
     {
         ShowMouseCursor = true;
         mainCamera = GameObject.Find("Main Camera").GetComponent<Camera>();
+        armsCamera = GameObject.Find("ArmsCamera").GetComponent<Camera>();
 
         mouseSensitivitySlider.value = pawn.PawnLook.MouseSensitivity;
         mouseSensitivityValue.text = pawn.PawnLook.MouseSensitivity.ToString();
@@ -54,6 +57,7 @@ public class ActionMenuUI : BaseUI
     public void OnPointerUpChangeFOV()
     {
         mainCamera.fieldOfView = fovSlider.value;
+        armsCamera.fieldOfView = fovSlider.value;
         fovValue.text = mainCamera.fieldOfView.ToString();
     }
 
