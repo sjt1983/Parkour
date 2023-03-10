@@ -68,7 +68,7 @@ public class Pistol : EquippableItem
                 ammoCount--;
                 pawnLook.Recoil(1, 3);
 
-                GameObject obj = new GameObject();
+                GameObject obj = new GameObject("Bullet");
                 Bullet bullet = obj.AddComponent<Bullet>();
                 obj.transform.position = pawnLook.MainCamera.position + pawnLook.MainCamera.forward * .5f; ;
                 obj.transform.rotation = pawnLook.MainCamera.rotation;

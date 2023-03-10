@@ -6,11 +6,13 @@ public class Utils : MonoBehaviour
     static IDictionary<string, string>  dic = new Dictionary<string, string>();
     static int inc = 0;
 
-    public static void SpawnDebugSphereAtPosition(Vector3 vector3)
+    public static GameObject SpawnDebugSphereAtPosition(Vector3 vector3, Transform owner)
     {
         GameObject gameObjectItem = (GameObject)Instantiate(Resources.Load("Prefabs/DebugSphere"), vector3, Quaternion.identity);
         gameObjectItem.name += inc++.ToString();
+        gameObjectItem.transform.parent = owner;
         dic.Add(gameObjectItem.name, "");
+        return gameObjectItem;
     }
 
     public static void ClearAllDebugSpheres()
