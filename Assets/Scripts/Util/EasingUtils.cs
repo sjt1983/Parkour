@@ -9,7 +9,7 @@ using UnityEngine;
 //STEVE NOTE - I stole this code, visualizations here: https://easings.net/
 public delegate float EasingFunction(float k);
 
-public class Easing
+public class EasingUtils
 {
 	public static float Linear(float k)
 	{

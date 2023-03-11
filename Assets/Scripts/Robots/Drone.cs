@@ -42,7 +42,10 @@ public class Drone : Damageable
     public override void ApplyDamage(float amount)
     {
         Health--;
+        GameObject hitMarkerGO = (GameObject)Instantiate(Resources.Load("Prefabs/UI/HitMarker"), transform.position, Quaternion.identity);
+        HitMarker marker = hitMarkerGO.GetComponent<HitMarker>();
 
+        marker.Initialize(1);
         if (Health <= 0)
         {
             deadY = -1000;

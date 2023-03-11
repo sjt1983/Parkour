@@ -313,7 +313,7 @@ public sealed class PawnLook : MonoBehaviour
         {
             recoilTimer += Time.deltaTime;
             float t = recoilTimer / 1;
-            t = Easing.Exponential.Out(t);
+            t = EasingUtils.Exponential.Out(t);
             recoilX = Mathf.Lerp(recoilTargetX, 0, t);
             recoilY = Mathf.Lerp(recoilTargetY, 0, t);
             if (recoilTimer >= 1)

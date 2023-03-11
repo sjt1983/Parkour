@@ -15,7 +15,7 @@ TagManager:
   - MapGeometry
   - Sensor
   - GroundItem
-  - PlayerCull
+  - PlayerArmsCull
   - 
   - 
   - 
