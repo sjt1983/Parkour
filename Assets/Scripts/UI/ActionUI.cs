@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 //Stuff the player sees while they are playing the game.
 public class ActionUI : BaseUI
@@ -19,27 +18,12 @@ public class ActionUI : BaseUI
         ShowMouseCursor = false;
     }
 
-    public string DebugText1
-    {
-        set
-        {
-            debug1.text = value;
-        }
-    }
+    //Set Debug Text 1
+    public string DebugText1 { set => debug1.text = value; }
 
-    public string DebugText2
-    {
-        set
-        {
-            debug2.text = value;
-        }
-    }
+    //Set Debug Text 2
+    public string DebugText2 { set => debug2.text = value; }
 
-    public string DebugText3
-    {
-        set
-        {
-            debug3.text = value;
-        }
-    }
+    //Set Debug Text 3
+    public string DebugText3 { set => debug3.text = value; }
 }

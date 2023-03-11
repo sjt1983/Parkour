@@ -1,7 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
+//Just a class used temporaily to give me something to shoot at!
 public class Drone : Damageable
 { 
 

@@ -1,22 +1,19 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 //Base class for a Sensor.
-//Used to determine if it users can do fun movement stuff.
+//Used to determine if it pawns can do fun movement stuff.
 public class Sensor : MonoBehaviour
 {
+    /************************/
     /*** Class Properties ***/
+    /************************/
+
     //Number of objects the sensor is currently colliding with.
     public int CollidedObjects { get; set; }
 
-    public bool IsCollidingWith(string gameObjectName)
-    {
-        return colliedObjectNames != null && colliedObjectNames.Keys.Count > 0 &&colliedObjectNames.ContainsKey(gameObjectName);
-    }
-
-    private IDictionary<string, bool> colliedObjectNames = new Dictionary<string, bool>();
-
+    /*********************/
     /*** Unity Methods ***/
+    /*********************/
 
     private void Awake()
     {
@@ -30,7 +27,6 @@ public class Sensor : MonoBehaviour
             return;
 
         CollidedObjects++;
-        //colliedObjectNames.Add(other.gameObject.name, true);
     }
 
     //When this objects collides with another, decrement count by 1;
@@ -40,6 +36,5 @@ public class Sensor : MonoBehaviour
             return;
 
         CollidedObjects--;
-        //colliedObjectNames.Remove(other.gameObject.name);
     }
 }

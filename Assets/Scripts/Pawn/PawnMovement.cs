@@ -220,9 +220,9 @@ public sealed class PawnMovement : MonoBehaviour
             if (!WasGroundedLastFrame && !pawn.IsSliding)
             {
                 if (CurrentYSpeed < GRAVITY_CAMERA_DIP_THRESHOLD)
-                    pawnLook.Dip(LAND_DIP_ANGLE, LAND_DIP_SMOOTH_TIME, LAND_DIP_RAISE_TIME);
+                    pawnLook.DipCamera(LAND_DIP_ANGLE, LAND_DIP_SMOOTH_TIME, LAND_DIP_RAISE_TIME);
 
-                float landDifference = Utils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, LastGroundedFrameAngle);
+                float landDifference = ParkourUtils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, LastGroundedFrameAngle);
 
                 if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW) 
                 {
@@ -306,7 +306,7 @@ public sealed class PawnMovement : MonoBehaviour
 
     private void Jump()
     {
-        pawnLook.Dip(JUMP_DIP_ANGLE, JUMP_DIP_SMOOTH_TIME, JUMP_DIP_RAISE_TIME);
+        pawnLook.DipCamera(JUMP_DIP_ANGLE, JUMP_DIP_SMOOTH_TIME, JUMP_DIP_RAISE_TIME);
         //If the jump boost sensor isnt colliding, we are near an egde, so lets boost the character!
         if (jumpBoostSensor.CollidedObjects == 0)
         {
@@ -337,17 +337,17 @@ public sealed class PawnMovement : MonoBehaviour
             //IMPROVEMENT - figure out which euler y the vector is traveling instead of locking in the angles at certain times.
             //If we have a difference of less than 45 degrees between the current angle and the angle we jumped at, reflect all velocity perfectly.
             var currentYAngle = transform.rotation.eulerAngles.y;
-            pawnLook.Dip(WALLJUMP_DIP_ANGLE, WALLJUMP_DIP_SMOOTH_TIME, WALLJUMP_DIP_RAISE_TIME);
+            pawnLook.DipCamera(WALLJUMP_DIP_ANGLE, WALLJUMP_DIP_SMOOTH_TIME, WALLJUMP_DIP_RAISE_TIME);
             CurrentYSpeed = JUMP_FORCE;
             pawn.AddVaultLock(.35f);
             XZGroundVelocity = Vector3.Reflect(XZGroundVelocity, hit.normal);
 
             //If we did some crazy rotation to hit the wall, reflect the angle, normalize it, then add a Vector3 to "push off" the wall instead of a "Bounce".
             //JK also testing adding an additional force and NOT normalizing the initial vector.
-            if (Utils.DifferenceInBetweenTwoAngles(currentYAngle, LastGroundedFrameAngle) >= WALLJUMP_OFF_ANGLE_THRESHOLD)
+            if (ParkourUtils.DifferenceInBetweenTwoAngles(currentYAngle, LastGroundedFrameAngle) >= WALLJUMP_OFF_ANGLE_THRESHOLD)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(hit.normal, transform.up);
-                Vector3 wallForce = Utils.GenerateDirectionalForceVector(targetRotation, WALLJUMP_OFF_ANGLE_BONUS_FORCE);
+                Vector3 wallForce = ParkourUtils.GenerateDirectionalForceVector(targetRotation, WALLJUMP_OFF_ANGLE_BONUS_FORCE);
                 XZGroundVelocity += wallForce;
             }
 

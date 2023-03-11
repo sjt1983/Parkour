@@ -26,7 +26,7 @@ public class Bullet : MonoBehaviour
         newPosition = transform.position + (transform.forward * Velocity * Time.deltaTime) + (transform.up * gravity * Time.deltaTime);
 
         if (Globals.Debug)
-            debugSpheres.Add(Utils.SpawnDebugSphereAtPosition(gameObject.transform.position, null));
+            debugSpheres.Add(DebugUtils.SpawnDebugSphereAtPosition(gameObject.transform.position, null));
 
 
         if (Physics.Linecast(transform.position, newPosition, out RaycastHit hitinfo))
@@ -61,6 +61,6 @@ public class Bullet : MonoBehaviour
         initialized = true;
 
         if (Globals.Debug)
-            debugSpheres.Add(Utils.SpawnDebugSphereAtPosition(gameObject.transform.position, null));
+            debugSpheres.Add(DebugUtils.SpawnDebugSphereAtPosition(gameObject.transform.position, null));
     }
 }

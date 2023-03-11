@@ -4,6 +4,10 @@ using UnityEngine;
 //Class representing the pawns inventory.
 public class PawnInventory : MonoBehaviour
 {
+    /***********************************/
+    /*** References to Unity Objects ***/
+    /***********************************/
+
     [SerializeField]
     private PawnArmsAnimator pawnArmsAnimator;
 
@@ -19,20 +23,26 @@ public class PawnInventory : MonoBehaviour
     [SerializeField]
     private Transform itemBone;
 
+    /***********************/
+    /*** Class Variables ***/
+    /***********************/
+
     //All the players equipment slots.
     public EquippableItem[] ItemSlots = new EquippableItem[4];
 
-    [SerializeField]
     //Current active inventory slow.
     public int activeSlot = -1;
 
-    [SerializeField]
     //Flag to indicate a current "item switch" is happening.
     private bool equippingItem = false;
 
     //How long to delay the coroutine to switch weapons
     private const float ITEM_SWITCH_COROUTINE_DELAY = .25f;
-        
+
+    /*****************/
+    /* Unity Methods */
+    /*****************/
+
     private void Update()
     {
         //For now, we only need to handle the equipment buttons being pressed.
@@ -50,6 +60,10 @@ public class PawnInventory : MonoBehaviour
                 UnequipItem();
         }
     }
+
+    /*****************/
+    /* Class Methods */
+    /*****************/
 
     //Pickup an item.
     public void PickupItem(EquippableItem equippableItem)

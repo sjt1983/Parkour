@@ -25,6 +25,8 @@ public abstract class EquippableItem: Interactable
     //SUPER IMPORTANT PROPERTY - scripts needs to determine if the item is equipped to know whether or not to execute.
     public bool Equipped { get; set; }
 
+    //Flag for enabling the item, which is another condition which can be checked. Certain actions disable certain items (items programmed to support it)
+    //example, you cannot use a pogostick while vaulting but you can shoot a gun.
     public bool ItemEnabled { get; set; }
 
     public void Awake()
@@ -74,6 +76,7 @@ public abstract class EquippableItem: Interactable
         ShowMeshes(1);
     }
 
+    //Hide the meshes, and also assign them to the passed-in layer.
     private void HideMeshes(int layerToAssignMeshes)
     {
         foreach (Renderer r in mainMeshRenderer)
@@ -83,6 +86,7 @@ public abstract class EquippableItem: Interactable
         }
     }
 
+    //Show the meshes, and also assign them to the passed-in layer.
     private void ShowMeshes(int layerToAssignMeshes)
     {
         foreach (Renderer r in mainMeshRenderer)

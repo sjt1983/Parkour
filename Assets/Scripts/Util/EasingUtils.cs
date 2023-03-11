@@ -5,6 +5,8 @@ using UnityEngine;
  * at https://github.com/sole/tween.js
  * Quadratic.Bezier by @fonserbc - Licensed under WTFPL license
  */
+
+//STEVE NOTE - I stole this code, visualizations here: https://easings.net/
 public delegate float EasingFunction(float k);
 
 public class Easing

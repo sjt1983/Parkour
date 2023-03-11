@@ -33,10 +33,8 @@ public sealed class UIManager : MonoBehaviour
 
     public void Initialize()
     {
-        foreach (BaseUI view in views)
-        {
-            view.Initialize();
-        }
+        foreach (BaseUI view in views)  
+            view.Initialize();   
     }
 
     //Shows a view
@@ -47,9 +45,7 @@ public sealed class UIManager : MonoBehaviour
         {
             view.gameObject.SetActive(view is T);
             if (view is T)
-            {
                 Cursor.visible = view.ShowMouseCursor;
-            }
         }
     }
 

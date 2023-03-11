@@ -26,11 +26,13 @@ public sealed class Pawn : MonoBehaviour
     /* Private class variables */
     /***************************/
 
+    //Minimum time to lock the pawn from doing stuff
     private const float ACTION_LOCK_MINIMUM_TIME = .25f;
 
     //Flag to prevent any logic from executing until after Initialization.
     private bool initialized = false;
 
+    //How long we should lock the vaulting action after doing it.
     public float VaultLockTimer { set; get; }
 
     /************************/
@@ -89,8 +91,10 @@ public sealed class Pawn : MonoBehaviour
     //Quick Reference for Upward Speed.
     public float UpwardSpeed { get => pawnMovement.UpwardSpeed; }
 
+    //Current forward vector the pawn is moving in
     public Vector3 ForwardVector { get; set; }
 
+    //Current right vector the pawn is moving in
     public Vector3 RightVector { get; set; }
 
     //Item the pawn is looking at
@@ -130,11 +134,13 @@ public sealed class Pawn : MonoBehaviour
 
     }
 
+    //Add a speed charge to the pawn to increase the max speed
     public void AddSpeedCharge()
     {
         SpeedCharges += 1;
     }
 
+    //Remove all speed charges on the pawn,
     public void RemoveAllSpeedCharges()
     {
         SpeedCharges = 0;

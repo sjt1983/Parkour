@@ -126,7 +126,7 @@ public class PawnVault : MonoBehaviour
         else if (vaultState == VaultState.PAUSE)
         {
             pawnArmsAnimator.SetTrigger("Vault");
-            pawnLook.Dip(VAULT_DIP_ANGLE, VAULT_DIP_SMOOTH_TIME, VAULT_DIP_RAISE_TIME, true);
+            pawnLook.DipCamera(VAULT_DIP_ANGLE, VAULT_DIP_SMOOTH_TIME, VAULT_DIP_RAISE_TIME, true);
             //Just sit for a bit but also slerp the camera.
             pauseTimer -= Time.deltaTime;
             if (pauseTimer <= 0)
@@ -137,7 +137,7 @@ public class PawnVault : MonoBehaviour
         //Now vault.
         else if (vaultState == VaultState.RAISE)
         {            
-            pawnLook.Dip(VAULT_DIP_ANGLE, VAULT_DIP_SMOOTH_TIME, VAULT_DIP_RAISE_TIME, true);
+            pawnLook.DipCamera(VAULT_DIP_ANGLE, VAULT_DIP_SMOOTH_TIME, VAULT_DIP_RAISE_TIME, true);
             transform.position = new Vector3(transform.position.x, Mathf.SmoothDamp(transform.position.y, vaultPoint.y + VAULT_SMOOTH_HEIGHT_BUFFER, ref smoothY, VAULT_SMOOTH_TIME), transform.position.z);
 
             //Release control after the raise phase

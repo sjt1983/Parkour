@@ -3,17 +3,21 @@ using UnityEngine;
 //Used to animate the pawns arms.
 public class PawnArmsAnimator : MonoBehaviour
 {
+    /*****************************************/
+    /*** Local references to unity objects ***/
+    /*****************************************/
+
     //Reference to the pawn.
     [SerializeField]
     private Pawn pawn;
     
-    //Reverence to the animator.
+    //Reverence to the arms animator.
     [SerializeField]
     private Animator pawnArmsAnimator;
 
     /*** Item switch animations/pawn properties need to happen on a timer and in-sync ***/
 
-    //Which item we will equip
+    //Which item we will equip.
     private EquippableItem itemToEquip;
     //Which state the equipping script is in.
     private EquipState equipState = EquipState.WAITING;
@@ -21,7 +25,7 @@ public class PawnArmsAnimator : MonoBehaviour
     /*** I do a neat trick where, instead of creating animations for each weapon to "Switch" I just move the arms backwards diagonally down ***/
     //default position of the pawns arms.
     private Vector3 defaultPawnArmsPosition;
-    //target position of the pawns arms,
+    //target position of the pawns arms.
     private Vector3 targetPawnArmsPosition;
     //How fast we should lerp the arms when switching weapons. This should be half the total time you want to switch weapons.
     private const float WEAPON_SWITCH_LERP_TIME = .25f;

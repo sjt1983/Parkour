@@ -35,7 +35,9 @@ public sealed class PawnLook : MonoBehaviour
 
     public Transform MainCamera { get => mainCamera; }
 
+    /*************************/
     /*** Camera Properties ***/
+    /*************************/
 
     //Used to clamp the camera to prevent the users neck from doing vertical 360s.
     private float cameraVerticalRotation = 0f;
@@ -43,7 +45,9 @@ public sealed class PawnLook : MonoBehaviour
 
     private Vector3 targetRotation = Vector3.zero;
 
+    /************************/
     /*** Mouse Properties ***/
+    /************************/
 
     //Values of the mouse delta from the last frame, adjusted for sensitivity.
     private float adjustedMouseX;
@@ -52,7 +56,9 @@ public sealed class PawnLook : MonoBehaviour
     //Mouse Sensitivity
     public float MouseSensitivity = 15;
 
+    /****************************/
     /*** Crouching Properties ***/
+    /****************************/
 
     //Default local camera Y local position
     private float defaultCameraLocalY = 1f;
@@ -66,7 +72,9 @@ public sealed class PawnLook : MonoBehaviour
     //How fast the charatcer should crouch, essentially, meters per second.
     private const float CROUCH_SPEED = 6f;
 
+    /**********************************************************/
     /************** Looking At Item Properties ****************/
+    /**********************************************************/
 
     //How close someone needs to be to the item.
     private const float ITEM_LOOK_DISTANCE_METERS = 3f;
@@ -74,8 +82,9 @@ public sealed class PawnLook : MonoBehaviour
     //How well they need to be looking at the item, aka the dot product
     private const float ITEM_LOOK_DOT_MAX = .95f;
 
+    /***************************************/
     /*********** Dip Properties ************/
-
+    /***************************************/
     //Flag to determine if we should dip;
     private DipState dipState = DipState.WAITING;
 
@@ -91,7 +100,9 @@ public sealed class PawnLook : MonoBehaviour
     //Semaphore for blocking a dip reset because we are already resetting it.
     bool dipResetBlock = false;
 
+    /******************************************/
     /********** Recoil Properties *************/
+    /******************************************/
 
     private float recoilTargetX = 0f;
     private float recoilTargetY = 0f;
@@ -208,13 +219,13 @@ public sealed class PawnLook : MonoBehaviour
     }
 
     //Shorthand Dip for skipping the forceReset param and assume false.
-    public void Dip(float dipAngle, float dipSmoothTime, float dipRaiseSmoothTime)
+    public void DipCamera(float dipAngle, float dipSmoothTime, float dipRaiseSmoothTime)
     {
-        Dip(dipAngle, dipSmoothTime, dipRaiseSmoothTime, false);            
+        DipCamera(dipAngle, dipSmoothTime, dipRaiseSmoothTime, false);            
     }
 
     //Dip and raise the camera to make vertical transicitons (jumping, landing, etc) look less basic
-    public void Dip(float dipAngle, float dipSmoothTime, float dipRaiseSmoothTime, bool forceReset)
+    public void DipCamera(float dipAngle, float dipSmoothTime, float dipRaiseSmoothTime, bool forceReset)
     {
         //If we are just waiting, calibrate the engine!!!!1
         if (dipState == DipState.WAITING)
@@ -268,20 +279,24 @@ public sealed class PawnLook : MonoBehaviour
         }
     }
 
-    public void Recoil(float x, float y)
+    //Set how much the camera should recoil.
+    public void RecoilCamera(float x, float y)
     {
-        recoilState = RecoilState.LOWERING;
+        recoilState = RecoilState.RAISING;
         recoilTimer = 0;
         recoilTargetX = x * (Random.Range(1, 3) == 1 ? -1 : 1);
         recoilTargetY = y;
     } 
     
+    //Perform the recoil, if necessary
     private void DoRecoil()
     {
+        //If we are waiting for recoil to happen, do nothing.
         if (recoilState == RecoilState.WAITING)
             return;
 
-        if (recoilState == RecoilState.LOWERING)
+        //For raising, very quickly lerp up.
+        if (recoilState == RecoilState.RAISING)
         {
             recoilTimer += Time.deltaTime;
 
@@ -289,11 +304,12 @@ public sealed class PawnLook : MonoBehaviour
             recoilY = Mathf.Lerp(0, recoilTargetY, recoilTimer);
             if (recoilTimer >= .05)
             {
-                recoilState = RecoilState.RAISING;
+                recoilState = RecoilState.LOWERING;
                 recoilTimer = 0;
             }
         }
-        else if (recoilState == RecoilState.RAISING)
+        //For lowering, lets be fancy in how we lerp back.
+        else if (recoilState == RecoilState.LOWERING)
         {
             recoilTimer += Time.deltaTime;
             float t = recoilTimer / 1;
@@ -302,7 +318,7 @@ public sealed class PawnLook : MonoBehaviour
             recoilY = Mathf.Lerp(recoilTargetY, 0, t);
             if (recoilTimer >= 1)
             {
-                recoilState = RecoilState.RAISING;
+                recoilState = RecoilState.WAITING;
             }
         }
     }

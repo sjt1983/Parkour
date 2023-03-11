@@ -175,10 +175,10 @@ public class PogoStick : EquippableItem
 
             //If we did some crazy rotation to hit the wall, reflect the angle, normalize it, then add a Vector3 to "push off" the wall instead of a "Bounce".
             //JK also testing adding an additional force and NOT normalizing the initial vector.
-            if (Utils.DifferenceInBetweenTwoAngles(currentYAngle, lastGroundedFrameAngle) >= 45)
+            if (ParkourUtils.DifferenceInBetweenTwoAngles(currentYAngle, lastGroundedFrameAngle) >= 45)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(hit.normal, pawn.transform.up);
-                Vector3 wallForce = Utils.GenerateDirectionalForceVector(targetRotation, 3f);
+                Vector3 wallForce = ParkourUtils.GenerateDirectionalForceVector(targetRotation, 3f);
                 xzAirVelocity += wallForce;
             }
 

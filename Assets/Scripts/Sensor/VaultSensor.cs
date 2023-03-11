@@ -43,8 +43,7 @@ public class VaultSensor : Sensor
         RaycastHit hitInfo;
         //Raycast down from the sensor, only looking at map geometry.
         if (Physics.Raycast(gameObject.transform.position, Vector3.down, out hitInfo, SENSOR_RANGE, layerMask))
-        {
- 
+        { 
             //If the point we are trying to vault at is lower than our shoulders, we dislocate both shoulders.
             //JK we just dont allow the vault.
 
@@ -66,8 +65,7 @@ public class VaultSensor : Sensor
                     inHitInfo = hitInfo;
                     return true;
                 }
-            }
-                
+            }                
         }
 
         return false;

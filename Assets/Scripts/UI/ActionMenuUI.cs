@@ -25,8 +25,10 @@ public class ActionMenuUI : BaseUI
     [SerializeField]
     private TextMeshProUGUI fovValue;
 
+    [SerializeField]
     private Camera mainCamera;
 
+    [SerializeField]
     private Camera armsCamera;
 
     /*** Unity Methods ***/
@@ -34,8 +36,6 @@ public class ActionMenuUI : BaseUI
     private void Awake()
     {
         ShowMouseCursor = true;
-        mainCamera = GameObject.Find("Main Camera").GetComponent<Camera>();
-        armsCamera = GameObject.Find("ArmsCamera").GetComponent<Camera>();
 
         mouseSensitivitySlider.value = pawn.PawnLook.MouseSensitivity;
         mouseSensitivityValue.text = pawn.PawnLook.MouseSensitivity.ToString();
