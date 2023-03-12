@@ -3,7 +3,7 @@
 public class HitResponse 
 {
     //Id of the thing that was hit.
-    public string TargetId { get; set; }
+    public int TargetId { get; set; }
 
     //Total damage done;
     public float Damage { get; set; }
