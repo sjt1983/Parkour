@@ -68,7 +68,7 @@ public class Pistol : EquippableItem
             return;
 
         //Fake UI for now.
-        UIManager.Instance.DebugText1 = ammoCount.ToString();
+        UIManager.Instance.DebugText1 = "Ammo count: " + ammoCount.ToString();
 
         //If the cooldown happened, reset the triggers.
         cooldownTimer = Mathf.Clamp(cooldownTimer - Time.deltaTime, 0f, 1f);

@@ -23,7 +23,6 @@ public class Drone : Damageable
     {
         Timer += Time.deltaTime;
         float x = Mathf.Sin(Timer);
-        UIManager.Instance.DebugText2 = x.ToString();
         transform.position = new Vector3(transform.position.x, Y + deadY + x * (2 + 3 - Health), transform.position.z);
 
         transform.localScale = new Vector3(Health / 3, Health / 3, Health / 3);
@@ -44,7 +43,7 @@ public class Drone : Damageable
     {
         Health--;
         GameObject gameObjectItem = (GameObject)Instantiate(Resources.Load("Prefabs/HitMarker"), GameObject.Find("HitMarkerTarget").transform);
-        gameObjectItem.GetComponent<HitMarker>().Initialize(amount);
+        gameObjectItem.GetComponent<HitMarker>().Initialize(amount, Color.blue);
        
         if (Health <= 0)
         {

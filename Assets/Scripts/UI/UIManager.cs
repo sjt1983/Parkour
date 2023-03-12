@@ -59,4 +59,10 @@ public sealed class UIManager : MonoBehaviour
     public string DebugText2 { set => actionUI.DebugText2 = value; }
 
     public string DebugText3 { set => actionUI.DebugText3 = value; }
+
+    public string DebugText4 { set => actionUI.DebugText4 = value; }
+
+    public string DebugText5 { set => actionUI.DebugText5 = value; }
+
+    public string DebugText6 { set => actionUI.DebugText6 = value; }
 }

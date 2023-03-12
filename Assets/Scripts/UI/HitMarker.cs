@@ -47,11 +47,12 @@ public class HitMarker : MonoBehaviour
        
     }
 
-    public void Initialize(float amount)
+    public void Initialize(float amount, Color color)
     {
         text.text = amount.ToString();
+        text.color = color;
         defaultPosition = transform.position; ;
-        targetPosition = defaultPosition + new Vector2(5f, 125f);
+        targetPosition = defaultPosition + new Vector2(50f, 15f);
 
         defaultScale = transform.localScale;
         targetScale = new Vector2(0, 0);
