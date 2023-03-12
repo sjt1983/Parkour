@@ -1,19 +1,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Class used to represent a simple bullet.
 public class Bullet : MonoBehaviour
 {
-    bool initialized = false;
+    //Pawn that owns the bullet fired.
+    private EquippableItem ownerItem;
 
-    private float Velocity = 0f;
+    //velocity of the bullet.
+    private float velocity = 0f;
 
+    //age of the bullet
     private float age = 0f;
 
-    Vector3 newPosition;
+    //total gravity force applied to the bullet.
+    private float gravity = 0f;
 
-    float gravity = 0f;
+    //Collection of debug spheres to destroy when the bullet is destroyed.
+    List<GameObject> debugSpheres = new();
 
-    List<GameObject> debugSpheres = new List<GameObject>();
+    //Position we move the bullet to per frame
+    private Vector3 newPosition;
+
+    //How much gravity should be applied to the bullet per second.
+    private const float BULLET_GRAVITY = -30f;
+
+    //Initialization flag
+    private bool initialized = false;
 
     // Update is called once per frame
     void Update()
@@ -21,13 +34,17 @@ public class Bullet : MonoBehaviour
         if (!initialized)
             return;
 
-        gravity += -30f * Time.deltaTime;
+        //How much total gravity is applied to the bullet.
+        gravity += BULLET_GRAVITY * Time.deltaTime;
 
-        newPosition = transform.position + (transform.forward * Velocity * Time.deltaTime) + (transform.up * gravity * Time.deltaTime);
+        //Generate the new position.
+        newPosition = transform.position + (transform.forward * velocity * Time.deltaTime) + (transform.up * gravity * Time.deltaTime);
 
+        //If debug mode, add a sphere.
         if (Globals.Debug)
             debugSpheres.Add(DebugUtils.SpawnDebugSphereAtPosition(gameObject.transform.position, null));
 
+        //See if the bullet should hit something this frame with a linecast due to fast enough velocities missing colliders.
 
         if (Physics.Linecast(transform.position, newPosition, out RaycastHit hitinfo))
         {
@@ -35,7 +52,9 @@ public class Bullet : MonoBehaviour
 
             if (damageable != null)
             {
-                damageable.ApplyDamage(50);
+                //We hit something significant, so lets apply the damage and register the hit.
+                HitResponse hitResponse = damageable.ApplyDamage(7);
+                ownerItem.RegisterHit(hitResponse);
             }
 
             GameObject.Destroy(gameObject);
@@ -55,9 +74,10 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    public void Initialize(float velocity)
+    public void Initialize(EquippableItem owner, float velocity)
     {
-        Velocity = velocity;
+        this.velocity = velocity;
+        ownerItem = owner;
         initialized = true;
 
         if (Globals.Debug)

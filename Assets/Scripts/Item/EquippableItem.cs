@@ -96,4 +96,8 @@ public abstract class EquippableItem: Interactable
         }
     }
 
+    public void RegisterHit(HitResponse hitResponse)
+    {
+        pawn.RegisterHit(hitResponse);
+    }
 }

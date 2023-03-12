@@ -184,4 +184,9 @@ public sealed class Pawn : MonoBehaviour
             ItemPawnIsLookingAt.Interact(this);
     }
 
+    public void RegisterHit(HitResponse hitResponse)
+    {
+        UIManager.Instance.RegisterHit(hitResponse);
+    }
+
 }

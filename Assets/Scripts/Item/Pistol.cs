@@ -40,8 +40,6 @@ public class Pistol : EquippableItem
     //Realoding flag to prevent actions from happening while reloading.
     private bool reloading = false;
 
-
-
     public override void EquipItem()
     {
         base.EquipItem();
@@ -54,7 +52,6 @@ public class Pistol : EquippableItem
     {
         //Call the superclass method
         base.AssignToPawn(pawn);
-
         //Load references to unity objects.
         pawnInput = pawn.gameObject.GetComponent<PawnInput>();
         pawnLook = pawn.gameObject.GetComponent<PawnLook>();
@@ -95,7 +92,7 @@ public class Pistol : EquippableItem
                 Bullet bullet = obj.AddComponent<Bullet>();
                 obj.transform.position = pawnLook.MainCamera.position + pawnLook.MainCamera.forward * .5f; ;
                 obj.transform.rotation = pawnLook.MainCamera.rotation;
-                bullet.Initialize(500f);                
+                bullet.Initialize(this, 500f);                
             }
             else if (pawnInput.ReloadPressedThisFrame)
             {
@@ -108,6 +105,7 @@ public class Pistol : EquippableItem
             }
         }        
     }
+
 
     //Do the Reload animation.
     private IEnumerator PlayReloadPistolAnimation(float time)

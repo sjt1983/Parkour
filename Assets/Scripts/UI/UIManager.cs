@@ -49,6 +49,11 @@ public sealed class UIManager : MonoBehaviour
         }
     }
 
+    public void RegisterHit(HitResponse hitResponse)
+    {
+        actionUI.RegisterHit(hitResponse);
+    }
+
     //Simple getter to see if the cursor is enabled for utility.
     //e.g. you're in a menu and you don't want the camera to move, return from update if IsCursorVisible.
     public bool IsCursorVisible { get => Cursor.visible; }

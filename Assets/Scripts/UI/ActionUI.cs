@@ -4,6 +4,9 @@ using TMPro;
 public class ActionUI : BaseUI
 {
     [SerializeField]
+    Transform hitMarkerTarget;
+
+    [SerializeField]
     private TextMeshProUGUI debug1;
 
     [SerializeField]
@@ -27,6 +30,11 @@ public class ActionUI : BaseUI
         ShowMouseCursor = false;
     }
 
+    private void Update()
+    {
+
+    }
+
     //Set Debug Text 1
     public string DebugText1 { set => debug1.text = value; }
 
@@ -44,4 +52,13 @@ public class ActionUI : BaseUI
 
     //Set Debug Text 6
     public string DebugText6 { set => debug6.text = value; }
+
+    public void RegisterHit(HitResponse hitResponse)
+    {
+        GameObject gameObjectItem = (GameObject)Instantiate(Resources.Load("Prefabs/HitMarker"), hitMarkerTarget.transform);
+        if (hitResponse.ArmorDamage > 0)
+            gameObjectItem.GetComponent<HitMarker>().Initialize(hitResponse.ArmorDamage, Color.blue);
+        else
+            gameObjectItem.GetComponent<HitMarker>().Initialize(hitResponse.HealthDamage, Color.red);
+    }
 }
