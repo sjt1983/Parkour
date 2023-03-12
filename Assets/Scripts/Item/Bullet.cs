@@ -27,9 +27,8 @@ public class Bullet : MonoBehaviour
 
     //Initialization flag
     private bool initialized = false;
-
-    // Update is called once per frame
-    void Update()
+        
+    private void Update()
     {
         if (!initialized)
             return;
@@ -60,22 +59,28 @@ public class Bullet : MonoBehaviour
             GameObject.Destroy(gameObject);
         }
 
+        //Now move the bullet.
         age += Time.deltaTime;
-
         transform.position = newPosition;
 
+        //IF the bullet is alive longer than 4 seconds kill it.
         if (age > 4)
         {
-            foreach (GameObject obj in debugSpheres)
+            if (Globals.Debug)
             {
-                GameObject.Destroy(obj);
+                foreach (GameObject obj in debugSpheres)
+                {
+                    GameObject.Destroy(obj);
+                }
             }
+                
             GameObject.Destroy(gameObject);
         }
     }
 
     public void Initialize(EquippableItem owner, float velocity)
     {
+        //Set the owner and velocity of the bullet.
         this.velocity = velocity;
         ownerItem = owner;
         initialized = true;

@@ -24,8 +24,7 @@ public class Drone : Damageable
         Timer += Time.deltaTime;
         float x = Mathf.Sin(Timer);
         transform.position = new Vector3(transform.position.x, Y + deadY + x , transform.position.z);
-
-      //  transform.localScale = new Vector3(Health / 20, Health / 20, Health / 20);
+        //transform.localScale = new Vector3(Health / 20, Health / 20, Health / 20);
 
         if (deadY < -999)
         {
@@ -42,7 +41,7 @@ public class Drone : Damageable
 
     public override HitResponse ApplyDamage(float amount)
     {
-        Debug.Log("WOOHOO");
+
         HitResponse hitResponse = new();
         hitResponse.TargetId = DamageableId;
         hitResponse.Damage = amount;

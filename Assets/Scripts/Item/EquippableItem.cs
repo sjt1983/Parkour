@@ -96,6 +96,7 @@ public abstract class EquippableItem: Interactable
         }
     }
 
+    //Register a hit with the gun.
     public void RegisterHit(HitResponse hitResponse)
     {
         pawn.RegisterHit(hitResponse);

@@ -24,15 +24,47 @@ public class ActionUI : BaseUI
     [SerializeField]
     private TextMeshProUGUI debug6;
 
+    /****************************/
+    /*** Hit Marker Variables ***/
+    /****************************/
+
+    //Last ID of the target hit.
+    private int lastTargetHit = -1;
+
+    //Damage accumulations
+    private float accumulatedArmorDamage = 0f;
+    private float accumulatedHealthDamage = 0f;
+
+    //Time and timer used to reset the marker if it has been a while since the pawn shot someone.
+    private float markerTimer = 0f;
+    private const float MARKER_TIMEOUT = 1f;
+
+    //Hit Markers GameObject and Component references.
+    GameObject hitMarkerGameObject1, hitMarkerGameObject2;
+    HitMarker hitMarker1, hitMarker2;
+
+    /*********************/
     /*** Unity Methods ***/
+    /*********************/
+
+
     private void Awake()
     {
         ShowMouseCursor = false;
+
+        //Setup the hit markers.
+        hitMarkerGameObject1 = (GameObject)Instantiate(Resources.Load("Prefabs/HitMarker"), hitMarkerTarget.transform);
+        hitMarker1 = hitMarkerGameObject1.GetComponent<HitMarker>();
+        hitMarkerGameObject2 = (GameObject)Instantiate(Resources.Load("Prefabs/HitMarker"), hitMarkerTarget.transform);
+        hitMarker2 = hitMarkerGameObject2.GetComponent<HitMarker>();
+
+        hitMarker1.Initialize(hitMarkerTarget.position);
+        hitMarker2.Initialize(hitMarkerTarget.position);
     }
 
     private void Update()
     {
-
+        markerTimer += Time.deltaTime;
     }
 
     //Set Debug Text 1
@@ -55,10 +87,34 @@ public class ActionUI : BaseUI
 
     public void RegisterHit(HitResponse hitResponse)
     {
-        GameObject gameObjectItem = (GameObject)Instantiate(Resources.Load("Prefabs/HitMarker"), hitMarkerTarget.transform);
-        if (hitResponse.ArmorDamage > 0)
-            gameObjectItem.GetComponent<HitMarker>().Initialize(hitResponse.ArmorDamage, Color.blue);
+        //If it has been one second after hitting someone, oro we hit a different target, reset the accumulated damage.
+        if (markerTimer > MARKER_TIMEOUT || lastTargetHit != hitResponse.TargetId)
+        {
+            lastTargetHit = hitResponse.TargetId;
+            accumulatedArmorDamage = hitResponse.ArmorDamage;
+            accumulatedHealthDamage = hitResponse.HealthDamage;           
+        }
+        //Otherwise accumulate damage.
+        else if (lastTargetHit == hitResponse.TargetId)
+        {
+            accumulatedArmorDamage += hitResponse.ArmorDamage;
+            accumulatedHealthDamage += hitResponse.HealthDamage;            
+        }
+
+        //We hit someone to reset the timer;
+        markerTimer = 0f;
+
+        //If we did both Armor and Health damage, split the markers in two, otherwise just display the color for the type we did.
+        if (hitResponse.ArmorDamage > 0 && hitResponse.HealthDamage > 0)
+        {
+            hitMarker1.Display(accumulatedHealthDamage, Color.red);
+            hitMarker2.Display(accumulatedArmorDamage, Color.blue, true);
+        }
+        else if (hitResponse.ArmorDamage > 0)
+            hitMarker1.Display(accumulatedArmorDamage, Color.blue);
         else
-            gameObjectItem.GetComponent<HitMarker>().Initialize(hitResponse.HealthDamage, Color.red);
+            hitMarker1.Display(accumulatedHealthDamage, Color.red);
+
+        
     }
 }
