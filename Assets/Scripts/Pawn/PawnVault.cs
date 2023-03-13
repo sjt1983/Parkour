@@ -54,12 +54,6 @@ public class PawnVault : MonoBehaviour
     /*** Special Variables for Vault Tuning. ***/
     /*******************************************/
 
-    /*** Pause ***/
-    //How long we pause before vaulting
-    private readonly float PAUSE_TIME = .3f;
-    //Calculated Pause Time;
-    private float pauseTimer;
-
     /*** Raise ***/
     //MAX Velocity for raising;
     private readonly float RAISE_HEIGHT_BUFFER = .1f;
@@ -103,13 +97,10 @@ public class PawnVault : MonoBehaviour
                 //If here, lets vault, do some housekeeping on the pawn.
                 //lock the pawn and stop it, but before we do that, see if its falling and set the proper state
                 pawn.MovementLocked = true;
-                vaultState = pawn.IsFalling ? VaultState.PAUSE : VaultState.RAISE;
+                vaultState = VaultState.RAISE;
                         
                 //For some reason the position of the pawn is 1m above the bottom of the CharacterController.
                 vaultPoint = hitInfo.point + new Vector3(0, 1 + RAISE_HEIGHT_BUFFER);
-
-                //Set how long we pause in the air.
-                pauseTimer = PAUSE_TIME;
 
                 //Reset the forward timer.
                 forwardTimer = 0f;
@@ -122,17 +113,6 @@ public class PawnVault : MonoBehaviour
 
                 pawnArmsAnimator.SetTrigger("Vault");
             }
-        }
-        else if (vaultState == VaultState.PAUSE)
-        {
-            pawnArmsAnimator.SetTrigger("Vault");
-            pawnLook.DipCamera(VAULT_DIP_ANGLE, VAULT_DIP_SMOOTH_TIME, VAULT_DIP_RAISE_TIME, true);
-            //Just sit for a bit but also slerp the camera.
-            pauseTimer -= Time.deltaTime;
-            if (pauseTimer <= 0)
-            {
-                vaultState = VaultState.RAISE;               
-            }                
         }
         //Now vault.
         else if (vaultState == VaultState.RAISE)
@@ -180,7 +160,6 @@ public class PawnVault : MonoBehaviour
 enum VaultState
 {
     ATTEMPT_VAULT,
-    PAUSE,
     RAISE,
     FORWARD
 }

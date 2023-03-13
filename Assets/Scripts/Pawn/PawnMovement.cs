@@ -68,13 +68,17 @@ public sealed class PawnMovement : MonoBehaviour
     private const float SPEED_CHARGE_MAX_VELOCITY = 1f;
 
     //How much drag we want to add per second;
-    private const float SLIDING_DRAG = 1f;
+    private const float SLIDING_DRAG = 2.5f;
 
     //How fast we need to be going to slide.
     private const float SLIDE_MINIMUM_VELOCITY = 2f;
 
     //Minimum Angle to slide
     private const float SLIDE_DRAG_ANGLE = 1f;
+
+    //Time and timer to determine if we spply drag while sliding.
+    private const float SLIDE_TIME = 1.5f;
+    private float slideTimer = SLIDE_TIME;
 
     //Y positon of the last frame, if its higher than this frame, we can state we are sliding downhill.
     private float slidingLastFrameYCheck;
@@ -189,16 +193,21 @@ public sealed class PawnMovement : MonoBehaviour
         if (pawn.IsGrounded && pawn.IsCrouching && TotalMagnitude > SLIDE_MINIMUM_VELOCITY)
         {
             pawn.IsSliding = true;
+            slideTimer -= Time.deltaTime * .5f;
 
             //If we are on an angle and sliding downhill, allow infinite sliding, otherwise add to the drag.
-            if (transform.position.y >= slidingLastFrameYCheck && GetPawnSlopeAngle() >= SLIDE_DRAG_ANGLE)
+            if (slideTimer <= 0 && transform.position.y >= slidingLastFrameYCheck && GetPawnSlopeAngle() >= SLIDE_DRAG_ANGLE)
             {
                 CurrentGroundedZSpeed -= (CurrentGroundedZSpeed * SLIDING_DRAG * Time.deltaTime);
                 CurrentGroundedXSpeed -= (CurrentGroundedXSpeed * SLIDING_DRAG * Time.deltaTime);
             }
         }
-        else //If we aren't sliding, don't slide, LOL! GENIUS!
+        else
+        {
+            slideTimer = Mathf.Clamp(slideTimer + Time.deltaTime, 0, SLIDE_TIME);
+            //If we aren't sliding, don't slide, LOL! GENIUS!
             pawn.IsSliding = false;
+        }
 
         //Set the current Y position for the frame
         slidingLastFrameYCheck = transform.position.y;

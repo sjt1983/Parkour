@@ -12,7 +12,6 @@ public abstract class Damageable : MonoBehaviour
     protected virtual void Start()
     {
         DamageableId = GeneratedId++;
-        Debug.Log("Generated ID " + DamageableId);
     }
 
     //Apply damage to the entity
