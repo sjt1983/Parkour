@@ -80,8 +80,20 @@ public sealed class PawnMovement : MonoBehaviour
     private const float SLIDE_TIME = 1.5f;
     private float slideTimer = SLIDE_TIME;
 
+    //How much to set the sliding falloff penalty to.
+    private const float SLIDING_MOVEMENT_PENALTY = .1f;
+
+    //How fast the slide timer should recover in "seconds per second".
+    //e.g. 1 second of slide time takes two seconds to recover.
+    private const float SLIDE_TIMER_RECOVERY_RATE = .5f;
+
     //Y positon of the last frame, if its higher than this frame, we can state we are sliding downhill.
     private float slidingLastFrameYCheck;
+
+    //Flag to see if the pawn was sliding last frame, so we know when to trigger "Landing" if they stop sliding at a wildly different angle.
+    public bool WasSlidingLastFrame = false;
+    //The angle of the pawn when it was last grounded when it started sliding.
+    public float LastSlidingFrameAngle;
 
     //Current Speed the character is moving in all directions.
     public float CurrentGroundedXSpeed = 0;
@@ -129,10 +141,15 @@ public sealed class PawnMovement : MonoBehaviour
     //The angle in which the pawn is "too perpendicular" for a reflected walljump.
     private const float WALLJUMP_OFF_ANGLE_THRESHOLD = 45f;
 
-    //Falloff for Landing penalty.
-    private float landingFalloffPenalty = 1f;
+    //Multiplier used to indicate how much the character slows down when they do something to kill their momentum.
+    //Examples are landing 180 from the angle which you jumped, or sliding in one direction, 180 then stand up.
+    private float movementPenalty = 1f;
+
+    //How much the penalty recovers per second.
     private const float LANDING_RECOVERY_RATE_PER_SECOND = .75f;
-       
+    //How much to set the landing falloff penalty to.
+    private const float LANDING_MOVEMENT_PENALTY = .5f;
+
     //Flag to see if the pawn was grounded last frame, so we know when to trigger "Landing".
     public bool WasGroundedLastFrame = false;
 
@@ -192,9 +209,12 @@ public sealed class PawnMovement : MonoBehaviour
         //Lets determine if we should slide first
         if (pawn.IsGrounded && pawn.IsCrouching && TotalMagnitude > SLIDE_MINIMUM_VELOCITY)
         {
+            if (!WasSlidingLastFrame)
+                LastSlidingFrameAngle = transform.rotation.eulerAngles.y;
+            
             pawn.IsSliding = true;
-            slideTimer -= Time.deltaTime * .5f;
-
+            slideTimer -= Time.deltaTime;
+            WasSlidingLastFrame = true;
             //If we are on an angle and sliding downhill, allow infinite sliding, otherwise add to the drag.
             if (slideTimer <= 0 && transform.position.y >= slidingLastFrameYCheck && GetPawnSlopeAngle() >= SLIDE_DRAG_ANGLE)
             {
@@ -204,9 +224,22 @@ public sealed class PawnMovement : MonoBehaviour
         }
         else
         {
-            slideTimer = Mathf.Clamp(slideTimer + Time.deltaTime, 0, SLIDE_TIME);
+         
+            //We dont want someone to be able to 180 while sliding and keep full momentum.
+            if (WasSlidingLastFrame)
+            {
+                float slideAngleDifference = ParkourUtils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, LastSlidingFrameAngle);
+
+                if (slideAngleDifference > JUMP_MOMENTUM_TOLERANCE_LOW)                
+                    movementPenalty = SLIDING_MOVEMENT_PENALTY;
+            }            
+
             //If we aren't sliding, don't slide, LOL! GENIUS!
             pawn.IsSliding = false;
+            WasSlidingLastFrame = false;
+
+            //Recover the slide timer.
+            slideTimer = Mathf.Clamp(slideTimer + Time.deltaTime * SLIDE_TIMER_RECOVERY_RATE, 0, SLIDE_TIME);
         }
 
         //Set the current Y position for the frame
@@ -221,9 +254,9 @@ public sealed class PawnMovement : MonoBehaviour
         /************************/
 
         //Landing Falloff needs to be adjusted up.
-        landingFalloffPenalty = Mathf.Clamp(landingFalloffPenalty + LANDING_RECOVERY_RATE_PER_SECOND * Time.deltaTime, 0, 1);
+        movementPenalty = Mathf.Clamp(movementPenalty + LANDING_RECOVERY_RATE_PER_SECOND * Time.deltaTime, 0, 1);
 
-        //Check to see if we should land, if we are grounded this frame but were not the last.
+        //Check to see if we should land, if we are grounded this frame but were not the last, and are not sliding.
         if (pawn.IsGrounded)
         {
             if (!WasGroundedLastFrame && !pawn.IsSliding)
@@ -234,9 +267,8 @@ public sealed class PawnMovement : MonoBehaviour
                 float landDifference = ParkourUtils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, LastGroundedFrameAngle);
 
                 if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW) 
-                {
-                    landingFalloffPenalty = .5f;
-                }
+                    movementPenalty = LANDING_MOVEMENT_PENALTY;
+
             }
 
             WasGroundedLastFrame = true;
@@ -271,8 +303,8 @@ public sealed class PawnMovement : MonoBehaviour
                 XZSlideVelocity = Vector3.zero;
                 pawn.RightVector = transform.right;
                 pawn.ForwardVector = transform.forward;
-                CurrentGroundedZSpeed = GetRunningZSpeed() * landingFalloffPenalty;
-                CurrentGroundedXSpeed = GetRunningXSpeed() * landingFalloffPenalty;
+                CurrentGroundedZSpeed = GetRunningZSpeed() * movementPenalty;
+                CurrentGroundedXSpeed = GetRunningXSpeed() * movementPenalty;
                 XZGroundVelocity = (pawn.ForwardVector * CurrentGroundedZSpeed) + (pawn.RightVector * CurrentGroundedXSpeed);
             }            
         }
