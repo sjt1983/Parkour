@@ -10390,7 +10390,11 @@ MonoBehaviour:
   WasSlidingLastFrame: 0
   LastSlidingFrameAngle: 0
   CurrentGroundedXSpeed: 0
+  TargetGroundedXSpeed: 0
+  SmoothGroundedXSpeed: 0
   CurrentGroundedZSpeed: 0
+  TargetGroundedZSpeed: 0
+  SmoothGroundedZSpeed: 0
   CurrentYSpeed: 0
   XZGroundVelocity: {x: 0, y: 0, z: 0}
   XZSlideVelocity: {x: 0, y: 0, z: 0}
@@ -10460,6 +10464,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pawn: {fileID: 1041797165}
   pawnLook: {fileID: 1041797163}
+  pawnMovement: {fileID: 1041797162}
   pawnInventory: {fileID: 1041797169}
   vaultHighSensor: {fileID: 1022092206}
   vaultLowSensor: {fileID: 1924691758}

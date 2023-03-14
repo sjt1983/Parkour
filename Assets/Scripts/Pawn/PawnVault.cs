@@ -13,6 +13,9 @@ public class PawnVault : MonoBehaviour
     private PawnLook pawnLook;
 
     [SerializeField]
+    private PawnMovement pawnMovement;
+
+    [SerializeField]
     private PawnInventory pawnInventory;
 
     [SerializeField]
@@ -134,6 +137,7 @@ public class PawnVault : MonoBehaviour
             movementVelocity.y = 0;
             pawn.Move(movementVelocity);
             forwardTimer += Time.deltaTime;
+            pawnMovement.LastGroundedFrameAngle = transform.rotation.eulerAngles.y;
             if (forwardTimer > FORWARD_TIME)
             {
                 pawnArmsAnimator.ResetTrigger("Vault");

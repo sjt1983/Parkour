@@ -67,12 +67,6 @@ public sealed class PawnInput : MonoBehaviour
     //Calculated direction the player is moving
     private Vector2 inputMovementDirection;
 
-    //Vector used to Smooth out character movement.
-    private Vector2 smoothMovementDirection;
-
-    //Final smoothed out vector
-    private Vector2 finalMovementDirection;
-
     /*********************/
     /*** Unity Methods ***/
     /*********************/
@@ -117,8 +111,7 @@ public sealed class PawnInput : MonoBehaviour
         //Move the player.
         //Standard 2d movement reads with SmoothDamp
         inputMovementDirection = movementInput.ReadValue<Vector2>();
-        finalMovementDirection = Vector2.SmoothDamp(finalMovementDirection, inputMovementDirection, ref smoothMovementDirection, .2f);
-        XDirection = finalMovementDirection.x;
-        ZDirection = finalMovementDirection.y;
+        XDirection = inputMovementDirection.x;
+        ZDirection = inputMovementDirection.y;
     }
 }
