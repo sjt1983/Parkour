@@ -65,7 +65,7 @@ public sealed class PawnMovement : MonoBehaviour
     private const int MAX_SPEED_CHARGES = 2;
 
     //How much of a speed boost the character gets per charge
-    private const float SPEED_CHARGE_MAX_VELOCITY = 1f;
+    private const float SPEED_CHARGE_BONUS_VELOCITY = 1f;
 
     //How much drag we want to add per second;
     private const float SLIDING_DRAG = 2.5f;
@@ -99,6 +99,10 @@ public sealed class PawnMovement : MonoBehaviour
     public float CurrentGroundedXSpeed = 0;
     public float TargetGroundedXSpeed = 0;
     public float SmoothGroundedXSpeed = 0;
+
+    public float CurrentBonusSpeed = 0;
+    public float TargetBonusSpeed = 0;
+    public float SmoothBonusSpeed = 0;
 
     public float CurrentGroundedZSpeed = 0;
     public float TargetGroundedZSpeed = 0;
@@ -146,14 +150,10 @@ public sealed class PawnMovement : MonoBehaviour
 
     //Multiplier used to indicate how much the character slows down when they do something to kill their momentum.
     //Examples are landing 180 from the angle which you jumped, or sliding in one direction, 180 then stand up.
-    private float MOVEMENT_PENALTY = .7f;
+    private const float MOVEMENT_PENALTY = .7f;
 
+    //How long the player should be penalized for.
     private float movementPenaltyTime = 0f;
-
-    //How much the penalty recovers per second.
-    private const float LANDING_RECOVERY_RATE_PER_SECOND = .75f;
-    //How much to set the landing falloff penalty to.
-    private const float LANDING_MOVEMENT_PENALTY = .5f;
 
     //Flag to see if the pawn was grounded last frame, so we know when to trigger "Landing".
     public bool WasGroundedLastFrame = false;
@@ -221,24 +221,21 @@ public sealed class PawnMovement : MonoBehaviour
             slideTimer -= Time.deltaTime;
             WasSlidingLastFrame = true;
             //If we are on an angle and sliding downhill, allow infinite sliding, otherwise add to the drag.
-            if (slideTimer <= 0 && transform.position.y >= slidingLastFrameYCheck && GetPawnSlopeAngle() >= SLIDE_DRAG_ANGLE)
+            if (slideTimer <= 0 && transform.position.y >= slidingLastFrameYCheck)
             {
                 CurrentGroundedZSpeed -= (CurrentGroundedZSpeed * SLIDING_DRAG * Time.deltaTime);
                 CurrentGroundedXSpeed -= (CurrentGroundedXSpeed * SLIDING_DRAG * Time.deltaTime);
             }
         }
         else
-        {
-         
+        {         
             //We dont want someone to be able to 180 while sliding and keep full momentum.
             if (WasSlidingLastFrame)
             {
                 float slideAngleDifference = ParkourUtils.DifferenceInBetweenTwoAngles(transform.rotation.eulerAngles.y, LastSlidingFrameAngle);
 
                 if (slideAngleDifference > JUMP_MOMENTUM_TOLERANCE_LOW)
-                {
                     ApplyMovementPenalty();
-                }
                     
             }            
 
@@ -275,8 +272,6 @@ public sealed class PawnMovement : MonoBehaviour
                 {
                     ApplyMovementPenalty();
                 }
-                    
-
             }
 
             WasGroundedLastFrame = true;
@@ -287,13 +282,12 @@ public sealed class PawnMovement : MonoBehaviour
 
         //Landing Falloff needs to be adjusted up.
         movementPenaltyTime = Mathf.Clamp(movementPenaltyTime - Time.deltaTime, 0, 1);
-
     }
 
     private void MoveXZ()
     {
         //If the pawns speed goes below the default max speed we remove all speed charges
-        if (CurrentGroundedZSpeed < MAX_WALK_SPEED_FORWARD)
+        if (pawn.PawnInput.ZDirection != 1)
             pawn.RemoveAllSpeedCharges();
 
         /*********************************/
@@ -438,17 +432,26 @@ public sealed class PawnMovement : MonoBehaviour
         LastGroundedFrameAngle = transform.rotation.eulerAngles.y;
         initialized = true;
     }
-    
+
     //Determine the maximum speed on the Z axis.
     private float GetRunningZSpeed()
-    {        
+    {
         if (pawn.IsCrouching && !pawn.IsSliding)
             TargetGroundedZSpeed = MAX_CROUCH_WALK_SPEED;
         else
             TargetGroundedZSpeed = MAX_WALK_SPEED_FORWARD;
 
+        if (pawn.SpeedCharges > 0 && pawn.PawnInput.ZDirection > 0)
+        {
+            TargetBonusSpeed = pawn.SpeedCharges * SPEED_CHARGE_BONUS_VELOCITY; ;
+        }
+        else
+        {
+            TargetBonusSpeed = 0f;
+        }
+
         TargetGroundedZSpeed *= pawn.PawnInput.ZDirection * (movementPenaltyTime > 0 ? MOVEMENT_PENALTY : 1);
-        CurrentGroundedZSpeed = Mathf.SmoothDamp(CurrentGroundedZSpeed, TargetGroundedZSpeed, ref SmoothGroundedZSpeed, .2f);
+        CurrentGroundedZSpeed = Mathf.SmoothDamp(CurrentGroundedZSpeed, TargetGroundedZSpeed + TargetBonusSpeed, ref SmoothGroundedZSpeed, .2f);
 
         return CurrentGroundedZSpeed;
     }
@@ -501,6 +504,7 @@ public sealed class PawnMovement : MonoBehaviour
 
     private void ApplyMovementPenalty()
     {
+        pawn.RemoveAllSpeedCharges(); 
         movementPenaltyTime = .6f;
         CurrentGroundedZSpeed = 0f;
     }
