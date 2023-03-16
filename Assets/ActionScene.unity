@@ -10164,6 +10164,7 @@ GameObject:
   - component: {fileID: 1041797161}
   - component: {fileID: 1041797168}
   - component: {fileID: 1041797169}
+  - component: {fileID: 1041797170}
   m_Layer: 0
   m_Name: Pawn
   m_TagString: Untagged
@@ -10259,6 +10260,7 @@ MonoBehaviour:
   lookLayerMask:
     serializedVersion: 2
     m_Bits: 0
+  TargetZAngle: 0
   MouseSensitivity: 15
 --- !u!114 &1041797164
 MonoBehaviour:
@@ -10349,6 +10351,23 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   activeSlot: -1
+--- !u!114 &1041797170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1041797159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29256fccbad7d4c47be7b22812f38db6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pawn: {fileID: 1041797165}
+  pawnInput: {fileID: 1041797164}
+  pawnLook: {fileID: 1041797163}
+  pawnMovement: {fileID: 1041797162}
+  wallRunSensor: {fileID: 1949123956}
 --- !u!43 &1044195705
 Mesh:
   m_ObjectHideFlags: 0
@@ -16215,7 +16234,7 @@ GameObject:
   - component: {fileID: 1949123955}
   - component: {fileID: 1949123956}
   m_Layer: 0
-  m_Name: VaultLowSensor (1)
+  m_Name: WallRunSensor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16229,7 +16248,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1949123954}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.725, z: 0}
+  m_LocalPosition: {x: -0.75, y: -0.75, z: 0}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -16424,7 +16443,7 @@ GameObject:
   - component: {fileID: 1972965133}
   - component: {fileID: 1972965132}
   m_Layer: 7
-  m_Name: VaultLowSphere
+  m_Name: WallRunSphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -82,7 +82,7 @@ public class PogoStick : EquippableItem
         }
 
         //If the item is not enabled, and nothing else is current locking the pawn, lets see if we should enable the item.
-        if (!ItemEnabled && !pawn.MovementLocked)
+        if (!ItemEnabled && !pawnMovement.MovementLocked)
         {
             //If jump is not currently presset, exit.
             if (!pawnInput.JumpPressed)
@@ -106,7 +106,7 @@ public class PogoStick : EquippableItem
         }
 
         //Ok, lets bounce, MovementLock the pawn from the main movement script.
-        pawn.MovementLocked = true;
+        pawnMovement.MovementLocked = true;
 
         //If we are gounded we need to handle the bouncy bounce.
         if (pawn.IsGrounded)
@@ -196,7 +196,7 @@ public class PogoStick : EquippableItem
         jumpCharges = 0;
         if (IsAssignedToPawn)
         {
-            pawn.MovementLocked = false;
+            pawnMovement.MovementLocked = false;
         }
     }
 }

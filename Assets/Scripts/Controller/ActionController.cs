@@ -143,6 +143,15 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Parkour"",
+                    ""type"": ""Button"",
+                    ""id"": ""c7285d38-073c-4367-8111-a51bd65ef4d6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -354,6 +363,17 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                     ""action"": ""Unequip"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""24ef8c03-a356-4a6f-af57-a67bfd8646d0"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Parkour"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -375,6 +395,7 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
         m_PlayerControls_EquipSlot3 = m_PlayerControls.FindAction("EquipSlot3", throwIfNotFound: true);
         m_PlayerControls_EquipSlot4 = m_PlayerControls.FindAction("EquipSlot4", throwIfNotFound: true);
         m_PlayerControls_Unequip = m_PlayerControls.FindAction("Unequip", throwIfNotFound: true);
+        m_PlayerControls_Parkour = m_PlayerControls.FindAction("Parkour", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -447,6 +468,7 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerControls_EquipSlot3;
     private readonly InputAction m_PlayerControls_EquipSlot4;
     private readonly InputAction m_PlayerControls_Unequip;
+    private readonly InputAction m_PlayerControls_Parkour;
     public struct PlayerControlsActions
     {
         private @ActionController m_Wrapper;
@@ -464,6 +486,7 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
         public InputAction @EquipSlot3 => m_Wrapper.m_PlayerControls_EquipSlot3;
         public InputAction @EquipSlot4 => m_Wrapper.m_PlayerControls_EquipSlot4;
         public InputAction @Unequip => m_Wrapper.m_PlayerControls_Unequip;
+        public InputAction @Parkour => m_Wrapper.m_PlayerControls_Parkour;
         public InputActionMap Get() { return m_Wrapper.m_PlayerControls; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -512,6 +535,9 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                 @Unequip.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnUnequip;
                 @Unequip.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnUnequip;
                 @Unequip.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnUnequip;
+                @Parkour.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnParkour;
+                @Parkour.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnParkour;
+                @Parkour.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnParkour;
             }
             m_Wrapper.m_PlayerControlsActionsCallbackInterface = instance;
             if (instance != null)
@@ -555,6 +581,9 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
                 @Unequip.started += instance.OnUnequip;
                 @Unequip.performed += instance.OnUnequip;
                 @Unequip.canceled += instance.OnUnequip;
+                @Parkour.started += instance.OnParkour;
+                @Parkour.performed += instance.OnParkour;
+                @Parkour.canceled += instance.OnParkour;
             }
         }
     }
@@ -574,5 +603,6 @@ public partial class @ActionController : IInputActionCollection2, IDisposable
         void OnEquipSlot3(InputAction.CallbackContext context);
         void OnEquipSlot4(InputAction.CallbackContext context);
         void OnUnequip(InputAction.CallbackContext context);
+        void OnParkour(InputAction.CallbackContext context);
     }
 }

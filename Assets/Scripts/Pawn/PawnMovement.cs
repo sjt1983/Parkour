@@ -29,6 +29,8 @@ public sealed class PawnMovement : MonoBehaviour
     //Quick check to see if there is significant movement
     public bool IsMoving { get => Mathf.Abs(CurrentGroundedXSpeed + CurrentGroundedZSpeed) > .1f; }
 
+    public bool MovementLocked  { get; set; }
+
     /*****************************/
     /*** Local Class Variables ***/
     /*****************************/
@@ -176,8 +178,10 @@ public sealed class PawnMovement : MonoBehaviour
         if (!initialized)
             Initialize();
 
+        UIManager.Instance.DebugText1 = pawn.SpeedCharges.ToString();
+
         //This means some other script has taken control of the character, e.g. the script to vault the character.
-        if (pawn.MovementLocked)
+        if (MovementLocked)
             return;
 
         Slide();
@@ -271,6 +275,7 @@ public sealed class PawnMovement : MonoBehaviour
                 if (landDifference > JUMP_MOMENTUM_TOLERANCE_LOW)
                 {
                     ApplyMovementPenalty();
+                    Debug.Log("LANDED");
                 }
             }
 
@@ -287,7 +292,7 @@ public sealed class PawnMovement : MonoBehaviour
     private void MoveXZ()
     {
         //If the pawns speed goes below the default max speed we remove all speed charges
-        if (pawn.PawnInput.ZDirection != 1)
+        if (CurrentGroundedZSpeed < MAX_WALK_SPEED_FORWARD * .55)
             pawn.RemoveAllSpeedCharges();
 
         /*********************************/
@@ -430,6 +435,7 @@ public sealed class PawnMovement : MonoBehaviour
     private void Initialize()
     {
         LastGroundedFrameAngle = transform.rotation.eulerAngles.y;
+        MovementLocked = false;
         initialized = true;
     }
 
@@ -507,5 +513,15 @@ public sealed class PawnMovement : MonoBehaviour
         pawn.RemoveAllSpeedCharges(); 
         movementPenaltyTime = .6f;
         CurrentGroundedZSpeed = 0f;
+    }
+
+    public void TransferState(Vector3 newXzGround, float newJumpForce)
+    {
+        XZGroundVelocity = newXzGround;
+        
+        pawn.RightVector = Quaternion.LookRotation(XZGroundVelocity) * Vector3.right;
+        pawn.ForwardVector = Quaternion.LookRotation(XZGroundVelocity) * Vector3.forward;
+
+        CurrentYSpeed = newJumpForce;
     }
 }

@@ -35,6 +35,10 @@ public sealed class PawnLook : MonoBehaviour
 
     public Transform MainCamera { get => mainCamera; }
 
+    public float TargetZAngle = 0;
+    private float currentZAngle = 0f;
+    private float smoothZAngle = 0f;
+
     /*************************/
     /*** Camera Properties ***/
     /*************************/
@@ -140,12 +144,18 @@ public sealed class PawnLook : MonoBehaviour
         //Rotate player along the Y axis.
         gameObject.transform.Rotate(Vector3.up, adjustedMouseX);
 
+        currentZAngle = Mathf.SmoothDamp(currentZAngle, TargetZAngle, ref smoothZAngle, .1f);
+
+        if (TargetZAngle == 0 && Mathf.Abs(currentZAngle) < .1)
+            currentZAngle = 0f;
+
         //Rotate the camera pitch.
         cameraVerticalRotation -= adjustedMouseY;
         cameraVerticalRotation = Mathf.Clamp(cameraVerticalRotation, -CAMERA_MAX_VERTICAL_ROTATION, CAMERA_MAX_VERTICAL_ROTATION);
         pawn.LookAngle = cameraVerticalRotation;
         targetRotation = transform.eulerAngles;
         targetRotation.x = cameraVerticalRotation + dipTargetAmount + -recoilY;
+        targetRotation.z = currentZAngle;
 
         mainCamera.transform.eulerAngles = targetRotation;
 
@@ -166,6 +176,11 @@ public sealed class PawnLook : MonoBehaviour
                                         characterController.height + (CROUCH_SPEED * Time.deltaTime),
                                         CROUCH_HEIGHT, STAND_HEIGHT);
         characterController.center = Vector3.down * (2f - characterController.height) / 2.0f;
+
+        UIManager.Instance.DebugText2 = currentZAngle.ToString();
+        UIManager.Instance.DebugText3 = TargetZAngle.ToString();
+
+
     }
 
     /*********************/

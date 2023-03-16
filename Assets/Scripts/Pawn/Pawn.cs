@@ -39,9 +39,6 @@ public sealed class Pawn : MonoBehaviour
     /*** Class properties ***/
     /************************/
 
-    //Flag to indicate that a certain script has control over the pawn and that nothing else should touch it.
-    public bool MovementLocked { get; set; }
-
     //Indicated the effects of items should be ignored.
     public bool ItemLocked { get; set; }
 
