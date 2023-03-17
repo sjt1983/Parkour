@@ -33,6 +33,7 @@ public class PawnWallRun : MonoBehaviour
     private Vector3 forwardVector;
     private Vector3 raycastOrigin;
 
+    private float raycastTimer = 0f;
     private void Awake()
     {
         layerMask = LayerMask.GetMask("MapGeometry");
@@ -41,7 +42,7 @@ public class PawnWallRun : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (pawn.SpeedCharges > 0 && pawnInput.ParkourPressed && wallRunState == WallRunState.CHECKING)
+        if (pawnMovement.CurrentYSpeed <= 0 && !pawn.IsGrounded && pawn.SpeedCharges > 0 && pawnInput.ParkourPressed && wallRunState == WallRunState.CHECKING)
         {
             raycastOrigin = transform.position + -transform.up * .5f + (transform.forward * 1f);
             checkLeft = !checkLeft;
@@ -54,7 +55,6 @@ public class PawnWallRun : MonoBehaviour
                 pawnMovement.MovementLocked = true;
                 lerpFromPosition = transform.position;
                 lerpToPosition = hitInfo.point + new Vector3(0, 1, 0);
-                DebugUtils.SpawnDebugSphereAtPosition(lerpToPosition, null);
                 wallRunState = WallRunState.ADJUSTING;
                 pawnLook.TargetZAngle = checkLeft ? -15 : 15;
             }
@@ -72,6 +72,16 @@ public class PawnWallRun : MonoBehaviour
         }
         else if (wallRunState == WallRunState.CLAMPED)
         {
+            raycastTimer += Time.deltaTime;
+
+            if (raycastTimer > .15 && !Physics.Raycast(transform.position, (checkLeft ? -transform.right : transform.right), out RaycastHit hitInfo, 1f, layerMask))
+            {
+                pawnMovement.MovementLocked = false;
+                wallRunState = WallRunState.CHECKING;
+                pawnLook.TargetZAngle = 0;
+                raycastTimer = 0f;
+            }
+
             CollisionFlags flags = pawn.Move(forwardVector * Time.deltaTime);
             if ((flags & CollisionFlags.CollidedSides) != 0)
             {
@@ -82,7 +92,7 @@ public class PawnWallRun : MonoBehaviour
 
             if (pawnInput.JumpPressedThisFrame)
             {
-                pawnMovement.TransferState(forwardVector + ((checkLeft ? Vector3.right : -Vector3.right) * 2), 10);
+                pawnMovement.TransferState(forwardVector + ((checkLeft ? Vector3.right : -Vector3.right) * 10), 10);
                 pawnMovement.MovementLocked = false;
                 wallRunState = WallRunState.CHECKING;
                 pawnLook.TargetZAngle = 0;
