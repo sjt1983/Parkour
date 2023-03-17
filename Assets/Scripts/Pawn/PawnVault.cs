@@ -115,6 +115,7 @@ public class PawnVault : MonoBehaviour
                 pawn.ItemLocked = true;
 
                 pawnArmsAnimator.SetTrigger("Vault");
+                pawn.IsVaulting = true;
             }
         }
         //Now vault.
@@ -145,6 +146,7 @@ public class PawnVault : MonoBehaviour
                 pawn.HaltMovement(false, true, false);
                 pawn.ItemLocked = false;
                 pawnMovement.MovementLocked = false;
+                pawn.IsVaulting = false;
             }
         }
     }

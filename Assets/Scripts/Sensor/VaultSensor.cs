@@ -12,16 +12,18 @@ public class VaultSensor : Sensor
     private LayerMask layerMask;
 
     //How far down from the sensor we should raycast.
-    private readonly float SENSOR_RANGE = 3f;
+    private const float SENSOR_RANGE = 3f;
 
     //How far to the left and right the secondary sensors fire.
-    private readonly float SECONDARY_SENSOR_SPREAD = .25f;
+    private const float SECONDARY_SENSOR_SPREAD = .25f;
 
     //How far up from the hitpoint we cast the secondary rays, and how far down we cast.
-    private readonly float SECONDARY_SENSOR_HEIGHT_BUFFER = 1.25f;
+    private const float SECONDARY_SENSOR_HEIGHT_BUFFER = 1.25f;
 
     //How far down the secondary raycast should travel
-    private readonly float SECONDARY_SENSOR_RANGE = 2f;
+    private const float SECONDARY_SENSOR_RANGE = 2f;
+
+    private const float VAULT_RANGE = 1.5f;
 
     /*********************/
     /*** Unity Methods ***/
@@ -40,14 +42,13 @@ public class VaultSensor : Sensor
     //Used the Bool with return object pattern.
     public bool FindVaultPoint(ref RaycastHit inHitInfo, Vector3 vaultLowPointPosition)
     {
-        RaycastHit hitInfo;
         //Raycast down from the sensor, only looking at map geometry.
-        if (Physics.Raycast(gameObject.transform.position, Vector3.down, out hitInfo, SENSOR_RANGE, layerMask))
+        if (Physics.Raycast(gameObject.transform.position, Vector3.down, out RaycastHit hitInfo, SENSOR_RANGE, layerMask))
         { 
             //If the point we are trying to vault at is lower than our shoulders, we dislocate both shoulders.
             //JK we just dont allow the vault.
 
-            if (hitInfo.point.y > vaultLowPointPosition.y && hitInfo.point.y <= vaultLowPointPosition.y + 1)
+            if (hitInfo.point.y > vaultLowPointPosition.y && hitInfo.point.y <= vaultLowPointPosition.y + VAULT_RANGE)
             {
                 //This may be inefficient but for now we will cast two more rays, to the left and right of center.
                 //Old algorithm for vaulting required there be a "Wall" in front of the player to climb which gave us an angle to ensure

@@ -159,7 +159,7 @@ public sealed class PawnLook : MonoBehaviour
 
         mainCamera.transform.eulerAngles = targetRotation;
 
-        CheckToWhatPlayerIsLookingAt();
+        CheckToSeeWhatPawnIsLookingAt();
 
         //Do stuff with the camera when crouching
         //Move the camera mount downward or upward over time. Determine the new position and set the 
@@ -195,7 +195,7 @@ public sealed class PawnLook : MonoBehaviour
     }
 
     //Used to see which item the player is looking at.
-    private void CheckToWhatPlayerIsLookingAt()
+    private void CheckToSeeWhatPawnIsLookingAt()
     {
         //Grab all equippable items.
         EquippableItem[] items = GameObject.FindObjectsOfType<EquippableItem>();

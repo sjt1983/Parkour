@@ -51,7 +51,7 @@ public sealed class PawnInput : MonoBehaviour
     //Player is holding the jump button.
     public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
 
-    //Parkour Press the frame or is pressed;
+    //Parkour Pressed this frame or is pressed;
     public bool ParkourPressedThisFrame { get => actionController.PlayerControls.Parkour.WasPressedThisFrame(); }
     public bool ParkourPressed { get => actionController.PlayerControls.Parkour.IsPressed(); }
 

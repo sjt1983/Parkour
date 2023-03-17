@@ -48,7 +48,7 @@ public class PawnArmsAnimator : MonoBehaviour
     private void Update()
     {
         //Determine if we should be playing the run animation or not.
-        if (pawn.IsGrounded && pawn.IsMovingFasterThan(2f) && !pawn.IsSliding)
+        if (pawn.IsWallRunning || (pawn.IsGrounded && pawn.IsMovingFasterThan(6f) && !pawn.IsSliding))
             pawnArmsAnimator.SetBool("Running", true);
         else
             pawnArmsAnimator.SetBool("Running", false);
