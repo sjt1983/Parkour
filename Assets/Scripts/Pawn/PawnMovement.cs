@@ -314,7 +314,7 @@ public sealed class PawnMovement : MonoBehaviour
         else //aka in the air. 
         {
             XZSlideVelocity = Vector3.zero;
-            XZSlideVelocity = (transform.right * GetAirXSpeed()) + (transform.forward * GetAirZSpeed());
+            XZAirVelocity = (transform.right * GetAirXSpeed()) + (transform.forward * GetAirZSpeed());
         }
 
         finalXZVector = XZGroundVelocity + XZAirVelocity + XZSlideVelocity;
