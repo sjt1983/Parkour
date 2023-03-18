@@ -99,7 +99,7 @@ public class PawnVault : MonoBehaviour
             {               
                 //If here, lets vault, do some housekeeping on the pawn.
                 //lock the pawn and stop it, but before we do that, see if its falling and set the proper state
-                pawn.MovementLocked = true;
+                pawnMovement.MovementLocked = true;
                 vaultState = VaultState.RAISE;
                         
                 //For some reason the position of the pawn is 1m above the bottom of the CharacterController.
@@ -115,6 +115,7 @@ public class PawnVault : MonoBehaviour
                 pawn.ItemLocked = true;
 
                 pawnArmsAnimator.SetTrigger("Vault");
+                pawn.IsVaulting = true;
             }
         }
         //Now vault.
@@ -144,7 +145,8 @@ public class PawnVault : MonoBehaviour
                 vaultState = VaultState.ATTEMPT_VAULT;
                 pawn.HaltMovement(false, true, false);
                 pawn.ItemLocked = false;
-                pawn.MovementLocked = false;
+                pawnMovement.MovementLocked = false;
+                pawn.IsVaulting = false;
             }
         }
     }

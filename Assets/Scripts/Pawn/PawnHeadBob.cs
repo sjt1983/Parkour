@@ -54,7 +54,7 @@ public class PawnHeadBob : MonoBehaviour
     void Update()
     {
         //Don't head bob in the air.
-        if (!pawn.IsGrounded)
+        if (!pawn.IsGrounded && !pawn.IsWallRunning)
             return;
 
         //DO the head bobbing if we are moving fast enough.

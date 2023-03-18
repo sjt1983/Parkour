@@ -39,9 +39,6 @@ public sealed class Pawn : MonoBehaviour
     /*** Class properties ***/
     /************************/
 
-    //Flag to indicate that a certain script has control over the pawn and that nothing else should touch it.
-    public bool MovementLocked { get; set; }
-
     //Indicated the effects of items should be ignored.
     public bool ItemLocked { get; set; }
 
@@ -81,6 +78,12 @@ public sealed class Pawn : MonoBehaviour
 
     //Quick reference for if the pawn is sliding. Set by the PawnCrouch script.
     public bool IsFalling { get => pawnMovement.UpwardSpeed < 0f; }
+
+    //Quick reference for if the pawn is Vaulting.
+    public bool IsVaulting { get; set; }
+
+    //Quick reference for if the pawn is Vaulting.
+    public bool IsWallRunning { get; set; }
 
     //Quick reference for if the pawn is landing penalized
     public bool IsLandingPenalized { get; set; }
@@ -129,6 +132,8 @@ public sealed class Pawn : MonoBehaviour
         ItemLocked = false;
         ForwardVector = Vector3.zero;
         RightVector = Vector3.zero;
+        IsVaulting = false;
+        IsWallRunning = false;
 
         initialized = true;
 

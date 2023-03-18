@@ -49,7 +49,12 @@ public sealed class PawnInput : MonoBehaviour
     public bool JumpPressedThisFrame { get => actionController.PlayerControls.Jump.WasPressedThisFrame(); }
 
     //Player is holding the jump button.
-    public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }   
+    public bool JumpPressed { get => actionController.PlayerControls.Jump.IsPressed(); }
+
+    //Parkour Pressed this frame or is pressed;
+    public bool ParkourPressedThisFrame { get => actionController.PlayerControls.Parkour.WasPressedThisFrame(); }
+    public bool ParkourPressed { get => actionController.PlayerControls.Parkour.IsPressed(); }
+
 
     /*************************/
     /*** Private variables ***/
@@ -85,6 +90,7 @@ public sealed class PawnInput : MonoBehaviour
         actionController.PlayerControls.Reload.Enable();
         actionController.PlayerControls.Jump.Enable();
         actionController.PlayerControls.Crouch.Enable();
+        actionController.PlayerControls.Parkour.Enable();
 
         actionController.PlayerControls.EquipSlot1.Enable();
         actionController.PlayerControls.EquipSlot2.Enable();
@@ -104,6 +110,7 @@ public sealed class PawnInput : MonoBehaviour
 
         //Enable the controller.
         movementInput.Enable();
+
     }
 
     private void Update()
