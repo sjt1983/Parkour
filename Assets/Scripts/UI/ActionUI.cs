@@ -53,9 +53,9 @@ public class ActionUI : BaseUI
         ShowMouseCursor = false;
 
         //Setup the hit markers.
-        hitMarkerGameObject1 = (GameObject)Instantiate(Resources.Load("Prefabs/HitMarker"), hitMarkerTarget.transform);
+        hitMarkerGameObject1 = (GameObject)Instantiate(Resources.Load("UI/HitMarker"), hitMarkerTarget.transform);
         hitMarker1 = hitMarkerGameObject1.GetComponent<HitMarker>();
-        hitMarkerGameObject2 = (GameObject)Instantiate(Resources.Load("Prefabs/HitMarker"), hitMarkerTarget.transform);
+        hitMarkerGameObject2 = (GameObject)Instantiate(Resources.Load("UI/HitMarker"), hitMarkerTarget.transform);
         hitMarker2 = hitMarkerGameObject2.GetComponent<HitMarker>();
 
         hitMarker1.Initialize(hitMarkerTarget.position);

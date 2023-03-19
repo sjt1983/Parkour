@@ -10,7 +10,7 @@ public class DebugUtils : MonoBehaviour
     //Spawn a prefab DebugSphere with an optional owner.
     public static GameObject SpawnDebugSphereAtPosition(Vector3 vector3, Transform owner)
     {
-        GameObject gameObjectItem = (GameObject)Instantiate(Resources.Load("Prefabs/DebugSphere"), vector3, Quaternion.identity);
+        GameObject gameObjectItem = (GameObject)Instantiate(Resources.Load("DebugSphere"), vector3, Quaternion.identity);
         gameObjectItem.name += inc++.ToString();
         gameObjectItem.transform.parent = owner;
         dic.Add(gameObjectItem.name, "");
